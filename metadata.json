@@ -1,0 +1,8 @@
+{
+  "name": "Relatório estratégico — Planta Cobre",
+  "description": "Relatório estratégico automatizado para a planta de beneficiamento de cobre",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
