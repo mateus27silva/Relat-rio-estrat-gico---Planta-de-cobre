@@ -258,6 +258,20 @@ export default function App() {
     return (Math.round(total * 10) / 10).toString();
   };
 
+  const calcProducaoFiltro = (pmStr: any, pOutStr: any, prodStr: any): string => {
+    const pm = pmStr !== "" && pmStr !== undefined && pmStr !== null ? parseFloat(pmStr) : 0;
+    const pOut = pOutStr !== "" && pOutStr !== undefined && pOutStr !== null ? parseFloat(pOutStr) : 0;
+    const prod = prodStr !== "" && prodStr !== undefined && prodStr !== null ? parseFloat(prodStr) : null;
+
+    const horasPM = isNaN(pm) ? 0 : (pm > 12 ? pm / 60 : pm);
+    const horasOut = isNaN(pOut) ? 0 : (pOut > 12 ? pOut / 60 : pOut);
+    const horasOperadas = Math.max(0, 12 - horasPM - horasOut);
+    const produtividade = (prod === null || isNaN(prod)) ? 30 : prod;
+    if (produtividade <= 0) return "";
+    const total = horasOperadas * produtividade;
+    return (Math.round(total * 10) / 10).toString();
+  };
+
   const setDado = (sId: string, campoId: string, v: any) => {
     setDados(p => {
       const currentSector = { ...(p[sId] || {}) };
@@ -289,6 +303,15 @@ export default function App() {
 
         currentSector["disponibilidade"] = calcDisp(pm);
         currentSector["utilizacao"] = calcUtil(pm, pOut);
+      }
+
+      // Cálculo automático de Produção do Filtro (t) = (12h - paradas_manutencao - paradas_outros) * produtividade
+      if (sId === "filtro_prensa" && (campoId === "paradas_manutencao" || campoId === "paradas_outros" || campoId === "producao" || campoId === "producao_filtro")) {
+        const pm = campoId === "paradas_manutencao" ? v : currentSector["paradas_manutencao"];
+        const pOut = campoId === "paradas_outros" ? v : currentSector["paradas_outros"];
+        const prod = campoId === "producao" ? v : currentSector["producao"];
+
+        currentSector["producao_filtro"] = calcProducaoFiltro(pm, pOut, prod);
       }
 
       // Cálculo automático de Total Autonomia minério
@@ -441,6 +464,9 @@ export default function App() {
         if (s.id === "moagem" && (sDados.produtividade_total === undefined || sDados.produtividade_total === "")) {
           sDados.produtividade_total = calcProdTotal(sDados.prod_mi003, sDados.prod_mi004, sDados.prod_mi005);
         }
+        if (s.id === "filtro_prensa" && (sDados.producao_filtro === undefined || sDados.producao_filtro === "")) {
+          sDados.producao_filtro = calcProducaoFiltro(sDados.paradas_manutencao, sDados.paradas_outros, sDados.producao);
+        }
         if (s.id === "flotacao") {
           if (sDados.recuperacao === undefined || sDados.recuperacao === "") {
             sDados.recuperacao = calcRecuperacao(sDados.teor_alimentacao, sDados.teor_concentrado, sDados.teor_rejeito);
@@ -517,6 +543,9 @@ export default function App() {
               sDados.produtividade_total = calcProdTotal(sDados.taxa_alimentacao_l1, sDados.taxa_alimentacao_l2, sDados.taxa_alimentacao_l3);
             }
           }
+          if (s.id === "filtro_prensa" && (sDados.producao_filtro === undefined || sDados.producao_filtro === "")) {
+            sDados.producao_filtro = calcProducaoFiltro(sDados.paradas_manutencao, sDados.paradas_outros, sDados.producao);
+          }
           if (s.id === "flotacao") {
             if (sDados.recuperacao === undefined || sDados.recuperacao === "") {
               sDados.recuperacao = calcRecuperacao(sDados.teor_alimentacao, sDados.teor_concentrado, sDados.teor_rejeito);
@@ -567,6 +596,7 @@ export default function App() {
             else if (c.id === "utilizacao") v = calcUtil(sDados.paradas_manutencao, sDados.paradas_outros);
             else if (c.id === "total_autonomia" && s.id === "patio_silos") v = calcAutonomia(sDados.estoque_patio, sDados.nivel_silo1, sDados.nivel_silo2);
             else if (c.id === "produtividade_total" && s.id === "moagem") v = calcProdTotal(sDados.prod_mi003, sDados.prod_mi004, sDados.prod_mi005);
+            else if (c.id === "producao_filtro" && s.id === "filtro_prensa") v = calcProducaoFiltro(sDados.paradas_manutencao, sDados.paradas_outros, sDados.producao);
             else if (c.id === "recuperacao" && s.id === "flotacao") v = calcRecuperacao(sDados.teor_alimentacao, sDados.teor_concentrado, sDados.teor_rejeito);
             else if (c.id === "metal_contido" && s.id === "flotacao") {
               const prodM = dados["moagem"]?.producao_moagem;
@@ -1255,7 +1285,8 @@ export default function App() {
                     const isRecuperacaoField = campo.id === "recuperacao" && setor.id === "flotacao";
                     const isMetalField = campo.id === "metal_contido" && setor.id === "flotacao";
                     const isConcentradoField = campo.id === "concentrado" && setor.id === "flotacao";
-                    const isCalcField = isDispField || isUtilField || isEstoqueTotalField || isProdTotalRebritagemField || isAutonomiaField || isProdTotalField || isRecuperacaoField || isMetalField || isConcentradoField;
+                    const isProducaoFiltroField = campo.id === "producao_filtro" && setor.id === "filtro_prensa";
+                    const isCalcField = isDispField || isUtilField || isEstoqueTotalField || isProdTotalRebritagemField || isAutonomiaField || isProdTotalField || isRecuperacaoField || isMetalField || isConcentradoField || isProducaoFiltroField;
 
                     const rawVal = d[campo.id] ?? "";
                     const val = (campo.type === "number" && isCalcField && (rawVal === "" || rawVal === undefined))
@@ -1275,10 +1306,12 @@ export default function App() {
                           ? calcRecuperacao(d.teor_alimentacao, d.teor_concentrado, d.teor_rejeito)
                           : isMetalField
                           ? calcMetal(dados["moagem"]?.producao_moagem, d.teor_alimentacao, d.recuperacao || calcRecuperacao(d.teor_alimentacao, d.teor_concentrado, d.teor_rejeito))
-                          : calcConcentrado(
+                          : isConcentradoField
+                          ? calcConcentrado(
                               d.metal_contido || calcMetal(dados["moagem"]?.producao_moagem, d.teor_alimentacao, d.recuperacao || calcRecuperacao(d.teor_alimentacao, d.teor_concentrado, d.teor_rejeito)),
                               d.teor_concentrado
-                            ))
+                            )
+                          : calcProducaoFiltro(d.paradas_manutencao, d.paradas_outros, d.producao))
                       : rawVal;
 
                     // Calculate average silo percentage for formula explanation
@@ -1391,6 +1424,11 @@ export default function App() {
                             {isConcentradoField && (
                               <p className="text-[11px] text-emerald-800 bg-emerald-50/80 border border-emerald-200/60 rounded-lg px-2.5 py-1.5 font-medium">
                                 Resultado: {d.metal_contido || "0"}t metal / ({d.teor_concentrado || 0}% teor CF / 100) = <strong className="font-bold text-emerald-950">{val || "0"} t</strong>
+                              </p>
+                            )}
+                            {isProducaoFiltroField && (
+                              <p className="text-[11px] text-pink-800 bg-pink-50/80 border border-pink-200/60 rounded-lg px-2.5 py-1.5 font-medium">
+                                Resultado: ((12h - {d.paradas_manutencao ? `${d.paradas_manutencao}h Manut.` : "0h"} - {d.paradas_outros ? `${d.paradas_outros}h OUT` : "0h"}) × {d.producao ? `${d.producao} t/h` : "30 t/h"}) = <strong className="font-bold text-pink-950">{val || "0"} t</strong>
                               </p>
                             )}
                             {campo.id === "paradas_manutencao" && (

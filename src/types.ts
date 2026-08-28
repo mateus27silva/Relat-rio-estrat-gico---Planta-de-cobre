@@ -263,6 +263,7 @@ export const SETORES: Setor[] = [
     cor: "pink",
     campos: [
       { id: "umidade", label: "Umidade do Bolo", type: "number", meta: 9.5, un: "%" },
+      { id: "producao_filtro", label: "Produção do filtro", type: "number", un: "t" },
       { id: "producao", label: "Produtividade", type: "number", meta: 30, un: "t/h" },
       { id: "tempo_sopro", label: "Tempo de sopro", type: "number", un: "min" },
       { id: "vazao_fim_compactacao", label: "Vazão ao final da compactação", type: "number", meta: 45, un: "m³/h" },
