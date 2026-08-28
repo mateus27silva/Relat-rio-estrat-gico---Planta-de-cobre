@@ -39,7 +39,9 @@ import {
   Monitor,
   Smartphone,
   FileDown,
-  Loader2
+  Loader2,
+  RotateCw,
+  Wrench
 } from "lucide-react";
 
 import {
@@ -68,10 +70,12 @@ const IconComponent = ({ name, className }: { name: string; className?: string }
     case "Columns": return <Columns className={className} />;
     case "Warehouse": return <Warehouse className={className} />;
     case "CircleDot": return <CircleDot className={className} />;
+    case "RotateCw": return <RotateCw className={className} />;
     case "Droplets": return <Droplets className={className} />;
     case "Filter": return <Filter className={className} />;
     case "FilterX": return <FilterX className={className} />;
     case "Layers": return <Layers className={className} />;
+    case "Wrench": return <Wrench className={className} />;
     default: return <Hammer className={className} />;
   }
 };
@@ -343,7 +347,7 @@ export default function App() {
   const preenchidos = SETORES.filter(s =>
     s.campos.some(c => {
       const v = dados[s.id]?.[c.id];
-      if (c.type === "atividades" || c.type === "pendencias") {
+      if (c.type === "atividades" || c.type === "pendencias" || c.type === "pendencias_programacao") {
         return Array.isArray(v) && v.some(x => x && x.trim());
       }
       return c.type === "number" ? v !== "" && v !== undefined : v && v.trim();
@@ -577,7 +581,7 @@ export default function App() {
             }
             else return;
           }
-          const s2 = st(v, c.meta, c.id);
+          const s2 = st(v, c.meta, c.id, s.id);
           if (s2 === "ok") ok++;
           else if (s2 === "alerta") al++;
           else if (s2 === "critico") cr++;
@@ -604,7 +608,7 @@ export default function App() {
                 Planta de Beneficiamento de Cobre
               </span>
               <span className="text-[10px] text-teal-200/80 font-medium block">
-                Mineração Caraíba & Tucumã • Gestão Estratégica ADM & Turno
+                Relatórios operacionais - Gestão / Estratégico / KPIS
               </span>
             </div>
           </div>
@@ -675,13 +679,9 @@ export default function App() {
 
       {/* RENDERIZAÇÃO DO MÓDULO CIRCUITO SECO, CIRCUITO ÚMIDO OU TURNO */}
       {moduloAtivo === "seco" ? (
-        <div className="w-full max-w-6xl pb-10">
-          <AdmModule circuitoTipo="seco" />
-        </div>
+        <AdmModule circuitoTipo="seco" modoWeb={modoWeb} toggleModoWeb={toggleModoWeb} />
       ) : moduloAtivo === "umido" ? (
-        <div className="w-full max-w-6xl pb-10">
-          <AdmModule circuitoTipo="umido" />
-        </div>
+        <AdmModule circuitoTipo="umido" modoWeb={modoWeb} toggleModoWeb={toggleModoWeb} />
       ) : (
         /* Container Device Wrapper for mobile simulation or full web desktop layout */
         <div className={`w-full bg-white transition-all duration-300 flex flex-col justify-between border-0 sm:border border-slate-200 relative overflow-hidden ${
@@ -740,45 +740,6 @@ export default function App() {
 
                   {/* Form Fields Container */}
                   <div className="p-4 space-y-4">
-                    
-                    {/* Atalhos para os Relatórios Estratégicos dos Circuitos */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      <div className="bg-[#0A2028] text-white p-3.5 rounded-2xl border border-slate-800 shadow-xs flex items-center justify-between gap-3">
-                        <div className="space-y-0.5">
-                          <span className="text-[10px] font-bold text-[#14B8A6] uppercase tracking-wide flex items-center gap-1">
-                            <Hammer className="w-3 h-3 text-[#14B8A6]" />
-                            CIRCUITO SECO
-                          </span>
-                          <p className="text-xs font-bold text-slate-100">
-                            Cominuição & Britagem
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => setModuloAtivo("seco")}
-                          className="bg-[#007369] hover:bg-[#005F56] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shrink-0 cursor-pointer"
-                        >
-                          Abrir
-                        </button>
-                      </div>
-
-                      <div className="bg-[#0A2028] text-white p-3.5 rounded-2xl border border-slate-800 shadow-xs flex items-center justify-between gap-3">
-                        <div className="space-y-0.5">
-                          <span className="text-[10px] font-bold text-[#14B8A6] uppercase tracking-wide flex items-center gap-1">
-                            <Droplets className="w-3 h-3 text-[#14B8A6]" />
-                            CIRCUITO ÚMIDO
-                          </span>
-                          <p className="text-xs font-bold text-slate-100">
-                            Beneficiamento & Moagem
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => setModuloAtivo("umido")}
-                          className="bg-[#007369] hover:bg-[#005F56] text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shrink-0 cursor-pointer"
-                        >
-                          Abrir
-                        </button>
-                      </div>
-                    </div>
                   
                   {/* Identificacao Card */}
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3.5">
@@ -997,7 +958,7 @@ export default function App() {
                     // Check if this sector has any filled field
                     const hasData = s.campos.some(c => {
                       const v = dados[s.id]?.[c.id];
-                      if (c.type === "atividades" || c.type === "pendencias") {
+                      if (c.type === "atividades" || c.type === "pendencias" || c.type === "pendencias_programacao") {
                         return Array.isArray(v) && v.some(x => x && x.trim());
                       }
                       return c.type === "number" ? v !== "" && v !== undefined : v && v.trim();
@@ -1098,15 +1059,15 @@ export default function App() {
                       const list = getLista(setor.id, campo.id);
                       const activeCount = list.filter(x => x && x.trim()).length;
                       return (
-                        <div key={campo.id} className={`bg-orange-50/50 border border-orange-200 rounded-2xl p-4 space-y-3 shadow-sm ${modoWeb ? "col-span-full" : ""}`}>
-                          <div className="flex items-center justify-between border-b border-orange-100 pb-2 mb-1">
+                        <div key={campo.id} className={`bg-red-50/50 border border-red-200 rounded-2xl p-4 space-y-3 shadow-sm ${modoWeb ? "col-span-full" : ""}`}>
+                          <div className="flex items-center justify-between border-b border-red-100 pb-2 mb-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-orange-600">🔴</span>
-                              <label className="text-xs font-bold uppercase tracking-wider text-orange-800">Pendências Críticas</label>
+                              <span className="text-red-600">🔴</span>
+                              <label className="text-xs font-bold uppercase tracking-wider text-red-800">Pendências Críticas</label>
                             </div>
                             {activeCount > 0 && (
-                              <span className="bg-red-50 text-red-700 text-[10px] font-extrabold px-1.5 py-0.5 rounded border border-red-200 animate-pulse">
-                                {activeCount} Pendente{activeCount > 1 ? "s" : ""}
+                              <span className="bg-red-100 text-red-800 text-[10px] font-extrabold px-2 py-0.5 rounded border border-red-200 animate-pulse">
+                                {activeCount} {activeCount > 1 ? "críticas" : "crítica"}
                               </span>
                             )}
                           </div>
@@ -1114,13 +1075,13 @@ export default function App() {
                           <div className="space-y-2">
                             {list.map((item, i) => (
                               <div key={i} className="flex gap-2 items-center">
-                                <span className="text-xs text-orange-600 font-bold font-mono">{i + 1}.</span>
+                                <span className="text-xs text-red-600 font-bold font-mono">{i + 1}.</span>
                                 <input
                                   type="text"
-                                  placeholder="Descrição da pendência..."
+                                  placeholder="Descrição da pendência crítica..."
                                   value={item}
                                   onChange={e => setItem(setor.id, campo.id, i, e.target.value)}
-                                  className="flex-1 bg-white border border-orange-200 focus:border-orange-500 rounded-xl px-3 py-2 text-sm text-slate-800 outline-none transition"
+                                  className="flex-1 bg-white border border-red-200 focus:border-red-500 rounded-xl px-3 py-2 text-sm text-slate-800 outline-none transition"
                                 />
                                 {list.length > 1 && (
                                   <button
@@ -1138,10 +1099,148 @@ export default function App() {
                           <button
                             type="button"
                             onClick={() => addItem(setor.id, campo.id)}
-                            className="bg-orange-50 hover:bg-orange-100 border border-dashed border-orange-300 text-orange-700 text-xs font-extrabold w-full py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                            className="bg-red-50 hover:bg-red-100 border border-dashed border-red-300 text-red-700 text-xs font-extrabold w-full py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
                           >
-                            <Plus className="h-3.5 w-3.5" /> Adicionar Pendência
+                            <Plus className="h-3.5 w-3.5" /> Adicionar Pendência Crítica
                           </button>
+                        </div>
+                      );
+                    }
+
+                    // PENDENCIAS DE ACOMPANHAMENTO / PROGRAMACAO FIELD LIST
+                    if (campo.type === "pendencias_programacao") {
+                      const list = getLista(setor.id, campo.id);
+                      const activeCount = list.filter(x => x && x.trim()).length;
+                      return (
+                        <div key={campo.id} className={`bg-sky-50/50 border border-sky-200 rounded-2xl p-4 space-y-3 shadow-sm ${modoWeb ? "col-span-full" : ""}`}>
+                          <div className="flex items-center justify-between border-b border-sky-100 pb-2 mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sky-600">📋</span>
+                              <div>
+                                <label className="text-xs font-bold uppercase tracking-wider text-sky-800 block">Pendências de Acompanhamento</label>
+                                <span className="text-[10px] text-sky-600 font-medium">Pendências para programação semanal / preventiva</span>
+                              </div>
+                            </div>
+                            {activeCount > 0 ? (
+                              <span className="bg-sky-100 text-sky-800 text-[10px] font-extrabold px-2 py-0.5 rounded border border-sky-200">
+                                {activeCount} {activeCount > 1 ? "itens" : "item"}
+                              </span>
+                            ) : (
+                              <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                0
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
+                            {list.map((item, i) => (
+                              <div key={i} className="flex gap-2 items-center">
+                                <span className="text-xs text-sky-600 font-bold font-mono">{i + 1}.</span>
+                                <input
+                                  type="text"
+                                  placeholder="Descrição da pendência para programação..."
+                                  value={item}
+                                  onChange={e => setItem(setor.id, campo.id, i, e.target.value)}
+                                  className="flex-1 bg-white border border-sky-200 focus:border-sky-500 rounded-xl px-3 py-2 text-sm text-slate-800 outline-none transition"
+                                />
+                                {list.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => delItem(setor.id, campo.id, i)}
+                                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-100 rounded-lg transition"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => addItem(setor.id, campo.id)}
+                            className="bg-sky-50 hover:bg-sky-100 border border-dashed border-sky-300 text-sky-700 text-xs font-extrabold w-full py-2.5 rounded-xl transition flex items-center justify-center gap-1.5"
+                          >
+                            <Plus className="h-3.5 w-3.5" /> Adicionar Pendência de Acompanhamento
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    // SPECIAL REBRITAGEM CRUSHER AFERIÇÃO TABLE (42BR001 to 42BR006)
+                    if (setor.id === "rebritagem" && (
+                      campo.id === "afericao_42br002" || 
+                      campo.id === "afericao_42br003" || 
+                      campo.id === "afericao_42br004" || 
+                      campo.id === "afericao_42br005" || 
+                      campo.id === "afericao_42br006"
+                    )) {
+                      return null;
+                    }
+
+                    if (setor.id === "rebritagem" && campo.id === "afericao_42br001") {
+                      const britadores = [
+                        { id: "afericao_42br001", label: "42BR001" },
+                        { id: "afericao_42br002", label: "42BR002" },
+                        { id: "afericao_42br003", label: "42BR003" },
+                        { id: "afericao_42br004", label: "42BR004" },
+                        { id: "afericao_42br005", label: "42BR005" },
+                        { id: "afericao_42br006", label: "42BR006" },
+                      ];
+
+                      return (
+                        <div
+                          key="tabela_afericao_rebritagem"
+                          className={`bg-blue-50/40 border border-blue-200/90 rounded-2xl p-4 shadow-sm space-y-3 ${
+                            modoWeb ? "col-span-full" : ""
+                          }`}
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-blue-100 pb-2.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base text-blue-600">⚙️</span>
+                              <div>
+                                <label className="text-xs font-bold uppercase tracking-wider text-blue-950 block">
+                                  Tabela de Aferição dos Britadores (Pós-Checagem)
+                                </label>
+                                <span className="text-[11px] text-slate-500 font-medium">
+                                  Informe para quanto ficou aferido cada britador após a checagem operacional (mm)
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse min-w-[500px]">
+                              <thead>
+                                <tr className="bg-white text-[11px] font-bold text-slate-700 uppercase tracking-wider border border-blue-200">
+                                  {britadores.map(b => (
+                                    <th key={b.id} className="py-2.5 px-3 text-center border-r border-blue-200 last:border-r-0 font-extrabold text-blue-900">
+                                      {b.label}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr className="border border-blue-200 bg-white">
+                                  {britadores.map(b => (
+                                    <td key={b.id} className="p-2 border-r border-blue-200 last:border-r-0">
+                                      <div className="relative">
+                                        <input
+                                          type="number"
+                                          step="any"
+                                          inputMode="decimal"
+                                          placeholder="0.0 mm"
+                                          value={d[b.id] || ""}
+                                          onChange={e => setDado(setor.id, b.id, e.target.value)}
+                                          className="w-full bg-slate-50 focus:bg-white border border-slate-300 focus:border-blue-500 rounded-xl px-2.5 py-2 text-center text-sm font-bold text-slate-800 outline-none transition"
+                                        />
+                                      </div>
+                                    </td>
+                                  ))}
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       );
                     }
@@ -1206,13 +1305,13 @@ export default function App() {
                           </div>
                           {campo.type === "number" && campo.meta !== undefined && val !== "" && (
                             <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                              st(val, campo.meta, campo.id) === "ok"
+                              st(val, campo.meta, campo.id, setor.id) === "ok"
                                 ? "bg-emerald-50 text-emerald-800"
-                                : st(val, campo.meta, campo.id) === "alerta"
+                                : st(val, campo.meta, campo.id, setor.id) === "alerta"
                                 ? "bg-amber-50 text-amber-800"
                                 : "bg-red-50 text-red-800"
                             }`}>
-                              {st(val, campo.meta, campo.id).toUpperCase()}
+                              {st(val, campo.meta, campo.id, setor.id).toUpperCase()}
                             </span>
                           )}
                         </div>
@@ -1228,6 +1327,27 @@ export default function App() {
                               onChange={e => setDado(setor.id, campo.id, e.target.value)}
                               className="w-full bg-white border border-slate-250 focus:border-teal-500 rounded-xl px-3.5 py-3 font-semibold text-[17px] text-slate-800 outline-none transition"
                             />
+                            {/* Campo dinâmico de Tratativa / Ação do Supervisor para Alerta ou Crítico */}
+                            {val !== "" && val !== undefined && (st(val, campo.meta, campo.id, setor.id) === "alerta" || st(val, campo.meta, campo.id, setor.id) === "critico") && (
+                              <div className="mt-2.5 p-3 bg-amber-50/95 border border-amber-300 rounded-xl space-y-1.5 shadow-2xs">
+                                <div className="flex items-center justify-between">
+                                  <label className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
+                                    <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                                    <span>Tratativa do Supervisor (Meta não atingida):</span>
+                                  </label>
+                                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
+                                    {st(val, campo.meta, campo.id, setor.id) === "critico" ? "Crítico" : "Alerta"}
+                                  </span>
+                                </div>
+                                <textarea
+                                  rows={2}
+                                  placeholder="Descreva a tratativa realizada para retorno à meta..."
+                                  value={d[`acao_${campo.id}`] || ""}
+                                  onChange={e => setDado(setor.id, `acao_${campo.id}`, e.target.value)}
+                                  className="w-full text-xs p-2 rounded-lg border border-amber-300 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium resize-none"
+                                />
+                              </div>
+                            )}
                             {isDispField && (
                               <p className="text-[11px] text-teal-700 bg-teal-50/80 border border-teal-200/60 rounded-lg px-2.5 py-1.5 font-medium">
                                 Resultado: ((12h - {d.paradas_manutencao ? `${d.paradas_manutencao}h Manut.` : "0h Manut."}) / 12h) × 100 = <strong className="font-bold text-teal-900">{val}%</strong>
@@ -1297,22 +1417,46 @@ export default function App() {
                         )}
 
                         {campo.type === "select" && (
-                          <div className="relative">
-                            <select
-                              value={val}
-                              onChange={e => setDado(setor.id, campo.id, e.target.value)}
-                              className="w-full bg-white border border-slate-250 focus:border-teal-500 rounded-xl px-3.5 py-3 font-semibold text-[15px] text-slate-800 outline-none transition cursor-pointer appearance-none pr-10"
-                            >
-                              <option value="">Selecione uma opção...</option>
-                              {campo.opcoes?.map(opt => (
-                                <option key={opt} value={opt}>
-                                  {opt}
-                                </option>
-                              ))}
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
-                              <ChevronDown className="h-4 w-4" />
+                          <div className="space-y-2">
+                            <div className="relative">
+                              <select
+                                value={val}
+                                onChange={e => setDado(setor.id, campo.id, e.target.value)}
+                                className="w-full bg-white border border-slate-250 focus:border-teal-500 rounded-xl px-3.5 py-3 font-semibold text-[15px] text-slate-800 outline-none transition cursor-pointer appearance-none pr-10"
+                              >
+                                <option value="">Selecione uma opção...</option>
+                                {campo.opcoes?.map(opt => (
+                                  <option key={opt} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
+                              </select>
+                              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3.5 text-slate-500">
+                                <ChevronDown className="h-4 w-4" />
+                              </div>
                             </div>
+
+                            {/* Tratativa obrigatória se Pendente */}
+                            {val === "Pendente" && (
+                              <div className="mt-2 p-3 bg-amber-50/95 border border-amber-300 rounded-xl space-y-1.5 shadow-2xs">
+                                <div className="flex items-center justify-between">
+                                  <label className="flex items-center gap-1.5 text-xs font-bold text-amber-950">
+                                    <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                                    <span>Tratativa do Supervisor (Aferição Pendente):</span>
+                                  </label>
+                                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-200 text-amber-900">
+                                    Pendente
+                                  </span>
+                                </div>
+                                <textarea
+                                  rows={2}
+                                  placeholder="Descreva a tratativa / motivo pelo qual a aferição ficou pendente e planejamento de execução..."
+                                  value={d[`acao_${campo.id}`] || ""}
+                                  onChange={e => setDado(setor.id, `acao_${campo.id}`, e.target.value)}
+                                  className="w-full text-xs p-2 rounded-lg border border-amber-300 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium resize-none"
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
