@@ -41,7 +41,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
   estrategiaMes,
   onUpdateHorizonte
 }) => {
-  const [activeTab, setActiveTab] = useState<HorizontePlanejamento>("dia");
+  const [activeTab, setActiveTab] = useState<HorizontePlanejamento>("semana");
   const isSeco = circuitoTipo === "seco";
 
   const setoresOpcoes = isSeco
@@ -72,33 +72,25 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
 
   const parseItemSetorTexto = (itemStr: string) => {
     if (!itemStr) return { setor: defaultSetor, texto: "" };
-    const match = itemStr.match(/^\[(.*?)\]\s*(.*)$/);
+    const match = itemStr.match(/^\[(.*?)\](?:\s)?([\s\S]*)$/);
     if (match) {
       return {
         setor: match[1].trim(),
-        texto: match[2].trim()
+        texto: match[2]
       };
     }
     return {
       setor: defaultSetor,
-      texto: itemStr.trim()
+      texto: itemStr
     };
   };
 
   const formatItemSetorTexto = (setor: string, texto: string) => {
     const cleanSetor = setor && setor.trim().length > 0 ? setor.trim() : defaultSetor;
-    const cleanTexto = texto || "";
-    return `[${cleanSetor}] ${cleanTexto}`;
+    return `[${cleanSetor}] ${texto ?? ""}`;
   };
 
-  const horizonData: Record<HorizontePlanejamento, { data: EstrategiaPorHorizonte; label: string; icon: any; color: string; badge: string }> = {
-    dia: {
-      data: estrategiaDia,
-      label: "Estratégia do Dia (24h)",
-      icon: Sun,
-      color: "emerald",
-      badge: "ALINHAMENTO 24H"
-    },
+  const horizonData: Record<Exclude<HorizontePlanejamento, "dia">, { data: EstrategiaPorHorizonte; label: string; icon: any; color: string; badge: string }> = {
     semana: {
       data: estrategiaSemana,
       label: "Estratégia da Semana (WTD)",
@@ -229,8 +221,8 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
   return (
     <div className="space-y-5">
       {/* Horizon Selector Tabs */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
-        {(["dia", "semana", "fim_de_semana", "parada", "mes"] as HorizontePlanejamento[]).map(tab => {
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+        {(["semana", "fim_de_semana", "parada", "mes"] as Array<Exclude<HorizontePlanejamento, "dia">>).map(tab => {
           const item = horizonData[tab];
           const Icon = item.icon;
           const isActive = activeTab === tab;

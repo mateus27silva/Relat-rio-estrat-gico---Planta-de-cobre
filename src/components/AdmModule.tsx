@@ -558,7 +558,7 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                 }`}
               >
                 <Target className="w-4 h-4 text-[#14B8A6]" />
-                <span>2. Horizontes (Dia / Semana / FDS / Mês)</span>
+                <span>2. Horizontes (Semana / FDS / Parada / Mês)</span>
               </button>
 
               <button
