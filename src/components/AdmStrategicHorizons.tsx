@@ -326,12 +326,12 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
                       </select>
                     </div>
                   </div>
-                  <input
-                    type="text"
+                  <textarea
+                    rows={2}
                     value={texto}
                     onChange={e => updateDiretrizTexto(idx, e.target.value)}
                     placeholder={`Ação / Procedimento operacional para ${setor}...`}
-                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-[#007369] placeholder:text-slate-400"
+                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-[#007369] placeholder:text-slate-400 leading-relaxed resize-y min-h-[38px]"
                   />
                   <button
                     onClick={() => removeDiretriz(idx)}
@@ -387,12 +387,12 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
                       </select>
                     </div>
                   </div>
-                  <input
-                    type="text"
+                  <textarea
+                    rows={2}
                     value={texto}
                     onChange={e => updateRecursoManutencaoTexto(idx, e.target.value)}
                     placeholder={`Intervenção de manutenção programada / recurso para ${setor}...`}
-                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-[#007369] placeholder:text-slate-400"
+                    className="flex-1 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-[#007369] placeholder:text-slate-400 leading-relaxed resize-y min-h-[38px]"
                   />
                   <button
                     onClick={() => removeRecursoManutencao(idx)}
@@ -449,12 +449,12 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
                       </select>
                     </div>
                   </div>
-                  <input
-                    type="text"
+                  <textarea
+                    rows={2}
                     value={texto}
                     onChange={e => updateAlertaTexto(idx, e.target.value)}
                     placeholder={`Ponto de atenção crítico / risco operacional para ${setor}...`}
-                    className="flex-1 bg-white border border-amber-200/80 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-amber-500 placeholder:text-slate-400"
+                    className="flex-1 bg-white border border-amber-200/80 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-amber-500 placeholder:text-slate-400 leading-relaxed resize-y min-h-[38px]"
                   />
                   <button
                     onClick={() => removeAlerta(idx)}
@@ -476,12 +476,12 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
               <ShieldCheck className="w-4 h-4 text-amber-700" />
               Protocolo de Blindagem de Final de Semana
             </label>
-            <input
-              type="text"
+            <textarea
+              rows={3}
               value={current.planoBlindagemFds || ""}
               onChange={e => updateField("planoBlindagemFds", e.target.value)}
               placeholder="Ex: Checklist de blindagem deve ser assinado na sexta-feira até as 17:00..."
-              className="w-full bg-white border border-amber-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-amber-500"
+              className="w-full bg-white border border-amber-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-amber-500 leading-relaxed resize-y min-h-[50px]"
             />
           </div>
         )}
@@ -493,12 +493,12 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
               <Wrench className="w-4 h-4 text-rose-700" />
               Protocolo de Alinhamento de Parada de Manutenção
             </label>
-            <input
-              type="text"
+            <textarea
+              rows={3}
               value={current.planoAlinhamentoParada || ""}
               onChange={e => updateField("planoAlinhamentoParada", e.target.value)}
               placeholder="Ex: Reunião de alinhamento com Manutenção 1h antes, bloqueio LOTO conferido e liberação segura..."
-              className="w-full bg-white border border-rose-200 rounded-lg px-3 py-1.5 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-rose-500"
+              className="w-full bg-white border border-rose-200 rounded-lg px-3 py-2 text-xs font-medium text-slate-900 focus:ring-1 focus:ring-rose-500 leading-relaxed resize-y min-h-[50px]"
             />
           </div>
         )}

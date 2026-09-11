@@ -52,10 +52,437 @@ import {
   DADOS_DIARIOS_REBRITAGEM_PADRAO,
   obterLeituraAtualRebritagem,
   obterAcaoEstrategicaRebritagem,
-  calcularCartasControleRebritagem
+  calcularCartasControleRebritagem,
+  CONFIG_PARAMETROS_MOAGEM,
+  DADOS_DIARIOS_MOAGEM_PADRAO,
+  calcularCartasControleMoagem,
+  detectarDesviosMoagem,
+  obterLeituraAtualMoagem,
+  obterAcaoEstrategicaMoagem,
+  CONFIG_PARAMETROS_REMOAGEM,
+  DADOS_DIARIOS_REMOAGEM_PADRAO,
+  calcularCartasControleRemoagem,
+  detectarDesviosRemoagem,
+  obterLeituraAtualRemoagem,
+  obterAcaoEstrategicaRemoagem,
+  CONFIG_PARAMETROS_FLOTACAO,
+  DADOS_DIARIOS_FLOTACAO_PADRAO,
+  calcularCartasControleFlotacao,
+  detectarDesviosFlotacao,
+  obterLeituraAtualFlotacao,
+  obterAcaoEstrategicaFlotacao,
+  CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO,
+  DADOS_DIARIOS_ESPESSAMENTO_REJEITO_PADRAO,
+  calcularCartasControleEspessamentoRejeito,
+  detectarDesviosEspessamentoRejeito,
+  obterLeituraAtualEspessamentoRejeito,
+  obterAcaoEstrategicaEspessamentoRejeito,
+  CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO,
+  DADOS_DIARIOS_ESPESSAMENTO_CONCENTRADO_PADRAO,
+  calcularCartasControleEspessamentoConcentrado,
+  detectarDesviosEspessamentoConcentrado,
+  obterLeituraAtualEspessamentoConcentrado,
+  obterAcaoEstrategicaEspessamentoConcentrado,
+  CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO,
+  DADOS_DIARIOS_FILTRAGEM_CONCENTRADO_PADRAO,
+  calcularCartasControleFiltragemConcentrado,
+  detectarDesviosFiltragemConcentrado,
+  obterLeituraAtualFiltragemConcentrado,
+  obterAcaoEstrategicaFiltragemConcentrado,
+  CONFIG_PARAMETROS_UTILIDADES_ETA,
+  DADOS_DIARIOS_UTILIDADES_ETA_PADRAO,
+  calcularCartasControleUtilidadesETA,
+  obterLeituraAtualUtilidadesETA,
+  obterAcaoEstrategicaUtilidadesETA
 } from "../typesAdm";
 import { gerarRelatorioAdmPDF } from "../utils/pdfGeneratorAdm";
 import { AdmGanttChartView } from "./AdmGanttChartView";
+
+interface LinhaMonitoramentoOperacional {
+  nome: string;
+  equipamento?: string;
+  subsistema?: string;
+  leituraFormatada: string;
+  faixaIdeal: string;
+  statusTipo: "good" | "warn" | "alert" | "none";
+  statusLabel: string;
+  acaoEstrategica?: string;
+}
+
+interface TabelaMonitoramentoOperacionalProps {
+  idPrefix: string;
+  titulo: string;
+  badge: string;
+  linhas: LinhaMonitoramentoOperacional[];
+}
+
+const TabelaMonitoramentoOperacional: React.FC<TabelaMonitoramentoOperacionalProps> = ({
+  idPrefix,
+  titulo,
+  badge,
+  linhas
+}) => (
+  <div id={`sec-${idPrefix}`} className="space-y-2">
+    <div className="flex items-center justify-between border-l-4 border-l-[#007369] pl-3 py-1 bg-slate-50 rounded-r">
+      <span className="font-black text-xs text-[#0A2028] uppercase tracking-wide flex items-center gap-1.5">
+        <Gauge className="w-4 h-4 text-[#007369]" />
+        {titulo}
+      </span>
+      <span className="text-[10px] font-bold text-[#007369] uppercase tracking-wider">
+        {badge}
+      </span>
+    </div>
+
+    <div className="overflow-x-auto rounded-lg border border-slate-300 shadow-2xs">
+      <table className="w-full text-left border-collapse text-[11px]">
+        <thead>
+          <tr className="bg-[#007369] text-white font-bold text-[10px]">
+            <th className="p-2 border-r border-teal-800">Variável / Indicador de Processo</th>
+            <th className="p-2 border-r border-teal-800 text-center">Equipamento</th>
+            <th className="p-2 border-r border-teal-800">Subsistema</th>
+            <th className="p-2 text-center border-r border-teal-800">Leitura Atual</th>
+            <th className="p-2 text-center border-r border-teal-800 text-teal-100 font-semibold">Faixa Operacional</th>
+            <th className="p-2 text-center border-r border-teal-800 text-[#A7F3D0]">Status / Condição</th>
+            <th className="p-2 text-left">Ação estratégica</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-300">
+          {linhas.map((row, idx) => (
+            <tr
+              key={idx}
+              className={
+                row.statusTipo === "alert"
+                  ? "bg-rose-50/80 font-medium text-slate-900"
+                  : row.statusTipo === "warn"
+                  ? "bg-amber-50/80 font-medium text-slate-900"
+                  : idx % 2 === 1
+                  ? "bg-slate-50/70"
+                  : "bg-white"
+              }
+            >
+              <td className="p-2 border-r border-slate-300 font-bold text-slate-900">
+                {row.nome}
+              </td>
+              <td className="p-2 border-r border-slate-300 text-center font-extrabold text-blue-900">
+                <span className="px-1.5 py-0.5 bg-blue-50 border border-blue-200 rounded text-[10px]">
+                  {row.equipamento || "-"}
+                </span>
+              </td>
+              <td className="p-2 border-r border-slate-300 text-slate-600 font-medium">
+                {row.subsistema || "-"}
+              </td>
+              <td
+                className={`p-2 text-center border-r border-slate-300 font-bold ${
+                  row.statusTipo === "alert"
+                    ? "text-rose-700 font-black"
+                    : row.statusTipo === "warn"
+                    ? "text-amber-800 font-bold"
+                    : row.statusTipo === "good"
+                    ? "text-[#00554E]"
+                    : "text-slate-400 font-normal"
+                }`}
+              >
+                {row.leituraFormatada ? row.leituraFormatada : <span className="text-slate-400 font-normal">-</span>}
+              </td>
+              <td className="p-2 text-center border-r border-slate-300 text-slate-600 font-normal">
+                {row.faixaIdeal}
+              </td>
+              <td className="p-2 text-center border-r border-slate-300">
+                {row.statusTipo === "none" ? (
+                  <span className="text-slate-400 font-semibold text-xs">-</span>
+                ) : (
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+                      row.statusTipo === "alert"
+                        ? "bg-rose-100 text-rose-800 border border-rose-200"
+                        : row.statusTipo === "warn"
+                        ? "bg-amber-100 text-amber-800 border border-amber-200"
+                        : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                    }`}
+                  >
+                    {row.statusLabel}
+                  </span>
+                )}
+              </td>
+              <td className="p-2 text-slate-700 text-[10.5px] font-medium leading-tight">
+                {row.acaoEstrategica ? row.acaoEstrategica : <span className="text-slate-400 font-normal">-</span>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+interface ItemCartaEstatistica {
+  parametro: {
+    chave: string;
+    nome: string;
+    nomeCurto?: string;
+    unidade: string;
+    minIdeal: number;
+    maxIdeal: number;
+    alvo: number;
+    decimais: number;
+    equipamento?: string;
+  };
+  media: number;
+  pontosForaFaixa: number;
+  valoresPorDia: {
+    dia: string;
+    diaLabel: string;
+    valor: number | null;
+    status: "normal" | "alerta_alto" | "alerta_baixo";
+  }[];
+}
+
+interface GradeCartasControleProps {
+  idPrefix: string;
+  titulo: string;
+  subtitulo: string;
+  estatisticas: ItemCartaEstatistica[];
+}
+
+const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
+  idPrefix,
+  titulo,
+  subtitulo,
+  estatisticas
+}) => {
+  const dayLabelsMin = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+
+  return (
+    <div id={`cep-${idPrefix}`} className="pt-3 space-y-2">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
+        <span className="text-[11px] font-black text-[#0A2028] uppercase tracking-wide flex items-center gap-1.5">
+          <TrendingUp className="w-3.5 h-3.5 text-[#007369]" />
+          {titulo}
+        </span>
+        <span className="text-[10px] font-bold text-slate-500">
+          {subtitulo}
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {estatisticas.map((stat, idx) => {
+          const p = stat.parametro;
+          const isMinOnly = (p as any).tipoLimite === "min";
+          const isMaxOnly = (p as any).tipoLimite === "max";
+          const temDesvio = stat.pontosForaFaixa > 0;
+          const valoresValidos = stat.valoresPorDia
+            .map(v => v.valor)
+            .filter((v): v is number => v !== null && !isNaN(v));
+          const minLido = valoresValidos.length > 0 ? Math.min(...valoresValidos) : p.minIdeal;
+          const maxLido = valoresValidos.length > 0 ? Math.max(...valoresValidos) : p.maxIdeal;
+          const yMin = isMinOnly ? Math.min(p.minIdeal * 0.95, minLido * 0.98) : isMaxOnly ? 0 : Math.min(p.minIdeal * 0.94, minLido * 0.97);
+          const yMax = isMaxOnly ? Math.max(p.maxIdeal * 1.25, maxLido * 1.1) : isMinOnly ? Math.max(p.alvo * 1.05, maxLido * 1.02) : Math.max(p.maxIdeal * 1.06, maxLido * 1.03);
+          const ySpan = yMax - yMin || 1;
+
+          // SVG dimensions
+          const svgW = 320;
+          const svgH = 95;
+          const padL = 32;
+          const padR = 18;
+          const padT = 14;
+          const padB = 22;
+          const plotW = svgW - padL - padR;
+          const plotH = svgH - padT - padB;
+
+          const getY = (val: number) => {
+            const clamped = Math.max(yMin, Math.min(yMax, val));
+            return padT + plotH - ((clamped - yMin) / ySpan) * plotH;
+          };
+
+          const lscY = getY(p.maxIdeal);
+          const licY = getY(p.minIdeal);
+
+          const points = stat.valoresPorDia.map((item, d) => {
+            const x = padL + (d / 6) * plotW;
+            const val = item.valor;
+            const isFora = val !== null && (
+              isMinOnly ? val < p.minIdeal : isMaxOnly ? val > p.maxIdeal : (val > p.maxIdeal || val < p.minIdeal)
+            );
+            const y = val !== null ? getY(val) : null;
+            return { x, y, val, isFora, diaLabel: dayLabelsMin[d] };
+          });
+
+          const validPoints = points.filter(
+            (pt): pt is { x: number; y: number; val: number; isFora: boolean; diaLabel: string } =>
+              pt.val !== null && pt.y !== null
+          );
+          const polylinePts = validPoints.map(pt => `${pt.x},${pt.y}`).join(" ");
+
+          return (
+            <div
+              key={p.chave || idx}
+              id={`card-cep-${p.chave || idx}`}
+              className={`bg-white rounded-lg border p-3 shadow-2xs space-y-2 ${
+                temDesvio ? "border-rose-300 bg-rose-50/20" : "border-slate-300"
+              }`}
+            >
+              <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                <span className="font-bold text-xs text-slate-900 truncate">
+                  {idx + 1}. {p.nomeCurto || p.nome} {p.equipamento ? `(${p.equipamento})` : `(${p.unidade})`}
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[9px] font-semibold text-slate-500">
+                    Média: {stat.media} {p.unidade}
+                  </span>
+                  <span
+                    className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md ${
+                      temDesvio
+                        ? "bg-rose-100 text-rose-800 border border-rose-200"
+                        : "bg-teal-50 text-teal-800 border border-teal-200"
+                    }`}
+                  >
+                    {temDesvio ? `Desvio (${stat.pontosForaFaixa}x)` : "Controlado"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] font-semibold flex-wrap gap-1">
+                {isMinOnly ? (
+                  <span className="text-blue-600 flex items-center gap-1 font-bold">
+                    <span className="w-2.5 h-0.5 bg-blue-500 inline-block border-t border-dashed"></span>
+                    Limite Mínimo: {(p as any).rotuloFaixa || `> ${p.minIdeal} ${p.unidade}`}
+                  </span>
+                ) : isMaxOnly ? (
+                  <span className="text-rose-600 flex items-center gap-1 font-bold">
+                    <span className="w-2.5 h-0.5 bg-rose-500 inline-block border-t border-dashed"></span>
+                    Limite Máximo: {(p as any).rotuloFaixa || `< ${p.maxIdeal} ${p.unidade}`}
+                  </span>
+                ) : (
+                  <>
+                    <span className="text-blue-600 flex items-center gap-1">
+                      <span className="w-2.5 h-0.5 bg-blue-500 inline-block border-t border-dashed"></span>
+                      LIC: {p.minIdeal} {p.unidade}
+                    </span>
+                    <span className="text-rose-600 flex items-center gap-1">
+                      <span className="w-2.5 h-0.5 bg-rose-500 inline-block border-t border-dashed"></span>
+                      LSC: {p.maxIdeal} {p.unidade}
+                    </span>
+                  </>
+                )}
+                <span className="text-emerald-800 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
+                  Realizado (Curva Diária)
+                </span>
+              </div>
+
+              <div className="w-full overflow-hidden">
+                <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-auto max-h-[110px]">
+                  {/* Faixa Ideal */}
+                  {isMinOnly ? (
+                    <rect
+                      x={padL}
+                      y={padT}
+                      width={plotW}
+                      height={Math.max(0, licY - padT)}
+                      fill="#f0fdf4"
+                      opacity="0.9"
+                    />
+                  ) : isMaxOnly ? (
+                    <rect
+                      x={padL}
+                      y={lscY}
+                      width={plotW}
+                      height={Math.max(0, (padT + plotH) - lscY)}
+                      fill="#f0fdf4"
+                      opacity="0.9"
+                    />
+                  ) : (
+                    <rect
+                      x={padL}
+                      y={Math.min(lscY, licY)}
+                      width={plotW}
+                      height={Math.abs(licY - lscY)}
+                      fill="#f0fdf4"
+                      opacity="0.9"
+                    />
+                  )}
+
+                  {/* Linhas de Limite */}
+                  {!isMinOnly && (
+                    <line
+                      x1={padL}
+                      y1={lscY}
+                      x2={padL + plotW}
+                      y2={lscY}
+                      stroke="#ef4444"
+                      strokeWidth="1.2"
+                      strokeDasharray="3,2"
+                    />
+                  )}
+                  {!isMaxOnly && (
+                    <line
+                      x1={padL}
+                      y1={licY}
+                      x2={padL + plotW}
+                      y2={licY}
+                      stroke="#3b82f6"
+                      strokeWidth="1.2"
+                      strokeDasharray="3,2"
+                    />
+                  )}
+
+                  {/* Polyline */}
+                  {polylinePts && (
+                    <polyline
+                      fill="none"
+                      stroke="#0f766e"
+                      strokeWidth="2.2"
+                      points={polylinePts}
+                    />
+                  )}
+
+                  {/* Pontos Diários */}
+                  {points.map((pt, d) => (
+                    <g key={d}>
+                      <text
+                        x={pt.x}
+                        y={svgH - 4}
+                        textAnchor="middle"
+                        fontSize="8.5"
+                        fontWeight="600"
+                        fill="#475569"
+                      >
+                        {pt.diaLabel}
+                      </text>
+
+                      {pt.val !== null && pt.y !== null && (
+                        <>
+                          <circle
+                            cx={pt.x}
+                            cy={pt.y}
+                            r={pt.isFora ? "4" : "3"}
+                            fill={pt.isFora ? "#e11d48" : "#047857"}
+                            stroke="#ffffff"
+                            strokeWidth="1.5"
+                          />
+                          <text
+                            x={pt.x}
+                            y={pt.y < (lscY + licY) / 2 ? pt.y - 6 : pt.y + 11}
+                            textAnchor="middle"
+                            fontSize="7.5"
+                            fontWeight={pt.isFora ? "bold" : "600"}
+                            fill={pt.isFora ? "#be123c" : "#0f172a"}
+                          >
+                            {p.decimais > 0 ? pt.val.toFixed(p.decimais).replace(".", ",") : pt.val}
+                          </text>
+                        </>
+                      )}
+                    </g>
+                  ))}
+                </svg>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 interface AdmExecutiveSummaryViewProps {
   payload: RelatorioAdmPayload;
@@ -226,63 +653,112 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
   const kpisUmido = [
     {
       label: "Metal Fino Cu (Planta)",
-      valor: ce.metalContidoMes ? `${ce.metalContidoMes.toLocaleString("pt-BR")}` : "3.435",
+      valor: ce.metalContidoMes ? `${Number(ce.metalContidoMes).toLocaleString("pt-BR")}` : "2.260",
       unidade: "t Cu",
-      budget: `Budget: ${ce.metaMetalContidoMes ? ce.metaMetalContidoMes.toLocaleString("pt-BR") : "3.355"} t`,
-      delta: "▲ +80 t (+2,4%)",
-      isPos: true,
-      pctFill: 102.4,
-      status: "good" as const
+      budget: `Budget: ${ce.metaMetalContidoMes ? Number(ce.metaMetalContidoMes).toLocaleString("pt-BR") : "2.450"} t`,
+      delta: (() => {
+        const val = Number(ce.metalContidoMes || 2260);
+        const meta = Number(ce.metaMetalContidoMes || 2450);
+        const diff = val - meta;
+        const pct = ((diff / meta) * 100).toFixed(1).replace(".", ",");
+        return diff >= 0
+          ? `▲ +${diff.toLocaleString("pt-BR")} t (+${pct}%)`
+          : `▼ ${diff.toLocaleString("pt-BR")} t (${pct}%)`;
+      })(),
+      isPos: Number(ce.metalContidoMes || 2260) >= Number(ce.metaMetalContidoMes || 2450),
+      pctFill: Math.min(100, +((Number(ce.metalContidoMes || 2260) / Number(ce.metaMetalContidoMes || 2450)) * 100).toFixed(1)),
+      status: Number(ce.metalContidoMes || 2260) >= Number(ce.metaMetalContidoMes || 2450) ? ("good" as const) : ("warn" as const)
     },
     {
       label: "Massa Moagem (Feed)",
-      valor: ce.producaoMoagemMes ? `${ce.producaoMoagemMes.toLocaleString("pt-BR")}` : "398.560",
+      valor: ce.producaoMoagemMes ? `${Number(ce.producaoMoagemMes).toLocaleString("pt-BR")}` : "198.000",
       unidade: "t",
-      budget: `Budget: ${ce.metaProducaoMoagemMes ? ce.metaProducaoMoagemMes.toLocaleString("pt-BR") : "407.671"} t`,
-      delta: "▼ -9.111 t (-2,2%)",
-      isPos: false,
-      pctFill: 97.8,
-      status: "warn" as const
+      budget: `Budget: ${ce.metaProducaoMoagemMes ? Number(ce.metaProducaoMoagemMes).toLocaleString("pt-BR") : "216.000"} t`,
+      delta: (() => {
+        const val = Number(ce.producaoMoagemMes || 198000);
+        const meta = Number(ce.metaProducaoMoagemMes || 216000);
+        const diff = val - meta;
+        const pct = ((diff / meta) * 100).toFixed(1).replace(".", ",");
+        return diff >= 0
+          ? `▲ +${diff.toLocaleString("pt-BR")} t (+${pct}%)`
+          : `▼ ${diff.toLocaleString("pt-BR")} t (${pct}%)`;
+      })(),
+      isPos: Number(ce.producaoMoagemMes || 198000) >= Number(ce.metaProducaoMoagemMes || 216000),
+      pctFill: Math.min(100, +((Number(ce.producaoMoagemMes || 198000) / Number(ce.metaProducaoMoagemMes || 216000)) * 100).toFixed(1)),
+      status: Number(ce.producaoMoagemMes || 198000) >= Number(ce.metaProducaoMoagemMes || 216000) ? ("good" as const) : ("warn" as const)
     },
     {
       label: "Recuperação Metalúrgica",
-      valor: ce.recuperacaoMetalurgica ? `${ce.recuperacaoMetalurgica}` : "89,46",
+      valor: ce.recuperacaoMetalurgica ? `${ce.recuperacaoMetalurgica}` : "89,2",
       unidade: "%",
-      budget: `Budget: ${ce.metaRecuperacao || 87.98}%`,
-      delta: "▲ +1,48 pp",
-      isPos: true,
-      pctFill: 89.5,
+      budget: `Budget: ${ce.metaRecuperacao || 88.5}%`,
+      delta: (() => {
+        const val = Number(ce.recuperacaoMetalurgica || 89.2);
+        const meta = Number(ce.metaRecuperacao || 88.5);
+        const diff = val - meta;
+        return diff >= 0
+          ? `▲ +${diff.toFixed(2).replace(".", ",")} pp`
+          : `▼ ${diff.toFixed(2).replace(".", ",")} pp`;
+      })(),
+      isPos: Number(ce.recuperacaoMetalurgica || 89.2) >= Number(ce.metaRecuperacao || 88.5),
+      pctFill: Math.min(100, Number(ce.recuperacaoMetalurgica || 89.2)),
       status: "good" as const
     },
     {
       label: "Teor Cu Alimentação (CuT)",
-      valor: ce.teorAlimentacaoCu ? `${ce.teorAlimentacaoCu}` : "0,963",
+      valor: ce.teorAlimentacaoCu ? `${ce.teorAlimentacaoCu}` : "1,28",
       unidade: "%",
-      budget: "Budget: 0,935%",
-      delta: "▲ +0,028 pp",
-      isPos: true,
-      pctFill: 96.3,
+      budget: "Budget: 1,28%",
+      delta: (() => {
+        const val = Number(ce.teorAlimentacaoCu || 1.28);
+        const meta = 1.28;
+        const diff = val - meta;
+        if (Math.abs(diff) < 0.001) return "Em Meta (0,00 pp)";
+        return diff > 0 ? `▲ +${diff.toFixed(3).replace(".", ",")} pp` : `▼ ${diff.toFixed(3).replace(".", ",")} pp`;
+      })(),
+      isPos: Number(ce.teorAlimentacaoCu || 1.28) >= 1.28,
+      pctFill: 100,
       status: "good" as const
     },
     {
       label: "Concentrado Produzido",
-      valor: ce.concentradoProduzidoDia ? `${ce.concentradoProduzidoDia.toLocaleString("pt-BR")}` : "9.912",
-      unidade: "t",
-      budget: `Budget: 10.014 t`,
-      delta: "▼ -102 t (-1,0%)",
-      isPos: false,
-      pctFill: 99.0,
+      valor: ce.concentradoProduzidoDia ? `${Number(ce.concentradoProduzidoDia).toLocaleString("pt-BR")}` : "239,8",
+      unidade: "t/dia",
+      budget: `Budget: ${ce.metaConcentradoDia || "242,0"} t`,
+      delta: (() => {
+        const val = Number(ce.concentradoProduzidoDia || 239.8);
+        const meta = Number(ce.metaConcentradoDia || 242.0);
+        const diff = val - meta;
+        const pct = ((diff / meta) * 100).toFixed(1).replace(".", ",");
+        return diff >= 0
+          ? `▲ +${diff.toFixed(1).replace(".", ",")} t (+${pct}%)`
+          : `▼ ${diff.toFixed(1).replace(".", ",")} t (${pct}%)`;
+      })(),
+      isPos: Number(ce.concentradoProduzidoDia || 239.8) >= Number(ce.metaConcentradoDia || 242.0),
+      pctFill: Math.min(100, +((Number(ce.concentradoProduzidoDia || 239.8) / Number(ce.metaConcentradoDia || 242.0)) * 100).toFixed(1)),
       status: "good" as const
     },
     {
       label: "Filtro Prensa (Disp / Util)",
-      valor: "97,7 / 53,7",
+      valor: (() => {
+        const pm = typeof ce.paradasManutencaoFiltro === "number" ? ce.paradasManutencaoFiltro : 1.0;
+        const po = typeof ce.paradasOutrosFiltro === "number" ? ce.paradasOutrosFiltro : 1.0;
+        const disp = (((12 - pm) / 12) * 100).toFixed(1).replace(".", ",");
+        const util = (((12 - pm - po) / 12) * 100).toFixed(1).replace(".", ",");
+        return `${disp} / ${util}`;
+      })(),
       unidade: "%",
       budget: "Meta Util: ≥ 65% (Disp ≥ 90%)",
-      delta: "▼ -11,3 pp (Util)",
-      isPos: false,
-      pctFill: 53.7,
-      status: "warn" as const
+      delta: (() => {
+        const pm = typeof ce.paradasManutencaoFiltro === "number" ? ce.paradasManutencaoFiltro : 1.0;
+        const po = typeof ce.paradasOutrosFiltro === "number" ? ce.paradasOutrosFiltro : 1.0;
+        const util = ((12 - pm - po) / 12) * 100;
+        const diff = util - 65;
+        return diff >= 0 ? `▲ +${diff.toFixed(1).replace(".", ",")} pp (Util)` : `▼ ${diff.toFixed(1).replace(".", ",")} pp (Util)`;
+      })(),
+      isPos: true,
+      pctFill: 83.3,
+      status: "good" as const
     }
   ];
 
@@ -390,105 +866,567 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
     };
   });
 
-  // Tabela Operacional Formal (Circuito Úmido)
-  const tableDataOperacional = [
-        {
-          indicador: "Alimentação Moagem (Tratamento Planta)",
-          setor: "Moagem",
-          realDia: `${ce.producaoMoagemDia ? ce.producaoMoagemDia.toLocaleString("pt-BR") : "-"} t`,
-          metaDia: `${ce.metaProducaoMoagemDia ? ce.metaProducaoMoagemDia.toLocaleString("pt-BR") : "-"} t`,
-          ating: calcAtingimento(ce.producaoMoagemDia, ce.metaProducaoMoagemDia).pct,
-          realSemana: `${ce.producaoMoagemSemana ? ce.producaoMoagemSemana.toLocaleString("pt-BR") : "-"} t`,
-          metaSemana: `${ce.metaProducaoMoagemSemana ? ce.metaProducaoMoagemSemana.toLocaleString("pt-BR") : "-"} t`,
-          realMes: `${ce.producaoMoagemMes ? ce.producaoMoagemMes.toLocaleString("pt-BR") : "-"} t`,
-          metaMes: `${ce.metaProducaoMoagemMes ? ce.metaProducaoMoagemMes.toLocaleString("pt-BR") : "-"} t`,
-          destaque: true
-        },
-        {
-          indicador: "Cobre Contido Líquido Produzido",
-          setor: "Metalurgia",
-          realDia: `${ce.metalContidoDia || "-"} t Cu`,
-          metaDia: `${ce.metaMetalContidoDia || "-"} t Cu`,
-          ating: calcAtingimento(ce.metalContidoDia, ce.metaMetalContidoDia).pct,
-          realSemana: `${ce.metalContidoSemana || "-"} t Cu`,
-          metaSemana: `${ce.metaMetalContidoSemana || "-"} t Cu`,
-          realMes: `${ce.metalContidoMes || "-"} t Cu`,
-          metaMes: `${ce.metaMetalContidoMes || "-"} t Cu`,
-          destaque: true
-        },
-        {
-          indicador: "Taxa Total Moagem / Granulometria P80",
-          setor: "Moagem",
-          realDia: `${ce.taxaTotalMoagem || "-"} t/h (${ce.granulometria105 || "-"}%)`,
-          metaDia: "605 t/h (≥ 62%)",
-          ating: "Em Meta",
-          realSemana: "-",
-          metaSemana: "-",
-          realMes: "-",
-          metaMes: "-",
-          destaque: false
-        },
-        {
-          indicador: "Recuperação Metalúrgica Global Cu",
-          setor: "Flotação",
-          realDia: `${ce.recuperacaoMetalurgica || "-"}%`,
-          metaDia: `${ce.metaRecuperacao || "-"}%`,
-          ating: calcAtingimento(ce.recuperacaoMetalurgica, ce.metaRecuperacao).pct,
-          realSemana: `${ce.recuperacaoMetalurgica || "-"}%`,
-          metaSemana: `${ce.metaRecuperacao || "-"}%`,
-          realMes: `${ce.recuperacaoMetalurgica || "-"}%`,
-          metaMes: `${ce.metaRecuperacao || "-"}%`,
-          destaque: false
-        },
-        {
-          indicador: "Teores: Alimentação / Conc. / Rejeito",
-          setor: "Flotação",
-          realDia: `${ce.teorAlimentacaoCu || "-"}% / ${ce.teorConcentradoCu || "-"}% / ${ce.teorRejeitoCu || "-"}%`,
-          metaDia: "1,28% / 33,5% / 0,10%",
-          ating: "Conforme",
-          realSemana: "-",
-          metaSemana: "-",
-          realMes: "-",
-          metaMes: "-",
-          destaque: false
-        },
-        {
-          indicador: "Autonomia de Finos: Silos + Pátio",
-          setor: "Alimentação",
-          realDia: `${ce.autonomiaMinérioHoras || "-"} h (${ce.autonomiaMinérioToneladas ? ce.autonomiaMinérioToneladas.toLocaleString("pt-BR") : "-"} t)`,
-          metaDia: "24,0 h (8.000 t)",
-          ating: "Estável",
-          realSemana: "-",
-          metaSemana: "-",
-          realMes: "-",
-          metaMes: "-",
-          destaque: false
-        },
-        {
-          indicador: "Umidade Bolo Filtro Prensa / Ciclos",
-          setor: "Filtragem",
-          realDia: `${ce.umidadeBolo || "-"}% (${ce.ciclosFiltro || "-"} ciclos)`,
-          metaDia: `≤ ${ce.metaUmidadeBolo || "9,5"}% (26 ciclos)`,
-          ating: "Aderente",
-          realSemana: "-",
-          metaSemana: "-",
-          realMes: "-",
-          metaMes: "-",
-          destaque: false
-        },
-        {
-          indicador: "ETA: Taxa de Reuso / Recirculação Hídrica",
-          setor: "Rec. Hídricos",
-          realDia: `${ce.taxaRecirculacaoReuso || "-"}% (Turb: ${ce.turbidezAguaTratadaNtu || "-"} NTU)`,
-          metaDia: `≥ ${ce.metaRecirculacao || "85"}% (≤ 2,0 NTU)`,
-          ating: "Conforme",
-          realSemana: "-",
-          metaSemana: "-",
-          realMes: "-",
-          metaMes: "-",
-          destaque: false
+  // Dados verticais do Monitoramento Mecânico & Operacional da Moagem Primária (MI003 a MI005)
+  const tableDataMoagemVertical = CONFIG_PARAMETROS_MOAGEM.map(param => {
+    const infoLeitura = obterLeituraAtualMoagem(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaMoagem(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+        const deltaRel = Math.max(
+          param.minIdeal - numVal,
+          numVal - param.maxIdeal
+        ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+        if (deltaRel > 0.25) {
+          statusTipo = "alert";
+          statusLabel = "Crítico / Desvio";
+        } else {
+          statusTipo = "warn";
+          statusLabel = "Atenção / Desvio";
         }
-      ];
+      } else {
+        statusTipo = "good";
+        statusLabel = "Conforme";
+      }
+    }
+
+    const faixaIdeal = `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Dados verticais do Monitoramento Operacional da Remoagem (HIG Mill & Derrick)
+  const tableDataRemoagemVertical = CONFIG_PARAMETROS_REMOAGEM.map(param => {
+    const infoLeitura = obterLeituraAtualRemoagem(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaRemoagem(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+        const deltaRel = Math.max(
+          param.minIdeal - numVal,
+          numVal - param.maxIdeal
+        ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+        if (deltaRel > 0.25) {
+          statusTipo = "alert";
+          statusLabel = "Crítico / Desvio";
+        } else {
+          statusTipo = "warn";
+          statusLabel = "Atenção / Desvio";
+        }
+      } else {
+        statusTipo = "good";
+        statusLabel = "Conforme";
+      }
+    }
+
+    const faixaIdeal = `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Dados verticais do Monitoramento Operacional da Flotação de Cobre
+  const tableDataFlotacaoVertical = CONFIG_PARAMETROS_FLOTACAO.map(param => {
+    const infoLeitura = obterLeituraAtualFlotacao(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaFlotacao(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (param.tipoLimite === "min") {
+        if (numVal < param.minIdeal) {
+          const delta = param.minIdeal - numVal;
+          if (delta > 1.0) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Baixo";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Baixo";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else if (param.tipoLimite === "max") {
+        if (numVal > param.maxIdeal) {
+          const delta = numVal - param.maxIdeal;
+          if (delta > 0.02) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Alto";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Alto";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else {
+        if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+          const deltaRel = Math.max(
+            param.minIdeal - numVal,
+            numVal - param.maxIdeal
+          ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+          if (deltaRel > 0.25) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Desvio";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Desvio";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      }
+    }
+
+    const faixaIdeal = param.rotuloFaixa || `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Dados verticais do Monitoramento Operacional do Espessamento de Rejeito
+  const tableDataEspessamentoRejeitoVertical = CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO.map(param => {
+    const infoLeitura = obterLeituraAtualEspessamentoRejeito(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaEspessamentoRejeito(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (param.tipoLimite === "min") {
+        if (numVal < param.minIdeal) {
+          const delta = param.minIdeal - numVal;
+          if (delta > 20) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Baixo";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Baixo";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else if (param.tipoLimite === "max") {
+        if (numVal > param.maxIdeal) {
+          const delta = numVal - param.maxIdeal;
+          if (delta > 10) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Alto";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Alto";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else {
+        if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+          const deltaRel = Math.max(
+            param.minIdeal - numVal,
+            numVal - param.maxIdeal
+          ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+          if (deltaRel > 0.25) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Desvio";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Desvio";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      }
+    }
+
+    const faixaIdeal = param.rotuloFaixa || `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Dados verticais do Monitoramento Operacional do Espessamento de Concentrado
+  const tableDataEspessamentoConcentradoVertical = CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO.map(param => {
+    const infoLeitura = obterLeituraAtualEspessamentoConcentrado(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaEspessamentoConcentrado(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (param.tipoLimite === "min") {
+        if (numVal < param.minIdeal) {
+          const delta = param.minIdeal - numVal;
+          if (delta > 20) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Baixo";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Baixo";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else if (param.tipoLimite === "max") {
+        if (numVal > param.maxIdeal) {
+          const delta = numVal - param.maxIdeal;
+          if (delta > 10) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Alto";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Alto";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else {
+        if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+          const deltaRel = Math.max(
+            param.minIdeal - numVal,
+            numVal - param.maxIdeal
+          ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+          if (deltaRel > 0.25) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Desvio";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Desvio";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      }
+    }
+
+    const faixaIdeal = param.rotuloFaixa || `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Dados verticais do Monitoramento Operacional da Filtragem de Concentrado
+  const tableDataFiltragemConcentradoVertical = CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO.map(param => {
+    const infoLeitura = obterLeituraAtualFiltragemConcentrado(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaFiltragemConcentrado(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (param.tipoLimite === "min") {
+        if (numVal < param.minIdeal) {
+          const delta = param.minIdeal - numVal;
+          if (delta > 20) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Baixo";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Baixo";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else if (param.tipoLimite === "max") {
+        if (numVal > param.maxIdeal) {
+          const delta = numVal - param.maxIdeal;
+          if (delta > 1) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Alto";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Alto";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else {
+        if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+          const deltaRel = Math.max(
+            param.minIdeal - numVal,
+            numVal - param.maxIdeal
+          ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+          if (deltaRel > 0.25) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Desvio";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Desvio";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      }
+    }
+
+    const faixaIdeal = param.rotuloFaixa || `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Dados verticais do Monitoramento Operacional de Utilidades & ETA
+  const tableDataUtilidadesETAVertical = CONFIG_PARAMETROS_UTILIDADES_ETA.map(param => {
+    const infoLeitura = obterLeituraAtualUtilidadesETA(ce, param);
+    const numVal = infoLeitura.numVal;
+    const leituraFormatada = infoLeitura.leituraFormatada;
+    const acaoEstrategica = obterAcaoEstrategicaUtilidadesETA(ce, param);
+
+    let statusTipo: "good" | "warn" | "alert" | "none" = "none";
+    let statusLabel = "-";
+
+    if (numVal !== null && !isNaN(numVal)) {
+      if (param.tipoLimite === "min") {
+        if (numVal < param.minIdeal) {
+          const delta = param.minIdeal - numVal;
+          if (delta > 5) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Baixo";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Baixo";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else if (param.tipoLimite === "max") {
+        if (numVal > param.maxIdeal) {
+          const delta = numVal - param.maxIdeal;
+          if (delta > 0.5) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Alto";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Alto";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      } else {
+        if (numVal < param.minIdeal || numVal > param.maxIdeal) {
+          const deltaRel = Math.max(
+            param.minIdeal - numVal,
+            numVal - param.maxIdeal
+          ) / ((param.maxIdeal - param.minIdeal) || 1);
+
+          if (deltaRel > 0.25) {
+            statusTipo = "alert";
+            statusLabel = "Crítico / Desvio";
+          } else {
+            statusTipo = "warn";
+            statusLabel = "Atenção / Desvio";
+          }
+        } else {
+          statusTipo = "good";
+          statusLabel = "Conforme";
+        }
+      }
+    }
+
+    const faixaIdeal = param.rotuloFaixa || `${param.decimais > 0 ? param.minIdeal.toFixed(param.decimais).replace(".", ",") : param.minIdeal} - ${param.decimais > 0 ? param.maxIdeal.toFixed(param.decimais).replace(".", ",") : param.maxIdeal} ${param.unidade}`;
+    const alvoFormatado = `${param.decimais > 0 ? param.alvo.toFixed(param.decimais).replace(".", ",") : param.alvo} ${param.unidade}`;
+
+    return {
+      chave: param.chave,
+      nome: param.nome,
+      equipamento: param.equipamento,
+      subsistema: param.subsistema,
+      unidade: param.unidade,
+      numVal,
+      leituraFormatada,
+      faixaIdeal,
+      alvoFormatado,
+      statusTipo,
+      statusLabel,
+      acaoEstrategica,
+      acaoRecomendada: acaoEstrategica,
+      impactoDesvio: param.impactoDesvio
+    };
+  });
+
+  // Cartas de Controle Estatístico (CEP) — Cálculos
+  const estatisticasBritagem = calcularCartasControleBritagem(
+    br.historicoDiarioBritagem && br.historicoDiarioBritagem.length === 7
+      ? br.historicoDiarioBritagem
+      : DADOS_DIARIOS_BRITAGEM_PADRAO
+  );
+
+  const estatisticasRebritagem = calcularCartasControleRebritagem(
+    br.historicoDiarioRebritagem && br.historicoDiarioRebritagem.length === 7
+      ? br.historicoDiarioRebritagem
+      : DADOS_DIARIOS_REBRITAGEM_PADRAO
+  );
+
+  const estatisticasMoagem = calcularCartasControleMoagem(
+    ce.historicoDiarioMoagem && ce.historicoDiarioMoagem.length === 7
+      ? ce.historicoDiarioMoagem
+      : DADOS_DIARIOS_MOAGEM_PADRAO
+  );
+
+  const estatisticasRemoagem = calcularCartasControleRemoagem(
+    ce.historicoDiarioRemoagem && ce.historicoDiarioRemoagem.length === 7
+      ? ce.historicoDiarioRemoagem
+      : DADOS_DIARIOS_REMOAGEM_PADRAO
+  );
+
+  const estatisticasFlotacao = calcularCartasControleFlotacao(
+    ce.historicoDiarioFlotacao && ce.historicoDiarioFlotacao.length === 7
+      ? ce.historicoDiarioFlotacao
+      : DADOS_DIARIOS_FLOTACAO_PADRAO
+  );
+
+  const estatisticasEspessamentoRejeito = calcularCartasControleEspessamentoRejeito(
+    ce.historicoDiarioEspessamentoRejeito && ce.historicoDiarioEspessamentoRejeito.length === 7
+      ? ce.historicoDiarioEspessamentoRejeito
+      : DADOS_DIARIOS_ESPESSAMENTO_REJEITO_PADRAO
+  );
+
+  const estatisticasEspessamentoConcentrado = calcularCartasControleEspessamentoConcentrado(
+    ce.historicoDiarioEspessamentoConcentrado && ce.historicoDiarioEspessamentoConcentrado.length === 7
+      ? ce.historicoDiarioEspessamentoConcentrado
+      : DADOS_DIARIOS_ESPESSAMENTO_CONCENTRADO_PADRAO
+  );
+
+  const estatisticasFiltragemConcentrado = calcularCartasControleFiltragemConcentrado(
+    ce.historicoDiarioFiltragemConcentrado && ce.historicoDiarioFiltragemConcentrado.length === 7
+      ? ce.historicoDiarioFiltragemConcentrado
+      : DADOS_DIARIOS_FILTRAGEM_CONCENTRADO_PADRAO
+  );
+
+  const estatisticasUtilidadesETA = calcularCartasControleUtilidadesETA(
+    ce.historicoDiarioUtilidadesETA && ce.historicoDiarioUtilidadesETA.length === 7
+      ? ce.historicoDiarioUtilidadesETA
+      : DADOS_DIARIOS_UTILIDADES_ETA_PADRAO
+  );
 
   const gargalosTexto = isSeco
     ? br.gargalosAtuais || ""
@@ -993,74 +1931,119 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                   </div>
                 </div>
               ) : (
-                /* TABELA DE BALANÇO METALÚRGICO (CIRCUITO ÚMIDO) */
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between border-l-4 border-l-[#007369] pl-3 py-1 bg-slate-50 rounded-r">
-                    <span className="font-black text-xs text-[#0A2028] uppercase tracking-wide">
-                      1.0 Balanço Metalúrgico-Operacional: Circuito Úmido (Realizado vs Programado)
-                    </span>
-                    <span className="text-[10px] font-bold text-[#007369] uppercase tracking-wider">
-                      DESEMPENHO TÁTICO
-                    </span>
-                  </div>
+                /* CIRCUITO ÚMIDO: MOAGEM, REMOAGEM & FLOTAÇÃO NO MESMO PADRÃO FORMAL DO CIRCUITO SECO */
+                <div className="space-y-4">
+                  {/* 1.0 Moagem Primária */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="moagem"
+                    titulo="1.0 Monitoramento Operacional e Mecânico: Moagem Primária & Classificação (43-MI-003 / 004 / 005)"
+                    badge="CONTROLE OPERACIONAL MOAGEM"
+                    linhas={tableDataMoagemVertical}
+                  />
 
-                  <div className="overflow-x-auto rounded-lg border border-slate-300">
-                    <table className="w-full text-left border-collapse text-[11px]">
-                      <thead>
-                        <tr className="bg-[#007369] text-white font-bold text-[10px]">
-                          <th className="p-2 border-r border-teal-800">Variável / Indicador de Processo</th>
-                          <th className="p-2 border-r border-teal-800">Área</th>
-                          <th className="p-2 text-center border-r border-teal-800">Realizado Dia</th>
-                          <th className="p-2 text-center border-r border-teal-800 text-teal-100 font-semibold">Meta Dia</th>
-                          <th className="p-2 text-center border-r border-teal-800 text-[#A7F3D0]">Ating. (%)</th>
-                          <th className="p-2 text-center border-r border-teal-800">Acum. Semana</th>
-                          <th className="p-2 text-center border-r border-teal-800 text-teal-100 font-semibold">Meta Sem.</th>
-                          <th className="p-2 text-center border-r border-teal-800">Acum. Mês</th>
-                          <th className="p-2 text-center text-teal-100 font-semibold">Meta Mês</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-300">
-                        {tableDataOperacional.map((row, idx) => (
-                          <tr
-                            key={idx}
-                            className={
-                              row.destaque
-                                ? "bg-teal-50/80 font-semibold text-slate-900"
-                                : idx % 2 === 1
-                                ? "bg-slate-50/70"
-                                : "bg-white"
-                            }
-                          >
-                            <td className={`p-2 border-r border-slate-300 ${row.destaque ? "font-bold text-[#00554E]" : "font-medium text-slate-900"}`}>
-                              {row.indicador}
-                            </td>
-                            <td className="p-2 border-r border-slate-300 text-slate-600">{row.setor}</td>
-                            <td className={`p-2 text-center border-r border-slate-300 font-bold ${row.destaque ? "text-[#00554E]" : "text-slate-900"}`}>
-                              {row.realDia}
-                            </td>
-                            <td className="p-2 text-center border-r border-slate-300 text-slate-500 font-normal">
-                              {row.metaDia}
-                            </td>
-                            <td className="p-2 text-center border-r border-slate-300 font-black text-[#007369]">
-                              {row.ating}
-                            </td>
-                            <td className={`p-2 text-center border-r border-slate-300 font-bold ${row.destaque ? "text-[#00554E]" : "text-slate-900"}`}>
-                              {row.realSemana}
-                            </td>
-                            <td className="p-2 text-center border-r border-slate-300 text-slate-500 font-normal">
-                              {row.metaSemana}
-                            </td>
-                            <td className={`p-2 text-center border-r border-slate-300 font-bold ${row.destaque ? "text-[#00554E]" : "text-slate-900"}`}>
-                              {row.realMes}
-                            </td>
-                            <td className="p-2 text-center text-slate-500 font-normal">
-                              {row.metaMes}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  {/* 1.1 CEP Moagem */}
+                  <GradeCartasControle
+                    idPrefix="cep-moagem"
+                    titulo="1.1 Cartas de Controle Estatístico (CEP) — Moagem Primária (MI003 a MI005)"
+                    subtitulo="24 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasMoagem}
+                  />
+
+                  {/* 1.2 Remoagem & Moinho HIG */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="remoagem"
+                    titulo="1.2 Monitoramento Operacional: Circuito de Remoagem & Moinho Ultrafino HIG (HIG / Derrick)"
+                    badge="CONTROLE REMOAGEM & HIG"
+                    linhas={tableDataRemoagemVertical}
+                  />
+
+                  {/* 1.3 CEP Remoagem */}
+                  <GradeCartasControle
+                    idPrefix="cep-remoagem"
+                    titulo="1.3 Cartas de Controle Estatístico (CEP) — Circuito de Remoagem (HIG Mill & Derrick)"
+                    subtitulo="10 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasRemoagem}
+                  />
+
+                  {/* 1.4 Flotação de Cobre */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="flotacao"
+                    titulo="1.4 Monitoramento Operacional: Flotação de Cobre (Sólidos, Reagentes, pH e Teores de CF e RF)"
+                    badge="CONTROLE FLOTAÇÃO DE COBRE"
+                    linhas={tableDataFlotacaoVertical}
+                  />
+
+                  {/* 1.5 CEP Flotação */}
+                  <GradeCartasControle
+                    idPrefix="cep-flotacao"
+                    titulo="1.5 Cartas de Controle Estatístico (CEP) — Flotação de Cobre"
+                    subtitulo="13 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasFlotacao}
+                  />
+
+                  {/* 1.6 Espessamento de Rejeito */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="espessamento-rejeito"
+                    titulo="1.6 Monitoramento Operacional: Espessamento de Rejeito & Disposição (Densidade, Torques, % Sólidos, Floculante e Linhas HTR / Past Fill)"
+                    badge="CONTROLE ESPESSAMENTO & REJEITO"
+                    linhas={tableDataEspessamentoRejeitoVertical}
+                  />
+
+                  {/* 1.7 CEP Espessamento de Rejeito */}
+                  <GradeCartasControle
+                    idPrefix="cep-espessamento-rejeito"
+                    titulo="1.7 Cartas de Controle Estatístico (CEP) — Espessamento de Rejeito"
+                    subtitulo="14 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasEspessamentoRejeito}
+                  />
+
+                  {/* 1.8 Espessamento de Concentrado */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="espessamento-concentrado"
+                    titulo="1.8 Monitoramento Operacional: Espessamento de Concentrado (44EP001 / 44EP002 — Densidade, % Sólidos, Nível Tanque 44TQ001, Floculante, Rake e Torques)"
+                    badge="CONTROLE ESPESSAMENTO & CONCENTRADO"
+                    linhas={tableDataEspessamentoConcentradoVertical}
+                  />
+
+                  {/* 1.9 CEP Espessamento de Concentrado */}
+                  <GradeCartasControle
+                    idPrefix="cep-espessamento-concentrado"
+                    titulo="1.9 Cartas de Controle Estatístico (CEP) — Espessamento de Concentrado"
+                    subtitulo="9 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasEspessamentoConcentrado}
+                  />
+
+                  {/* 1.10 Filtragem de Concentrado */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="filtragem-concentrado"
+                    titulo="1.10 Monitoramento Operacional: Filtragem de Concentrado (Filtros Prensa 43-FP-001 / 43-FP-002 — Produção, Produtividade, Umidade Bolo, Ciclos, Pressão e Paradas)"
+                    badge="CONTROLE FILTRAGEM & DESAGUAMENTO"
+                    linhas={tableDataFiltragemConcentradoVertical}
+                  />
+
+                  {/* 1.11 CEP Filtragem de Concentrado */}
+                  <GradeCartasControle
+                    idPrefix="cep-filtragem-concentrado"
+                    titulo="1.11 Cartas de Controle Estatístico (CEP) — Filtragem de Concentrado"
+                    subtitulo="7 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasFiltragemConcentrado}
+                  />
+
+                  {/* 1.12 Utilidades & ETA */}
+                  <TabelaMonitoramentoOperacional
+                    idPrefix="utilidades-eta"
+                    titulo="1.12 Monitoramento Operacional: Utilidades & ETA (Balanço Hídrico, Rede de Ar Comprimido 47-CO & Estação de Tratamento de Água 47-ET)"
+                    badge="UTILIDADES & BALANÇO HÍDRICO"
+                    linhas={tableDataUtilidadesETAVertical}
+                  />
+
+                  {/* 1.13 CEP Utilidades & ETA */}
+                  <GradeCartasControle
+                    idPrefix="cep-utilidades-eta"
+                    titulo="1.13 Cartas de Controle Estatístico (CEP) — Utilidades & ETA"
+                    subtitulo="9 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasUtilidadesETA}
+                  />
                 </div>
               )}
 
@@ -1548,103 +2531,7 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
           )}
 
           {/* ========================================================================= */}
-          {/* 4. SEÇÃO 2: ANÁLISE GRÁFICA & VISUALIZAÇÃO POR PROCESSO ESPECÍFICO (APENAS CIRCUITO ÚMIDO) */}
-          {/* ========================================================================= */}
-          {!isSeco && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between border-l-4 border-l-[#007369] pl-3 py-1 bg-slate-50 rounded-r">
-                <span className="font-black text-xs text-[#0A2028] uppercase tracking-wide">
-                  ▶ Análise por Processo & Evolução Tática (Circuito Úmido - Beneficiamento)
-                </span>
-                <span className="text-[10px] font-bold text-[#007369] uppercase tracking-wider">
-                  COMPARAÇÃO COM BUDGET
-                </span>
-              </div>
-
-              {/* --- GRÁFICOS DO CIRCUITO ÚMIDO --- */}
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  {/* Moagem por Moinho */}
-                  <div className="bg-white p-3 rounded-lg border border-slate-300 space-y-1.5 text-xs">
-                    <span className="text-[10px] font-bold text-[#00554E] uppercase tracking-wider block">
-                      Moagem — Produção por Moinho (t/mês)
-                    </span>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="font-semibold text-slate-700">MI03 (Linha 1):</span>
-                        <span className="font-bold text-slate-900">134.245 t (210,3 t/h)</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="font-semibold text-slate-700">MI04 (Linha 2):</span>
-                        <span className="font-bold text-slate-900">131.848 t (201,8 t/h)</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="font-semibold text-slate-700">MI05 (Linha 3):</span>
-                        <span className="font-bold text-slate-900">132.467 t (201,9 t/h)</span>
-                      </div>
-                      <div className="pt-1 border-t border-slate-200 flex justify-between text-[10px] text-slate-600">
-                        <span>Disp. MI03: <strong>90,35%</strong></span>
-                        <span>P80 Global: <strong>105 µm (62%)</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Flotação Teores e Recuperação */}
-                  <div className="bg-white p-3 rounded-lg border border-slate-300 space-y-1.5 text-xs">
-                    <span className="text-[10px] font-bold text-[#00554E] uppercase tracking-wider block">
-                      Flotação — Teores & Recuperação Cu
-                    </span>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-slate-600">Teor Alimentação:</span>
-                        <span className="font-bold text-emerald-800">0,963% CuT (Budget: 0,935%)</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-slate-600">Teor Concentrado:</span>
-                        <span className="font-bold text-slate-900">{ce.teorConcentradoCu || "34,65"}% Cu</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-slate-600">Teor Rejeito:</span>
-                        <span className="font-bold text-slate-900">{ce.teorRejeitoCu || "0,108"}% Cu</span>
-                      </div>
-                      <div className="pt-1 border-t border-slate-200 flex justify-between text-[10px] text-[#00554E] font-bold">
-                        <span>Recuperação Metalúrgica:</span>
-                        <span className="text-emerald-700 font-black">89,46% (▲ +1,48 pp)</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Filtro Prensa */}
-                  <div className="bg-white p-3 rounded-lg border border-slate-300 space-y-1.5 text-xs">
-                    <span className="text-[10px] font-bold text-[#00554E] uppercase tracking-wider block">
-                      Filtro Prensa & ETA — Desempenho
-                    </span>
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-slate-600">Disponibilidade Filtro:</span>
-                        <span className="font-bold text-emerald-700">97,70% (Meta ≥ 90%)</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-slate-600">Utilização Filtro:</span>
-                        <span className="font-bold text-amber-700">53,66% (Meta ≥ 65%)</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="text-slate-600">Umidade do Bolo:</span>
-                        <span className="font-bold text-slate-900">{ce.umidadeBolo || "8,45"}% (Meta ≤ 9,0%)</span>
-                      </div>
-                      <div className="pt-1 border-t border-slate-200 flex justify-between text-[10px] text-slate-600">
-                        <span>Reuso Água ETA: <strong>{ce.taxaRecirculacaoReuso || "88,5"}%</strong></span>
-                        <span>Turbidez: <strong>{ce.turbidezAguaTratadaNtu || "4,2"} NTU</strong></span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================================= */}
-          {/* 5. SEÇÃO 3: PRINCIPAIS PERDAS & CAUSAS-RAIZ (PADRÃO FORMAL GEBEN) */}
+          {/* 4. PRINCIPAIS PERDAS & CAUSAS-RAIZ (PADRÃO FORMAL GEBEN) */}
           {/* ========================================================================= */}
           <div className="space-y-3">
             <div className="flex items-center justify-between border-l-4 border-l-[#007369] pl-3 py-1 bg-slate-50 rounded-r">
@@ -1658,14 +2545,35 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
 
             {/* Coluna 1: Perdas Quantificadas & Impactos */}
             {(() => {
-              const histDiario = isSeco
-                ? (payload.dadosBritagemRebritagem.historicoDiarioBritagem && payload.dadosBritagemRebritagem.historicoDiarioBritagem.length === 7
-                    ? payload.dadosBritagemRebritagem.historicoDiarioBritagem
-                    : DADOS_DIARIOS_BRITAGEM_PADRAO)
-                : [];
               const desviosDetectados = isSeco
-                ? detectarDesviosBritagem(histDiario, payload.dadosBritagemRebritagem.anotacoesDesvios)
-                : [];
+                ? [
+                    ...detectarDesviosBritagem(
+                      br.historicoDiarioBritagem && br.historicoDiarioBritagem.length === 7
+                        ? br.historicoDiarioBritagem
+                        : DADOS_DIARIOS_BRITAGEM_PADRAO,
+                      br.anotacoesDesvios
+                    )
+                  ]
+                : [
+                    ...detectarDesviosMoagem(
+                      ce.historicoDiarioMoagem && ce.historicoDiarioMoagem.length === 7
+                        ? ce.historicoDiarioMoagem
+                        : DADOS_DIARIOS_MOAGEM_PADRAO,
+                      ce.anotacoesDesviosMoagem
+                    ),
+                    ...detectarDesviosRemoagem(
+                      ce.historicoDiarioRemoagem && ce.historicoDiarioRemoagem.length === 7
+                        ? ce.historicoDiarioRemoagem
+                        : DADOS_DIARIOS_REMOAGEM_PADRAO,
+                      ce.anotacoesDesviosRemoagem
+                    ),
+                    ...detectarDesviosFlotacao(
+                      ce.historicoDiarioFlotacao && ce.historicoDiarioFlotacao.length === 7
+                        ? ce.historicoDiarioFlotacao
+                        : DADOS_DIARIOS_FLOTACAO_PADRAO,
+                      ce.anotacoesDesviosFlotacao
+                    )
+                  ];
 
               const acoesP1 = (payload.diretrizesTurno || [])
                 .filter(d => d.prioridade === "critica" || d.acaoEstrategica.includes("P1") || d.setor.includes("P1"))
@@ -1677,113 +2585,52 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                   {/* Coluna 1: Perdas Quantificadas */}
                   <div className="bg-white rounded-lg border border-slate-300 p-3.5 space-y-3">
                     <span className="text-[11px] font-black text-[#00554E] uppercase tracking-wider block border-b border-slate-200 pb-1.5">
-                      PERDAS QUANTIFICADAS ({isSeco ? "Impactos por Indicadores Fora da Faixa Ideal" : "Impacto em Metal Cu Contido"})
+                      PERDAS QUANTIFICADAS ({isSeco ? "Impactos por Indicadores Fora da Faixa Ideal" : "Impactos Moagem, Remoagem & Flotação Cu"})
                     </span>
 
-                    {isSeco ? (
-                      desviosDetectados.length > 0 ? (
-                        <div className="space-y-2.5 text-xs">
-                          {desviosDetectados.map((desv, idx) => (
-                            <div key={idx} className={`flex gap-2.5 items-start ${idx > 0 ? "pt-2 border-t border-slate-100" : ""}`}>
-                              <div className="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
-                                {idx + 1}
-                              </div>
-                              <div>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="font-bold text-slate-900 text-xs">
-                                    {desv.parametro.nome} — {desv.diaLabel}
-                                  </span>
-                                  <span className="bg-rose-100 text-rose-800 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">
-                                    desvio {desv.tipoDesvio === "alto" ? "LSC" : "LIC"}
-                                  </span>
-                                </div>
-                                <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                                  Leitura: <strong>{desv.valorLido} {desv.parametro.unidade}</strong> (Faixa ideal: {desv.parametro.minIdeal} a {desv.parametro.maxIdeal} {desv.parametro.unidade}).
-                                </p>
-                                {desv.impactoPerda ? (
-                                  <span className="text-rose-700 font-bold text-[11px] block mt-0.5">
-                                    ▼ {desv.impactoPerda}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400 italic text-[11px] block mt-0.5">
-                                    Impacto/perda a ser registrado pela supervisão no formulário operacional
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-2.5 text-xs">
-                          <div className="flex gap-2.5 items-start">
-                            <div className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
-                              ✓
+                    {desviosDetectados.length > 0 ? (
+                      <div className="space-y-2.5 text-xs">
+                        {desviosDetectados.slice(0, 8).map((desv, idx) => (
+                          <div key={idx} className={`flex gap-2.5 items-start ${idx > 0 ? "pt-2 border-t border-slate-100" : ""}`}>
+                            <div className="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
+                              {idx + 1}
                             </div>
                             <div>
-                              <span className="font-bold text-slate-900 text-xs">Operação Estável na Faixa Ideal</span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-slate-900 text-xs">
+                                  {desv.parametro.nome} — {desv.diaLabel}
+                                </span>
+                                <span className="bg-rose-100 text-rose-800 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">
+                                  desvio {desv.tipoDesvio === "alto" ? "LSC" : "LIC"}
+                                </span>
+                              </div>
                               <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                                Todos os 14 indicadores operacionais e mecânicos da britagem operando estritamente dentro dos limites de controle estatístico (CEP).
+                                Leitura: <strong>{desv.valorLido} {desv.parametro.unidade}</strong> (Faixa ideal: {desv.parametro.minIdeal} a {desv.parametro.maxIdeal} {desv.parametro.unidade}).
                               </p>
+                              {desv.impactoPerda ? (
+                                <span className="text-rose-700 font-bold text-[11px] block mt-0.5">
+                                  ▼ {desv.impactoPerda}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 italic text-[11px] block mt-0.5">
+                                  Impacto/perda a ser registrado pela supervisão no formulário operacional
+                                </span>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      )
+                        ))}
+                      </div>
                     ) : (
                       <div className="space-y-2.5 text-xs">
-                        {/* Item 1 */}
                         <div className="flex gap-2.5 items-start">
-                          <div className="w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
-                            1
+                          <div className="w-5 h-5 rounded-full bg-teal-600 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
+                            ✓
                           </div>
                           <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-slate-900 text-xs">Parada Moagem/Planta — Dia 28</span>
-                              <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">manutenção</span>
-                            </div>
+                            <span className="font-bold text-slate-900 text-xs">Operação Estável na Faixa Ideal</span>
                             <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                              Produção reduzida para 6.168 t (vs ~14.500 t esperado). Filtro Prensa com 8h MCM. Moinhos MI03, MI04 e MI05 com taxa reduzida.
+                              Todos os indicadores operacionais e de processo do {isSeco ? "circuito seco" : "circuito úmido (moagem, remoagem e flotação)"} operando estritamente dentro dos limites de controle estatístico (CEP).
                             </p>
-                            <span className="text-rose-700 font-bold text-[11px] block mt-0.5">
-                              ▼ ~70–75 t Cu | Produção no dia: 43,6 t Cu (meta ~108 t Cu)
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Item 2 */}
-                        <div className="flex gap-2.5 items-start pt-2 border-t border-slate-100">
-                          <div className="w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
-                            2
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-slate-900 text-xs">Queda de Teor CuT — Semana 4 (dias 22-27)</span>
-                              <span className="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">blend</span>
-                            </div>
-                            <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                              Teor médio de 0,80% CuT na 4ª semana vs 1,11% na 1ª semana. Queda de 0,31pp reduz metal gerado mesmo mantendo throughput de moagem.
-                            </p>
-                            <span className="text-rose-700 font-bold text-[11px] block mt-0.5">
-                              ▼ ~45–55 t Cu abaixo do potencial máximo da semana
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Item 3 */}
-                        <div className="flex gap-2.5 items-start pt-2 border-t border-slate-100">
-                          <div className="w-5 h-5 rounded-full bg-[#C9A84C] text-[#0A2028] flex items-center justify-center font-bold text-[11px] shrink-0 mt-0.5">
-                            3
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-bold text-slate-900 text-xs">Utilização Filtro Prensa Reduzida</span>
-                              <span className="bg-teal-100 text-teal-800 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase">capacidade</span>
-                            </div>
-                            <p className="text-slate-600 text-[11px] mt-0.5 leading-snug">
-                              Utilização média de 53,7% indica capacidade ociosa significativa no desaguamento.
-                            </p>
-                            <span className="text-slate-700 font-bold text-[11px] block mt-0.5">
-                              ℹ️ Oportunidade de expansão de ciclos e maior flexibilidade operacional
-                            </span>
                           </div>
                         </div>
                       </div>

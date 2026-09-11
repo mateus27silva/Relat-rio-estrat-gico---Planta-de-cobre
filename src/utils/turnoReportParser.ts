@@ -932,6 +932,8 @@ export function compilarRelatoriosTurno(
           setorNome = "Flotação de Cobre";
         } else if (pend.texto.includes("EP") || pend.texto.includes("rake") || pend.texto.includes("espessador")) {
           setorNome = "Espessamento Concentrado";
+        } else if (pend.texto.includes("ETA") || pend.texto.includes("compressor") || pend.texto.includes("ar comprimido") || pend.texto.includes("água") || pend.texto.includes("turbidez")) {
+          setorNome = "Utilidades & ETA";
         }
 
         novasDiretrizesUmido.push({
