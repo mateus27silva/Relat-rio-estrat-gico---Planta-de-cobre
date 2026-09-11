@@ -340,7 +340,10 @@ export function gerarRelatorioPDF(payload: PDFDataPayload) {
         }
 
         let metaStr = campo.meta !== undefined ? `${campo.meta}${campo.un ? ` ${campo.un}` : ""}` : "-";
-        if (campo.id.startsWith("elevacao_rake")) metaStr = "< 7 Pol (Atenção 7-11 / Crítico > 11)";
+        if (campo.id === "teor_rejeito" || campo.id.startsWith("teor_rejeito")) metaStr = "< 0,10% (Crítico ≥ 0,10%)";
+        else if (campo.id === "teor_concentrado" || campo.id.startsWith("teor_concentrado")) metaStr = "≥ 33,5% (Crítico < 33,5%)";
+        else if (campo.id === "solido_overflow" || campo.id === "solidos_overflow") metaStr = "< 90 ppm (Crítico ≥ 90 ppm)";
+        else if (campo.id.startsWith("elevacao_rake")) metaStr = "< 7 Pol (Atenção 7-11 / Crítico > 11)";
         else if (campo.id === "retido_meia" || campo.id.startsWith("retido_meia")) metaStr = "< 11% (Atenção 11-12 / Crítico > 12)";
         else if (campo.id === "total_autonomia" || campo.id.startsWith("total_autonomia")) metaStr = "> 4800 t (Atenção 3500-4800 / Crítico < 3500)";
         else if (campo.id === "producao_moagem" || (setor.id === "moagem" && campo.id.startsWith("producao"))) metaStr = "≥ 7200 t (Crítico < 7200)";
@@ -360,6 +363,12 @@ export function gerarRelatorioPDF(payload: PDFDataPayload) {
 
           if (campo.id.startsWith("paradas")) {
             status = "Apurado";
+          } else if (campo.id === "teor_rejeito" || campo.id.startsWith("teor_rejeito")) {
+            status = sType === "ok" ? "OK (<0,10%)" : "Acima Meta (≥0,10%)";
+          } else if (campo.id === "teor_concentrado" || campo.id.startsWith("teor_concentrado")) {
+            status = sType === "ok" ? "OK (≥33,5%)" : "Abaixo Meta (<33,5%)";
+          } else if (campo.id === "solido_overflow" || campo.id === "solidos_overflow") {
+            status = sType === "ok" ? "OK (<90 ppm)" : "Acima Meta (≥90 ppm)";
           } else if (campo.id.startsWith("elevacao_rake")) {
             status = sType === "ok" ? "OK (<7 Pol)" : sType === "alerta" ? "Atenção (7-11 Pol)" : "Crítico (>11 Pol)";
           } else if (campo.id === "retido_meia" || campo.id.startsWith("retido_meia")) {

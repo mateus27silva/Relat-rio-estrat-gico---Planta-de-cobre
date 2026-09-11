@@ -120,11 +120,7 @@ export const SETORES: Setor[] = [
       { id: "nivel_silo1", label: "Nível Silo 1", type: "number", un: "%" },
       { id: "nivel_silo2", label: "Nível Silo 2", type: "number", un: "%" },
       { id: "retomador", label: "Retomador", type: "select", opcoes: ["Operando", "Parado", "Manutenção", "Standby", "Sim", "Não", "Parcial"] },
-      { id: "paradas_manutencao", label: "Paradas de Manutenção", type: "number", un: "h" },
-      { id: "paradas_outros", label: "Paradas de Outros (OUT)", type: "number", un: "h" },
       { id: "total_autonomia", label: "Total Autonomia minério", type: "number", meta: 4800, un: "t" },
-      { id: "disponibilidade", label: "Disponibilidade", type: "number", meta: 90, un: "%" },
-      { id: "utilizacao", label: "Utilização", type: "number", meta: 85, un: "%" },
       { id: "ocorrencias", label: "Ocorrências", type: "text" },
       { id: "atividades", label: "Atividades realizadas", type: "atividades" },
       { id: "pendencias", label: "Pendências críticas", type: "pendencias" },
@@ -189,7 +185,7 @@ export const SETORES: Setor[] = [
     campos: [
       { id: "circuito", label: "Circuito", type: "select", opcoes: ["CI", "CII", "CIII", "CIV"] },
       { id: "teor_alimentacao", label: "Teor Alim. Cu", type: "number", un: "%" },
-      { id: "teor_concentrado", label: "Teor Conc. Cu", type: "number", meta: 33.5, un: "%" },
+      { id: "teor_concentrado", label: "Teor Concentrado Final Cu", type: "number", meta: 33.5, un: "%" },
       { id: "teor_rejeito", label: "Teor Rejeito Final Cu", type: "number", meta: 0.10, un: "%" },
       { id: "ph_rougher", label: "pH Linha principal", type: "number", meta: 9.5, un: "" },
       { id: "ph_segunda_linha", label: "pH Segunda linha", type: "number", meta: 10.5, un: "" },
@@ -269,7 +265,7 @@ export const SETORES: Setor[] = [
       { id: "vazao_fim_compactacao", label: "Vazão ao final da compactação", type: "number", meta: 45, un: "m³/h" },
       { id: "pressao_fim_compactacao", label: "Pressão final da compactação", type: "number", meta: 230, un: "kPa" },
       { id: "setpoint_peso_torta", label: "Setpoint Peso da torta", type: "number", meta: 8000, un: "kg" },
-      { id: "solido_overflow", label: "Sólido do overflow", type: "number", un: "ppm" },
+      { id: "solido_overflow", label: "Sólidos do overflow", type: "number", meta: 90, un: "ppm" },
       { id: "paradas_manutencao", label: "Paradas de Manutenção", type: "number", un: "h" },
       { id: "paradas_outros", label: "Paradas de Outros (OUT)", type: "number", un: "h" },
       { id: "disponibilidade", label: "Disponibilidade", type: "number", meta: 90, un: "%" },
@@ -293,10 +289,6 @@ export const SETORES: Setor[] = [
       { id: "vazao_agua_nova", label: "Vazão Captação Água Nova", type: "number", un: "m³/h" },
       { id: "compressores", label: "Compressores em Operação", type: "select", opcoes: ["Comp 01", "Comp 02", "Comp 03", "Comp 01 e 02", "Comp 01 e 03", "Comp 02 e 03", "Todos em Operação"] },
       { id: "bombas_agua", label: "Bombas Água de Processo", type: "select", opcoes: ["Bomba 01", "Bomba 02", "Ambas em Operação"] },
-      { id: "paradas_manutencao", label: "Paradas de Manutenção", type: "number", un: "h" },
-      { id: "paradas_outros", label: "Paradas de Outros (OUT)", type: "number", un: "h" },
-      { id: "disponibilidade", label: "Disponibilidade", type: "number", meta: 95, un: "%" },
-      { id: "utilizacao", label: "Utilização", type: "number", meta: 90, un: "%" },
       { id: "ocorrencias", label: "Ocorrências", type: "text" },
       { id: "atividades", label: "Atividades realizadas", type: "atividades" },
       { id: "pendencias", label: "Pendências críticas", type: "pendencias" },
@@ -326,6 +318,21 @@ export function st(val: string | number, meta: number | undefined, id: string, s
   // Paradas não possuem meta (apenas registro de horas)
   if (id.startsWith("paradas")) {
     return "nd";
+  }
+
+  // Teor Rejeito Final Cu: meta deve ser sempre menor que 0,1% (< 0.10%). Não atingido exige tratativa do supervisor (crítico).
+  if (id === "teor_rejeito" || id.startsWith("teor_rejeito")) {
+    return v < 0.10 ? "ok" : "critico";
+  }
+
+  // Teor Concentrado Final Cu: meta deve ser sempre maior ou igual a 33,5% (>= 33.5%). Não atingido exige tratativa do supervisor (crítico).
+  if (id === "teor_concentrado" || id.startsWith("teor_concentrado")) {
+    return v >= 33.5 ? "ok" : "critico";
+  }
+
+  // Sólidos do overflow: meta deve ser menor que 90 ppm (< 90 ppm). Não atingido exige tratativa do supervisor (crítico).
+  if (id === "solido_overflow" || id === "solidos_overflow") {
+    return v < 90 ? "ok" : "critico";
   }
 
   // Elevação do Rake (Espessadores de Concentrado)
@@ -489,7 +496,10 @@ export function gerarWpp({ data, turno, turma, supervisor, temaDds, dados, acoes
       .forEach(c => {
         if (st(d[c.id], c.meta, c.id, s.id) === "critico") {
           let refStr = c.meta !== undefined ? `meta ${c.meta}` : "";
-          if (c.id.startsWith("elevacao_rake")) refStr = "crítico > 11 Pol";
+          if (c.id === "teor_rejeito" || c.id.startsWith("teor_rejeito")) refStr = "meta < 0,10% Cu";
+          else if (c.id === "teor_concentrado" || c.id.startsWith("teor_concentrado")) refStr = "meta ≥ 33,5% Cu";
+          else if (c.id === "solido_overflow" || c.id === "solidos_overflow") refStr = "meta < 90 ppm";
+          else if (c.id.startsWith("elevacao_rake")) refStr = "crítico > 11 Pol";
           else if (c.id === "retido_meia" || c.id.startsWith("retido_meia")) refStr = "crítico > 12%";
           else if (c.id === "total_autonomia" || c.id.startsWith("total_autonomia")) refStr = "crítico < 3500 t";
           else if (c.id === "producao_moagem" || (s.id === "moagem" && c.id.startsWith("producao"))) refStr = "meta ≥ 7200 t";
@@ -498,7 +508,9 @@ export function gerarWpp({ data, turno, turma, supervisor, temaDds, dados, acoes
           else if (c.id.startsWith("torque_ep") || (s.id === "espessamento_rejeito" && c.id.startsWith("torque")) || (s.id === "espessamento_conc" && c.id.startsWith("torque"))) refStr = "crítico > 20%";
           else if (s.id === "remoagem" && (c.id === "produtividade" || c.id === "alimentacao")) refStr = "crítico > 275 t/h";
 
-          crits.push(`  • ${s.label} › ${c.label}: *${d[c.id]} ${c.un || ""}*${refStr ? ` (${refStr})` : ""}`);
+          const acao = d[`acao_${c.id}`];
+          const acaoStr = acao && typeof acao === "string" && acao.trim() ? ` — *Tratativa:* ${acao.trim()}` : "";
+          crits.push(`  • ${s.label} › ${c.label}: *${d[c.id]} ${c.un || ""}*${refStr ? ` (${refStr})` : ""}${acaoStr}`);
         }
       });
   });

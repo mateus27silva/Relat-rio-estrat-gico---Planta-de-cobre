@@ -3163,40 +3163,6 @@ export const CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO: ParametroConfigFiltragemCo
     rotuloFaixa: "210 - 260 kPa",
     impactoDesvio: "Pressão de compactação inadequada deixa torta úmida e frouxa, dificultando o desprendimento.",
     acaoRecomendada: "Calibrar válvula redutora proporcional e checar circuito hidráulico de compressão."
-  },
-  {
-    chave: "paradasManutencaoFiltro",
-    nome: "Paradas Manutenção Filtro (h)",
-    nomeCurto: "Paradas Manut.",
-    unidade: "h",
-    minIdeal: 0.0,
-    maxIdeal: 1.5,
-    tipoLimite: "max",
-    alvo: 0.5,
-    decimais: 1,
-    equipamento: "43-FP-001 / 002",
-    subsistema: "Disponibilidade",
-    grupo: "Paradas de Filtro (h)",
-    rotuloFaixa: "≤ 1,5 h",
-    impactoDesvio: "Parada excessiva de manutenção paralisa o desaguamento e força redução de carga na moagem.",
-    acaoRecomendada: "Programar trocas de lonas e reparos de vedação em janelas sincronizadas com a moagem."
-  },
-  {
-    chave: "paradasOutrosFiltro",
-    nome: "Paradas Operacionais / Outros (h)",
-    nomeCurto: "Paradas Outros",
-    unidade: "h",
-    minIdeal: 0.0,
-    maxIdeal: 1.0,
-    tipoLimite: "max",
-    alvo: 0.5,
-    decimais: 1,
-    equipamento: "43-FP-001 / 002",
-    subsistema: "Disponibilidade",
-    grupo: "Paradas de Filtro (h)",
-    rotuloFaixa: "≤ 1,0 h",
-    impactoDesvio: "Paradas por falta de ar de compressão ou pátio cheio geram ociosidade nos filtros prensa.",
-    acaoRecomendada: "Monitorar compressores de ar e manter fluxo contínuo de pás-carregadeiras no galpão."
   }
 ];
 
@@ -3453,40 +3419,6 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
     acaoRecomendada: "Regular vazão de alimentação dos filtros de areia e decantadores da ETA."
   },
   {
-    chave: "taxaRecirculacaoReuso",
-    nome: "Taxa de Reúso / Recirculação (%)",
-    nomeCurto: "Taxa Reúso (%)",
-    unidade: "%",
-    tipoLimite: "min",
-    minIdeal: 85.0,
-    maxIdeal: 95.0,
-    alvo: 86.5,
-    decimais: 1,
-    equipamento: "Planta Global / ETA",
-    subsistema: "Balanço Hídrico",
-    grupo: "Sustentabilidade Hídrica",
-    rotuloFaixa: "≥ 85,0%",
-    impactoDesvio: "Recirculação abaixo de 85% eleva o custo de outorga e o consumo de água nova dos mananciais.",
-    acaoRecomendada: "Maximizar clarificação no overflow dos espessadores 45EP e 44EP ajustando floculante."
-  },
-  {
-    chave: "turbidezAguaTratada",
-    nome: "Turbidez Água Tratada (NTU)",
-    nomeCurto: "Turbidez (NTU)",
-    unidade: "NTU",
-    tipoLimite: "max",
-    minIdeal: 0.5,
-    maxIdeal: 2.0,
-    alvo: 1.5,
-    decimais: 1,
-    equipamento: "ETA 47-ET-001",
-    subsistema: "Qualidade Hídrica",
-    grupo: "Tratamento ETA",
-    rotuloFaixa: "≤ 2,0 NTU",
-    impactoDesvio: "Turbidez acima de 2,0 NTU acelera o desgaste em selos de bombas de processo e compromete reagentes.",
-    acaoRecomendada: "Ajustar dosagem de coagulante/polímero e executar retrolavagem dos leitos filtrantes."
-  },
-  {
     chave: "nivelCamaraA",
     nome: "Nível da Câmara A (%)",
     nomeCurto: "Nível Câmara A (%)",
@@ -3519,40 +3451,6 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
     rotuloFaixa: "≥ 70% (Meta 75%)",
     impactoDesvio: "Baixa recuperação de água na ETA sobrecarrega o efluente e eleva custos de descarte.",
     acaoRecomendada: "Otimizar tempo de retenção hidráulica e dosagem de polímero auxiliar de decantação."
-  },
-  {
-    chave: "disponibilidadeUtilidades",
-    nome: "Disponibilidade Utilidades (%)",
-    nomeCurto: "Disponibilidade (%)",
-    unidade: "%",
-    tipoLimite: "min",
-    minIdeal: 92.0,
-    maxIdeal: 100.0,
-    alvo: 95.0,
-    decimais: 1,
-    equipamento: "Sistema Utilidades",
-    subsistema: "Confiabilidade",
-    grupo: "Operação Utilidades",
-    rotuloFaixa: "≥ 92,0% (Meta 95%)",
-    impactoDesvio: "Indisponibilidade em compressores ou bombas de água paralisa de imediato a moagem e flotação.",
-    acaoRecomendada: "Revisar prontidão das bombas reservas e executar check de óleo nos compressores."
-  },
-  {
-    chave: "paradasManutencaoUtilidades",
-    nome: "Paradas de Manutenção (h)",
-    nomeCurto: "Paradas Manut. (h)",
-    unidade: "h",
-    tipoLimite: "max",
-    minIdeal: 0.0,
-    maxIdeal: 1.5,
-    alvo: 0.5,
-    decimais: 1,
-    equipamento: "Sistema Utilidades",
-    subsistema: "Disponibilidade",
-    grupo: "Operação Utilidades",
-    rotuloFaixa: "≤ 1,5 h",
-    impactoDesvio: "Paradas não programadas em utilidades despressurizam a rede e causam disparos de intertravamento.",
-    acaoRecomendada: "Executar manutenções preventivas sincronizadas com as paradas de manutenção da moagem."
   }
 ];
 

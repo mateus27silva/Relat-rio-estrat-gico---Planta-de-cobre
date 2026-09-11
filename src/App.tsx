@@ -1355,11 +1355,39 @@ export default function App() {
                               type="number"
                               step="any"
                               inputMode="decimal"
-                              placeholder={campo.meta !== undefined ? `Meta: ${campo.meta}` : "0"}
+                              placeholder={
+                                campo.id === "teor_rejeito"
+                                  ? "Meta: < 0.10%"
+                                  : campo.id === "teor_concentrado"
+                                  ? "Meta: ≥ 33.5%"
+                                  : campo.id === "solido_overflow"
+                                  ? "Meta: < 90 ppm"
+                                  : campo.meta !== undefined
+                                  ? `Meta: ${campo.meta}`
+                                  : "0"
+                              }
                               value={val}
                               onChange={e => setDado(setor.id, campo.id, e.target.value)}
                               className="w-full bg-white border border-slate-250 focus:border-teal-500 rounded-xl px-3.5 py-3 font-semibold text-[17px] text-slate-800 outline-none transition"
                             />
+                            {campo.id === "teor_rejeito" && (
+                              <p className="text-[11px] text-teal-800 bg-teal-50/80 border border-teal-200/60 rounded-lg px-2.5 py-1.5 font-medium flex items-center justify-between">
+                                <span>Meta Operacional: <strong>&lt; 0,10% Cu</strong></span>
+                                <span className="text-[10px] text-slate-500 font-normal">≥ 0,10% exige tratativa</span>
+                              </p>
+                            )}
+                            {campo.id === "teor_concentrado" && (
+                              <p className="text-[11px] text-emerald-800 bg-emerald-50/80 border border-emerald-200/60 rounded-lg px-2.5 py-1.5 font-medium flex items-center justify-between">
+                                <span>Meta Operacional: <strong>&ge; 33,5% Cu</strong></span>
+                                <span className="text-[10px] text-slate-500 font-normal">&lt; 33,5% exige tratativa</span>
+                              </p>
+                            )}
+                            {campo.id === "solido_overflow" && (
+                              <p className="text-[11px] text-cyan-800 bg-cyan-50/80 border border-cyan-200/60 rounded-lg px-2.5 py-1.5 font-medium flex items-center justify-between">
+                                <span>Meta Operacional: <strong>&lt; 90 ppm</strong></span>
+                                <span className="text-[10px] text-slate-500 font-normal">≥ 90 ppm exige tratativa</span>
+                              </p>
+                            )}
                             {/* Campo dinâmico de Tratativa / Ação do Supervisor para Alerta ou Crítico */}
                             {val !== "" && val !== undefined && (st(val, campo.meta, campo.id, setor.id) === "alerta" || st(val, campo.meta, campo.id, setor.id) === "critico") && (
                               <div className="mt-2.5 p-3 bg-amber-50/95 border border-amber-300 rounded-xl space-y-1.5 shadow-2xs">

@@ -2236,7 +2236,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <button
                     type="button"
                     onClick={() => abrirModalColarColuna("posicaoManto")}
-                    className="px-2.5 py-1.5 rounded-lg bg-teal-50 text-teal-800 hover:bg-teal-100 border border-teal-200 text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                     title="Abrir assistente para colar dados de coluna do Excel"
                   >
                     <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
@@ -2246,10 +2246,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <button
                     type="button"
                     onClick={handleLimparTabela}
-                    className="px-2 py-1.5 rounded-lg bg-slate-50 text-slate-600 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 border border-slate-200 text-xs font-semibold transition flex items-center gap-1 cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                     title="Limpar todos os campos da tabela diária"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                     <span>Limpar</span>
                   </button>
                 </div>
@@ -2371,13 +2371,13 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                     {/* Modal Header */}
-                    <div className="bg-teal-800 text-white p-4 flex items-center justify-between">
+                    <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="p-2 bg-teal-900 rounded-lg">
+                        <div className="p-2 bg-teal-950 rounded-lg">
                           <FileSpreadsheet className="w-5 h-5 text-teal-300" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold">Colar Coluna do Excel na Tabela</h3>
+                          <h3 className="text-sm font-bold">Colar Coluna do Excel (Britagem Primária)</h3>
                           <p className="text-[11px] text-teal-200">
                             Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
                           </p>
@@ -2386,7 +2386,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       <button
                         type="button"
                         onClick={() => setModalColarColunaAberto(false)}
-                        className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-700 transition cursor-pointer"
+                        className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -2629,21 +2629,22 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
-                    onClick={handleLimparTabelaRebritagem}
-                    className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-300 hover:border-rose-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                    title="Limpar tabela de rebritagem"
+                    onClick={() => abrirModalColarColunaRebritagem("tempOleoLub_BR001")}
+                    className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Abrir assistente para colar dados de coluna do Excel"
                   >
-                    <Trash2 className="w-3 h-3 text-slate-500 hover:text-rose-600" />
-                    <span>Limpar</span>
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                    <span>Colar Coluna do Excel</span>
                   </button>
 
                   <button
                     type="button"
-                    onClick={() => abrirModalColarColunaRebritagem("tempOleoLub_BR001")}
-                    className="px-3 py-1 text-[11px] font-bold text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    onClick={handleLimparTabelaRebritagem}
+                    className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                    title="Limpar tabela de rebritagem"
                   >
-                    <ClipboardPaste className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Colar Coluna do Excel</span>
+                    <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                    <span>Limpar</span>
                   </button>
                 </div>
               </div>
@@ -2787,14 +2788,14 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
                   <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
                     {/* Modal Header */}
-                    <div className="bg-blue-900 text-white p-4 flex items-center justify-between">
+                    <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
-                        <div className="p-2 bg-blue-950 rounded-lg">
-                          <FileSpreadsheet className="w-5 h-5 text-blue-300" />
+                        <div className="p-2 bg-teal-950 rounded-lg">
+                          <FileSpreadsheet className="w-5 h-5 text-teal-300" />
                         </div>
                         <div>
                           <h3 className="text-sm font-bold">Colar Coluna do Excel (Rebritagem & Peneiramento)</h3>
-                          <p className="text-[11px] text-blue-200">
+                          <p className="text-[11px] text-teal-200">
                             Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
                           </p>
                         </div>
@@ -2802,7 +2803,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       <button
                         type="button"
                         onClick={() => setModalColarColunaRebritagemAberto(false)}
-                        className="text-blue-200 hover:text-white p-1 rounded-md hover:bg-blue-800 transition cursor-pointer"
+                        className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -2817,7 +2818,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                         <select
                           value={colunaSelecionadaParaColarRebritagem}
                           onChange={e => setColunaSelecionadaParaColarRebritagem(e.target.value)}
-                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                         >
                           {CONFIG_PARAMETROS_REBRITAGEM.map(param => (
                             <option key={param.chave} value={param.chave}>
@@ -2844,50 +2845,75 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                                 console.warn("Clipboard read error:", err);
                               }
                             }}
-                            className="text-[11px] font-bold text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 px-2 py-0.5 rounded border border-blue-200 transition flex items-center gap-1 cursor-pointer"
+                            className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
                           >
-                            <ClipboardCheck className="w-3.5 h-3.5" />
-                            <span>Ler da Área de Transferência</span>
+                            <ClipboardPaste className="w-3 h-3" />
+                            <span>Colar do Clipboard</span>
                           </button>
                         </div>
                         <textarea
                           rows={6}
                           value={textoColadoExcelRebritagem}
                           onChange={e => setTextoColadoExcelRebritagem(e.target.value)}
-                          placeholder="Cole aqui a coluna copiada do Excel (ex: 7 valores separados por linha)..."
-                          className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 bg-slate-50 focus:bg-white focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
+                          placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n50,0\n52,5\n49,0\n55,2\n51,0\n48,0\n50,0"}
+                          className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
                         />
                       </div>
 
-                      {/* Preview das Linhas Identificadas */}
-                      {textoColadoExcelRebritagem.trim() && (
-                        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 space-y-1.5">
-                          <span className="text-[11px] font-bold text-slate-700 block">Pré-visualização do Mapeamento Diário:</span>
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[10px]">
-                            {["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"].map((diaLabel, i) => {
-                              const linhas = textoColadoExcelRebritagem.trim().split(/\r\n|\r|\n/);
-                              const valLinha = linhas[i] ? linhas[i].split("\t")[0] : "";
-                              const parsed = parseNumeroBritagem(valLinha);
-                              return (
-                                <div key={diaLabel} className="bg-white p-1.5 rounded border border-slate-200 flex justify-between items-center">
-                                  <span className="font-bold text-slate-600">{diaLabel}:</span>
-                                  <span className={parsed !== null ? "font-bold text-blue-700" : "text-slate-400"}>
-                                    {parsed !== null ? parsed : (valLinha || "—")}
-                                  </span>
-                                </div>
-                              );
-                            })}
+                      {/* Pré-visualização dos 7 dias */}
+                      {(() => {
+                        const paramConfig = CONFIG_PARAMETROS_REBRITAGEM.find(p => p.chave === colunaSelecionadaParaColarRebritagem);
+                        const linhas = textoColadoExcelRebritagem.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                        return (
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                            <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                              Pré-visualização do Mapeamento (Segunda a Domingo):
+                            </span>
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                              {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                                const valLinha = linhas[idx] || "";
+                                const parsedVal = parseNumeroBritagem(valLinha);
+                                const hasVal = parsedVal !== null;
+                                const isFora = hasVal && paramConfig && (parsedVal > paramConfig.maxIdeal || parsedVal < paramConfig.minIdeal);
+
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                      !hasVal
+                                        ? "bg-white border-slate-200 text-slate-400"
+                                        : isFora
+                                        ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                        : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                    }`}
+                                  >
+                                    <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                    <div className="flex items-center justify-between mt-1">
+                                      <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                      {hasVal && (
+                                        <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                          isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                        }`}>
+                                          {isFora ? "Desvio" : "OK"}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                     </div>
 
                     {/* Modal Footer */}
-                    <div className="bg-slate-100 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
+                    <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                       <button
                         type="button"
                         onClick={() => setModalColarColunaRebritagemAberto(false)}
-                        className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800 bg-white border border-slate-300 rounded-lg transition cursor-pointer"
+                        className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                       >
                         Cancelar
                       </button>
@@ -2895,10 +2921,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                         type="button"
                         onClick={handleConfirmarColarModalRebritagem}
                         disabled={!textoColadoExcelRebritagem.trim()}
-                        className="px-4 py-2 text-xs font-bold text-white bg-blue-700 hover:bg-blue-800 rounded-lg transition disabled:opacity-50 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                       >
                         <Check className="w-4 h-4" />
-                        <span>Aplicar na Rebritagem</span>
+                        <span>Aplicar Valores na Coluna</span>
                       </button>
                     </div>
                   </div>
@@ -3016,290 +3042,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
       {/* ÁREA 2: CONCENTRADOR + ETA (EXCLUSIVO CIRCUITO ÚMIDO) */}
       {(isUmido || (!isSeco && !isUmido && activeArea === "concentrador_eta")) && (
         <div className="space-y-5">
-          {/* Bloco 2.0: Balanço Metalúrgico, Teores Cu & Metas Globais (Circuito Úmido) */}
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
-              <div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
-                  <Activity className="w-4 h-4 text-teal-700" />
-                  Balanço Metalúrgico & Produção Global da Planta (Circuito Úmido)
-                </h4>
-                <p className="text-[11px] text-slate-500">
-                  Parâmetros mestres para cálculo de recuperação metalúrgica, teores de cobre e balanceamento tático
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3 text-teal-600" />
-                  Rec. Calculada: <strong>{dadosCE.recuperacaoMetalurgica || 89.2}%</strong>
-                </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                  Meta: {dadosCE.metaRecuperacao || 88.5}%
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Card 1: Teores & Recuperação Cu */}
-              <div className="p-3.5 bg-slate-50/80 rounded-lg border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200/80 pb-1.5">
-                  <span className="text-[11px] font-bold text-teal-900 flex items-center gap-1.5">
-                    <CircleDot className="w-3.5 h-3.5 text-teal-700" />
-                    Teores Cu & Recuperação
-                  </span>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase">FLOTAÇÃO</span>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Teor Alim. (%)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={dadosCE.teorAlimentacaoCu || ""}
-                      onChange={e => setCE("teorAlimentacaoCu", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold text-slate-900"
-                      placeholder="1.28"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Teor Conc. (%)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.teorConcentradoCu || ""}
-                      onChange={e => setCE("teorConcentradoCu", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold text-slate-900"
-                      placeholder="33.8"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Teor Rej. (%)</label>
-                    <input
-                      type="number"
-                      step="0.001"
-                      value={dadosCE.teorRejeitoCu || ""}
-                      onChange={e => setCE("teorRejeitoCu", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold text-slate-900"
-                      placeholder="0.095"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
-                  <div>
-                    <label className="text-[10px] font-semibold text-teal-900 block">Rec. Metalúrgica (%)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.recuperacaoMetalurgica || ""}
-                      onChange={e => setCE("recuperacaoMetalurgica", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-teal-400 rounded p-1 text-xs font-black text-teal-800"
-                      placeholder="89.2"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Meta Recup. (%)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.metaRecuperacao || ""}
-                      onChange={e => setCE("metaRecuperacao", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold text-slate-700"
-                      placeholder="88.5"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <div>
-                    <label className="text-[9.5px] text-slate-500 block">Conc. Produzido Dia (t)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.concentradoProduzidoDia || ""}
-                      onChange={e => setCE("concentradoProduzidoDia", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold"
-                      placeholder="239.8"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9.5px] text-slate-500 block">Metal Contido Dia (t Cu)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.metalContidoDia || ""}
-                      onChange={e => setCE("metalContidoDia", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold"
-                      placeholder="81.06"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Produção Moagem & Granulometria */}
-              <div className="p-3.5 bg-slate-50/80 rounded-lg border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200/80 pb-1.5">
-                  <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
-                    <Gauge className="w-3.5 h-3.5 text-blue-700" />
-                    Produção de Moagem & Operação
-                  </span>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase">MOAGEM</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Prod. Dia (t)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.producaoMoagemDia || ""}
-                      onChange={e => setCE("producaoMoagemDia", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold"
-                      placeholder="7100"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Meta Dia (t)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.metaProducaoMoagemDia || ""}
-                      onChange={e => setCE("metaProducaoMoagemDia", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs"
-                      placeholder="7200"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Prod. Mês (t)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.producaoMoagemMes || ""}
-                      onChange={e => setCE("producaoMoagemMes", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold"
-                      placeholder="198000"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-semibold text-slate-600 block">Meta Mês (t)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.metaProducaoMoagemMes || ""}
-                      onChange={e => setCE("metaProducaoMoagemMes", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs"
-                      placeholder="216000"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5 pt-1">
-                  <div>
-                    <label className="text-[9px] text-slate-500 block">Taxa Total (t/h)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.taxaTotalMoagem || ""}
-                      onChange={e => setCE("taxaTotalMoagem", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold"
-                      placeholder="605"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] text-slate-500 block">P80 #105µm (%)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.granulometria105 || ""}
-                      onChange={e => setCE("granulometria105", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold"
-                      placeholder="63.8"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9px] text-slate-500 block">Disp. (%)</label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={dadosCE.disponibilidadeMoagem || ""}
-                      onChange={e => setCE("disponibilidadeMoagem", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-semibold"
-                      placeholder="92.4"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 3: Pátio de Minério & Silos */}
-              <div className="p-3.5 bg-slate-50/80 rounded-lg border border-slate-200 space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200/80 pb-1.5">
-                  <span className="text-[11px] font-bold text-slate-800 flex items-center gap-1.5">
-                    <Warehouse className="w-3.5 h-3.5 text-amber-700" />
-                    Pátio de ROM & Silos Moagem
-                  </span>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase">ALIMENTAÇÃO</span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-1.5">
-                  <div>
-                    <label className="text-[9.5px] font-semibold text-slate-600 block">Estoque Pátio (t)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.estoquePatio || ""}
-                      onChange={e => setCE("estoquePatio", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-bold"
-                      placeholder="6800"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9.5px] font-semibold text-slate-600 block">Silo 1 (%)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.nivelSilo1 || ""}
-                      onChange={e => setCE("nivelSilo1", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-semibold"
-                      placeholder="82"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[9.5px] font-semibold text-slate-600 block">Silo 2 (%)</label>
-                    <input
-                      type="number"
-                      value={dadosCE.nivelSilo2 || ""}
-                      onChange={e => setCE("nivelSilo2", parseFloat(e.target.value) || "")}
-                      className="w-full bg-white border border-slate-300 rounded p-1 text-xs font-semibold"
-                      placeholder="78"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
-                  <div className="bg-white p-2 rounded border border-slate-200">
-                    <span className="text-[9px] font-medium text-slate-500 block">Autonomia Total (h)</span>
-                    <span className="text-xs font-black text-amber-900">
-                      {dadosCE.autonomiaMinérioHoras || "31.5"} h
-                    </span>
-                  </div>
-                  <div className="bg-white p-2 rounded border border-slate-200">
-                    <span className="text-[9px] font-medium text-slate-500 block">Autonomia Total (t)</span>
-                    <span className="text-xs font-black text-slate-900">
-                      {(dadosCE.autonomiaMinérioToneladas || 10560).toLocaleString("pt-BR")} t
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[9.5px] text-slate-500 block">Status Retomador de Minério</label>
-                  <input
-                    type="text"
-                    value={dadosCE.statusRetomador || ""}
-                    onChange={e => setCE("statusRetomador", e.target.value)}
-                    className="w-full bg-white border border-slate-200 rounded p-1 text-xs font-medium"
-                    placeholder="Operando"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Bloco 2.1: Parâmetros Operacionais da Moagem (MI003, MI004, MI005) */}
           <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
             {/* Controles do Cabeçalho da Tabela da Moagem */}
@@ -3317,21 +3059,22 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleLimparTabelaMoagem}
-                  className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-300 hover:border-rose-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Limpar tabela de moagem"
+                  onClick={() => abrirModalColarColunaMoagem("taxa_MI003")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <Trash2 className="w-3 h-3 text-slate-500 hover:text-rose-600" />
-                  <span>Limpar</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => abrirModalColarColunaMoagem("taxa_MI003")}
-                  className="px-3 py-1 text-[11px] font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  onClick={handleLimparTabelaMoagem}
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Limpar tabela de moagem"
                 >
-                  <ClipboardPaste className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Limpar</span>
                 </button>
               </div>
             </div>
@@ -3725,34 +3468,35 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={handlePreencherPadraoRemoagem}
-                  className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-purple-700 bg-slate-100 hover:bg-purple-50 border border-slate-300 hover:border-purple-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência"
+                  onClick={() => abrirModalColarColunaRemoagem("derrickIsoladas")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <RotateCcw className="w-3 h-3 text-slate-500 hover:text-purple-600" />
-                  <span>Padrão</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleLimparTabelaRemoagem}
-                  className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-300 hover:border-rose-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Limpar tabela de remoagem"
                 >
-                  <Trash2 className="w-3 h-3 text-slate-500 hover:text-rose-600" />
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => abrirModalColarColunaRemoagem("derrickIsoladas")}
-                  className="px-3 py-1 text-[11px] font-bold text-purple-800 bg-purple-50 hover:bg-purple-100 border border-purple-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  onClick={handlePreencherPadraoRemoagem}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  title="Carregar valores de referência"
                 >
-                  <ClipboardPaste className="w-3.5 h-3.5 text-purple-700" />
-                  <span>Colar Coluna do Excel</span>
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Padrão</span>
                 </button>
               </div>
             </div>
@@ -3878,61 +3622,135 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
             {/* Modal para Colar Coluna do Excel (Remoagem) */}
             {modalColarColunaRemoagemAberto && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-2xs">
-                <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <ClipboardPaste className="w-5 h-5 text-purple-700" />
-                      <h3 className="font-extrabold text-sm text-slate-900">
-                        Assistente de Importação Excel — Remoagem
-                      </h3>
+              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-teal-950 rounded-lg">
+                        <FileSpreadsheet className="w-5 h-5 text-teal-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold">Colar Coluna do Excel (Remoagem Derrick & Vertimill)</h3>
+                        <p className="text-[11px] text-teal-200">
+                          Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setModalColarColunaRemoagemAberto(false)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                      className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-3 text-xs">
+                  {/* Modal Body */}
+                  <div className="p-5 space-y-4 overflow-y-auto">
                     <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        1. Selecione o Parâmetro da Remoagem:
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        1. Selecione a Coluna / Parâmetro da Remoagem:
                       </label>
                       <select
                         value={colunaSelecionadaParaColarRemoagem}
                         onChange={e => setColunaSelecionadaParaColarRemoagem(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                       >
-                        {CONFIG_PARAMETROS_REMOAGEM.map(p => (
-                          <option key={p.chave} value={p.chave}>
-                            {p.nome} {p.unidade ? `(${p.unidade})` : ""}
+                        {CONFIG_PARAMETROS_REMOAGEM.map(param => (
+                          <option key={param.chave} value={param.chave}>
+                            {param.nome} - Faixa: {param.minIdeal} a {param.maxIdeal} {param.unidade || ""}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        2. Cole os 7 valores copiados da coluna do Excel:
-                      </label>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <span>2. Cole os dados copiados do Excel (7 linhas):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) setTextoColadoExcelRemoagem(text);
+                              }
+                            } catch (err) {
+                              console.warn("Clipboard read error:", err);
+                            }
+                          }}
+                          className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ClipboardPaste className="w-3 h-3" />
+                          <span>Colar do Clipboard</span>
+                        </button>
+                      </div>
                       <textarea
-                        rows={7}
+                        rows={6}
                         value={textoColadoExcelRemoagem}
                         onChange={e => setTextoColadoExcelRemoagem(e.target.value)}
-                        placeholder="Copie do Excel e cole aqui (Ctrl+V)&#10;84,5&#10;86,0&#10;83,2&#10;85,8&#10;84,0&#10;83,5&#10;84,5"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:border-purple-500 focus:outline-none"
+                        placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n84,5\n86,0\n83,2\n85,8\n84,0\n83,5\n84,5"}
+                        className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
                       />
                     </div>
+
+                    {/* Pré-visualização dos 7 dias */}
+                    {(() => {
+                      const paramConfig = CONFIG_PARAMETROS_REMOAGEM.find(p => p.chave === colunaSelecionadaParaColarRemoagem);
+                      const linhas = textoColadoExcelRemoagem.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                      return (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                          <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                            Pré-visualização do Mapeamento (Segunda a Domingo):
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                              const valLinha = linhas[idx] || "";
+                              const parsedVal = parseNumeroBritagem(valLinha);
+                              const hasVal = parsedVal !== null;
+                              const isFora = hasVal && paramConfig && (parsedVal > paramConfig.maxIdeal || parsedVal < paramConfig.minIdeal);
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                    !hasVal
+                                      ? "bg-white border-slate-200 text-slate-400"
+                                      : isFora
+                                      ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                      : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                    {hasVal && (
+                                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                        isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                      }`}>
+                                        {isFora ? "Desvio" : "OK"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                  {/* Modal Footer */}
+                  <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                     <button
                       type="button"
                       onClick={() => setModalColarColunaRemoagemAberto(false)}
-                      className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -3940,10 +3758,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       type="button"
                       onClick={handleConfirmarColarModalRemoagem}
                       disabled={!textoColadoExcelRemoagem.trim()}
-                      className="px-4 py-1.5 text-xs font-bold text-white bg-purple-700 hover:bg-purple-800 disabled:opacity-50 rounded-lg transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Aplicar na Tabela (7 Dias)</span>
+                      <Check className="w-4 h-4" />
+                      <span>Aplicar Valores na Coluna</span>
                     </button>
                   </div>
                 </div>
@@ -4059,34 +3877,35 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={handlePreencherPadraoFlotacao}
-                  className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-cyan-700 bg-slate-100 hover:bg-cyan-50 border border-slate-300 hover:border-cyan-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência"
+                  onClick={() => abrirModalColarColunaFlotacao("solidosRougher")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <RotateCcw className="w-3 h-3 text-slate-500 hover:text-cyan-600" />
-                  <span>Padrão</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleLimparTabelaFlotacao}
-                  className="px-2.5 py-1 text-[11px] font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 border border-slate-300 hover:border-rose-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Limpar tabela de flotação"
                 >
-                  <Trash2 className="w-3 h-3 text-slate-500 hover:text-rose-600" />
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => abrirModalColarColunaFlotacao("solidosRougher")}
-                  className="px-3 py-1 text-[11px] font-bold text-cyan-800 bg-cyan-50 hover:bg-cyan-100 border border-cyan-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  onClick={handlePreencherPadraoFlotacao}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  title="Carregar valores de referência"
                 >
-                  <ClipboardPaste className="w-3.5 h-3.5 text-cyan-700" />
-                  <span>Colar Coluna do Excel</span>
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Padrão</span>
                 </button>
               </div>
             </div>
@@ -4222,61 +4041,135 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
             {/* Modal para Colar Coluna do Excel (Flotação) */}
             {modalColarColunaFlotacaoAberto && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-2xs">
-                <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <ClipboardPaste className="w-5 h-5 text-cyan-700" />
-                      <h3 className="font-extrabold text-sm text-slate-900">
-                        Assistente de Importação Excel — Flotação
-                      </h3>
+              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-teal-950 rounded-lg">
+                        <FileSpreadsheet className="w-5 h-5 text-teal-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold">Colar Coluna do Excel (Flotação)</h3>
+                        <p className="text-[11px] text-teal-200">
+                          Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setModalColarColunaFlotacaoAberto(false)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                      className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-3 text-xs">
+                  {/* Modal Body */}
+                  <div className="p-5 space-y-4 overflow-y-auto">
                     <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        1. Selecione o Parâmetro da Flotação:
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        1. Selecione a Coluna / Parâmetro da Flotação:
                       </label>
                       <select
                         value={colunaSelecionadaParaColarFlotacao}
                         onChange={e => setColunaSelecionadaParaColarFlotacao(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                       >
-                        {CONFIG_PARAMETROS_FLOTACAO.map(p => (
-                          <option key={p.chave} value={p.chave}>
-                            {p.nome} {p.unidade ? `(${p.unidade})` : ""}
+                        {CONFIG_PARAMETROS_FLOTACAO.map(param => (
+                          <option key={param.chave} value={param.chave}>
+                            {param.nome} - Faixa: {param.minIdeal} a {param.maxIdeal} {param.unidade || ""}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        2. Cole os 7 valores copiados da coluna do Excel:
-                      </label>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <span>2. Cole os dados copiados do Excel (7 linhas):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) setTextoColadoExcelFlotacao(text);
+                              }
+                            } catch (err) {
+                              console.warn("Clipboard read error:", err);
+                            }
+                          }}
+                          className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ClipboardPaste className="w-3 h-3" />
+                          <span>Colar do Clipboard</span>
+                        </button>
+                      </div>
                       <textarea
-                        rows={7}
+                        rows={6}
                         value={textoColadoExcelFlotacao}
                         onChange={e => setTextoColadoExcelFlotacao(e.target.value)}
-                        placeholder="Copie do Excel e cole aqui (Ctrl+V)&#10;32,2&#10;32,5&#10;31,8&#10;32,8&#10;32,0&#10;31,9&#10;32,1"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:border-cyan-500 focus:outline-none"
+                        placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n32,2\n32,5\n31,8\n32,8\n32,0\n31,9\n32,1"}
+                        className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
                       />
                     </div>
+
+                    {/* Pré-visualização dos 7 dias */}
+                    {(() => {
+                      const paramConfig = CONFIG_PARAMETROS_FLOTACAO.find(p => p.chave === colunaSelecionadaParaColarFlotacao);
+                      const linhas = textoColadoExcelFlotacao.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                      return (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                          <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                            Pré-visualização do Mapeamento (Segunda a Domingo):
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                              const valLinha = linhas[idx] || "";
+                              const parsedVal = parseNumeroBritagem(valLinha);
+                              const hasVal = parsedVal !== null;
+                              const isFora = hasVal && paramConfig && (parsedVal > paramConfig.maxIdeal || parsedVal < paramConfig.minIdeal);
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                    !hasVal
+                                      ? "bg-white border-slate-200 text-slate-400"
+                                      : isFora
+                                      ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                      : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                    {hasVal && (
+                                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                        isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                      }`}>
+                                        {isFora ? "Desvio" : "OK"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                  {/* Modal Footer */}
+                  <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                     <button
                       type="button"
                       onClick={() => setModalColarColunaFlotacaoAberto(false)}
-                      className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -4284,10 +4177,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       type="button"
                       onClick={handleConfirmarColarModalFlotacao}
                       disabled={!textoColadoExcelFlotacao.trim()}
-                      className="px-4 py-1.5 text-xs font-bold text-white bg-cyan-700 hover:bg-cyan-800 disabled:opacity-50 rounded-lg transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Aplicar na Tabela (7 Dias)</span>
+                      <Check className="w-4 h-4" />
+                      <span>Aplicar Valores na Coluna</span>
                     </button>
                   </div>
                 </div>
@@ -4414,22 +4307,34 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
                 <button
                   type="button"
-                  onClick={handlePreencherPadraoEspessamentoRejeito}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 transition cursor-pointer"
-                  title="Carregar valores de referência operacionais de espessamento"
+                  onClick={() => abrirModalColarColunaEspessamentoRejeito("densidadeUnderflow")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-                  <span>Preencher Padrão</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaEspessamentoRejeito}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 flex items-center gap-1.5 transition cursor-pointer"
-                  title="Limpar todos os campos da tabela de espessamento de rejeito"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Limpar tabela de espessamento de rejeito"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-400 hover:text-rose-600" />
-                  <span>Limpar Tabela</span>
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Limpar</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handlePreencherPadraoEspessamentoRejeito}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  title="Carregar valores de referência operacionais de espessamento"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Padrão</span>
+                </button>
+
                 {desviosDetectadosEspessamentoRejeito.length > 0 && (
                   <button
                     type="button"
@@ -4575,61 +4480,141 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
             {/* Modal para Colar Coluna do Excel (Espessamento de Rejeito) */}
             {modalColarColunaEspessamentoRejeitoAberto && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-2xs">
-                <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <ClipboardPaste className="w-5 h-5 text-teal-700" />
-                      <h3 className="font-extrabold text-sm text-slate-900">
-                        Assistente de Importação Excel — Espessamento de Rejeito
-                      </h3>
+              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-teal-950 rounded-lg">
+                        <FileSpreadsheet className="w-5 h-5 text-teal-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold">Colar Coluna do Excel (Espessamento de Rejeito)</h3>
+                        <p className="text-[11px] text-teal-200">
+                          Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setModalColarColunaEspessamentoRejeitoAberto(false)}
-                      className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+                      className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-3 text-xs">
+                  {/* Modal Body */}
+                  <div className="p-5 space-y-4 overflow-y-auto">
                     <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        1. Selecione o Parâmetro do Espessamento de Rejeito:
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        1. Selecione a Coluna / Parâmetro do Espessamento de Rejeito:
                       </label>
                       <select
                         value={colunaSelecionadaParaColarEspessamentoRejeito}
                         onChange={e => setColunaSelecionadaParaColarEspessamentoRejeito(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                       >
-                        {CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO.map(p => (
-                          <option key={p.chave} value={p.chave}>
-                            {p.nome} {p.unidade ? `(${p.unidade})` : ""}
+                        {CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO.map(param => (
+                          <option key={param.chave} value={param.chave}>
+                            {param.nome} - Faixa: {param.minIdeal} a {param.maxIdeal} {param.unidade || ""}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        2. Cole os 7 valores copiados da coluna do Excel:
-                      </label>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <span>2. Cole os dados copiados do Excel (7 linhas):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) setTextoColadoExcelEspessamentoRejeito(text);
+                              }
+                            } catch (err) {
+                              console.warn("Clipboard read error:", err);
+                            }
+                          }}
+                          className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ClipboardPaste className="w-3 h-3" />
+                          <span>Colar do Clipboard</span>
+                        </button>
+                      </div>
                       <textarea
-                        rows={7}
+                        rows={6}
                         value={textoColadoExcelEspessamentoRejeito}
                         onChange={e => setTextoColadoExcelEspessamentoRejeito(e.target.value)}
-                        placeholder="Copie do Excel e cole aqui (Ctrl+V)&#10;1720&#10;1715&#10;1730&#10;1725&#10;1740&#10;1718&#10;1722"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:border-teal-500 focus:outline-none"
+                        placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n1720\n1715\n1730\n1725\n1740\n1718\n1722"}
+                        className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
                       />
                     </div>
+
+                    {/* Pré-visualização dos 7 dias */}
+                    {(() => {
+                      const paramConfig = CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO.find(p => p.chave === colunaSelecionadaParaColarEspessamentoRejeito);
+                      const linhas = textoColadoExcelEspessamentoRejeito.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                      return (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                          <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                            Pré-visualização do Mapeamento (Segunda a Domingo):
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                              const valLinha = linhas[idx] || "";
+                              const parsedVal = parseNumeroBritagem(valLinha);
+                              const hasVal = parsedVal !== null;
+                              const isFora = hasVal && paramConfig && (
+                                paramConfig.tipoLimite === "min"
+                                  ? parsedVal < paramConfig.minIdeal
+                                  : paramConfig.tipoLimite === "max"
+                                  ? parsedVal > paramConfig.maxIdeal
+                                  : (parsedVal < paramConfig.minIdeal || parsedVal > paramConfig.maxIdeal)
+                              );
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                    !hasVal
+                                      ? "bg-white border-slate-200 text-slate-400"
+                                      : isFora
+                                      ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                      : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                    {hasVal && (
+                                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                        isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                      }`}>
+                                        {isFora ? "Desvio" : "OK"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                  {/* Modal Footer */}
+                  <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                     <button
                       type="button"
                       onClick={() => setModalColarColunaEspessamentoRejeitoAberto(false)}
-                      className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -4637,10 +4622,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       type="button"
                       onClick={handleConfirmarColarModalEspessamentoRejeito}
                       disabled={!textoColadoExcelEspessamentoRejeito.trim()}
-                      className="px-4 py-1.5 text-xs font-bold text-white bg-teal-700 hover:bg-teal-800 disabled:opacity-50 rounded-lg transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Aplicar na Tabela (7 Dias)</span>
+                      <Check className="w-4 h-4" />
+                      <span>Aplicar Valores na Coluna</span>
                     </button>
                   </div>
                 </div>
@@ -4768,27 +4753,39 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
                 <button
                   type="button"
-                  onClick={handlePreencherPadraoEspessamentoConcentrado}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 transition cursor-pointer"
-                  title="Carregar valores de referência operacionais do espessamento de concentrado"
+                  onClick={() => abrirModalColarColunaEspessamentoConcentrado("densidadeUnderflow")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>Preencher Padrão</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaEspessamentoConcentrado}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 flex items-center gap-1.5 transition cursor-pointer"
-                  title="Limpar todos os campos da tabela de espessamento de concentrado"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Limpar tabela de espessamento de concentrado"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-400 hover:text-rose-600" />
-                  <span>Limpar Tabela</span>
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Limpar</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handlePreencherPadraoEspessamentoConcentrado}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  title="Carregar valores de referência operacionais do espessamento de concentrado"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Padrão</span>
+                </button>
+
                 {desviosDetectadosEspessamentoConcentrado.length > 0 && (
                   <button
                     type="button"
                     onClick={handleSincronizarAcoesCorretivasEspessamentoConcentrado}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
                     title="Exportar desvios detectados para a Matriz de Diretrizes Operacionais"
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-300" />
@@ -4942,61 +4939,141 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
             {/* Modal para Colar Coluna do Excel (Espessamento de Concentrado) */}
             {modalColarColunaEspessamentoConcentradoAberto && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-2xs">
-                <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <ClipboardPaste className="w-5 h-5 text-emerald-700" />
-                      <h3 className="font-extrabold text-sm text-slate-900">
-                        Colar Coluna do Excel — Espessamento de Concentrado
-                      </h3>
+              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-teal-950 rounded-lg">
+                        <FileSpreadsheet className="w-5 h-5 text-teal-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold">Colar Coluna do Excel (Espessamento de Concentrado)</h3>
+                        <p className="text-[11px] text-teal-200">
+                          Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setModalColarColunaEspessamentoConcentradoAberto(false)}
-                      className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer"
+                      className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-3">
+                  {/* Modal Body */}
+                  <div className="p-5 space-y-4 overflow-y-auto">
                     <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        1. Selecione o Parâmetro do Espessamento de Concentrado:
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        1. Selecione a Coluna / Parâmetro do Espessamento de Concentrado:
                       </label>
                       <select
                         value={colunaSelecionadaParaColarEspessamentoConcentrado}
                         onChange={e => setColunaSelecionadaParaColarEspessamentoConcentrado(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2 text-xs font-bold text-slate-900"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                       >
-                        {CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO.map(p => (
-                          <option key={p.chave} value={p.chave}>
-                            {p.nome} {p.unidade ? `(${p.unidade})` : ""}
+                        {CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO.map(param => (
+                          <option key={param.chave} value={param.chave}>
+                            {param.nome} - Faixa: {param.minIdeal} a {param.maxIdeal} {param.unidade || ""}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    <div>
-                      <label className="text-[11px] font-bold text-slate-700 block mb-1">
-                        2. Cole os 7 valores copiados da coluna do Excel:
-                      </label>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <span>2. Cole os dados copiados do Excel (7 linhas):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) setTextoColadoExcelEspessamentoConcentrado(text);
+                              }
+                            } catch (err) {
+                              console.warn("Clipboard read error:", err);
+                            }
+                          }}
+                          className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ClipboardPaste className="w-3 h-3" />
+                          <span>Colar do Clipboard</span>
+                        </button>
+                      </div>
                       <textarea
-                        rows={7}
+                        rows={6}
                         value={textoColadoExcelEspessamentoConcentrado}
                         onChange={e => setTextoColadoExcelEspessamentoConcentrado(e.target.value)}
-                        placeholder="Copie do Excel e cole aqui (Ctrl+V)&#10;1850&#10;1840&#10;1865&#10;1855&#10;1845&#10;1850&#10;1860"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:border-emerald-500 focus:outline-none"
+                        placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n1850\n1840\n1865\n1855\n1845\n1850\n1860"}
+                        className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
                       />
                     </div>
+
+                    {/* Pré-visualização dos 7 dias */}
+                    {(() => {
+                      const paramConfig = CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO.find(p => p.chave === colunaSelecionadaParaColarEspessamentoConcentrado);
+                      const linhas = textoColadoExcelEspessamentoConcentrado.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                      return (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                          <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                            Pré-visualização do Mapeamento (Segunda a Domingo):
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                              const valLinha = linhas[idx] || "";
+                              const parsedVal = parseNumeroBritagem(valLinha);
+                              const hasVal = parsedVal !== null;
+                              const isFora = hasVal && paramConfig && (
+                                paramConfig.tipoLimite === "min"
+                                  ? parsedVal < paramConfig.minIdeal
+                                  : paramConfig.tipoLimite === "max"
+                                  ? parsedVal > paramConfig.maxIdeal
+                                  : (parsedVal < paramConfig.minIdeal || parsedVal > paramConfig.maxIdeal)
+                              );
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                    !hasVal
+                                      ? "bg-white border-slate-200 text-slate-400"
+                                      : isFora
+                                      ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                      : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                    {hasVal && (
+                                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                        isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                      }`}>
+                                        {isFora ? "Desvio" : "OK"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                  {/* Modal Footer */}
+                  <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                     <button
                       type="button"
                       onClick={() => setModalColarColunaEspessamentoConcentradoAberto(false)}
-                      className="px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -5004,10 +5081,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       type="button"
                       onClick={handleConfirmarColarModalEspessamentoConcentrado}
                       disabled={!textoColadoExcelEspessamentoConcentrado.trim()}
-                      className="px-4 py-1.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 rounded-lg transition shadow-xs cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Aplicar na Tabela (7 Dias)</span>
+                      <Check className="w-4 h-4" />
+                      <span>Aplicar Valores na Coluna</span>
                     </button>
                   </div>
                 </div>
@@ -5135,70 +5212,45 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
                 <button
                   type="button"
-                  onClick={handlePreencherPadraoFiltragemConcentrado}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center gap-1.5 transition cursor-pointer"
-                  title="Carregar valores de referência operacionais da filtragem de concentrado"
+                  onClick={() => abrirModalColarColunaFiltragem("producaoTurno1")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-pink-600" />
-                  <span>Preencher Padrão</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaFiltragemConcentrado}
-                  className="px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 flex items-center gap-1.5 transition cursor-pointer"
-                  title="Limpar todos os campos da tabela de filtragem de concentrado"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Limpar tabela de filtragem de concentrado"
                 >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-400 hover:text-rose-600" />
-                  <span>Limpar Tabela</span>
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Limpar</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handlePreencherPadraoFiltragemConcentrado}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  title="Carregar valores de referência operacionais da filtragem de concentrado"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Padrão</span>
+                </button>
+
                 {desviosDetectadosFiltragemConcentrado.length > 0 && (
                   <button
                     type="button"
                     onClick={handleSincronizarAcoesCorretivasFiltragemConcentrado}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-pink-700 hover:bg-pink-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
                     title="Exportar desvios detectados para a Matriz de Diretrizes Operacionais"
                   >
                     <Zap className="w-3.5 h-3.5 text-amber-300" />
                     <span>Sincronizar Ações ({desviosDetectadosFiltragemConcentrado.length})</span>
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* Banner com Fórmula de Produção Turno 12h */}
-            <div className="bg-pink-50/80 border border-pink-200 rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-black text-pink-950 uppercase tracking-wide flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-pink-700" />
-                    Cálculo de Produção Filtragem (Turno 12h)
-                  </span>
-                  <span className="text-[10px] font-bold text-pink-700 bg-white px-2 py-0.5 rounded border border-pink-200">
-                    Filtros Prensa 43-FP-001 / 43-FP-002
-                  </span>
-                </div>
-                <p className="text-[11px] text-pink-900 font-mono">
-                  Fórmula: (12h - Paradas Manut. - Paradas Outros) × Produtividade (t/h) = <strong>Produção (t)</strong>
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <div className="bg-white px-3 py-1.5 rounded-lg border border-pink-200 shadow-2xs text-right">
-                  <div className="text-[9.5px] font-bold text-slate-500 uppercase">Produção Último Turno</div>
-                  <div className="text-sm font-black text-pink-900">
-                    {dadosCE.producaoFiltragem !== undefined && dadosCE.producaoFiltragem !== "" ? `${dadosCE.producaoFiltragem} t` : "325 t"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Dica de Agilidade Excel */}
-            <div className="bg-pink-50/50 border border-pink-200 rounded-lg px-3 py-2 flex items-center justify-between gap-2 text-[11px] text-slate-700">
-              <div className="flex items-center gap-2">
-                <ClipboardPaste className="w-3.5 h-3.5 text-pink-700 shrink-0" />
-                <span>
-                  <strong className="text-pink-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-pink-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Filtragem, ou clique em <strong>"Colar"</strong> no cabeçalho do parâmetro desejado.
-                </span>
               </div>
             </div>
 
@@ -5222,9 +5274,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                     </th>
                     <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-800 text-cyan-200">
                       CICLOS & PRESSÃO
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-amber-950 text-amber-200">
-                      PARADAS DE FILTRO (H)
                     </th>
                   </tr>
 
@@ -5361,64 +5410,141 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
             {/* Modal para Colar Coluna do Excel (Filtragem de Concentrado) */}
             {modalColarColunaFiltragemAberto && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-2xs">
-                <div className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <ClipboardPaste className="w-5 h-5 text-pink-700" />
-                      <h4 className="font-bold text-sm text-slate-900">
-                        Assistente de Colagem do Excel — Filtragem de Concentrado
-                      </h4>
+              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-teal-950 rounded-lg">
+                        <FileSpreadsheet className="w-5 h-5 text-teal-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold">Colar Coluna do Excel (Filtragem de Concentrado)</h3>
+                        <p className="text-[11px] text-teal-200">
+                          Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setModalColarColunaFiltragemAberto(false)}
-                      className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer"
+                      className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-3">
+                  {/* Modal Body */}
+                  <div className="p-5 space-y-4 overflow-y-auto">
                     <div>
-                      <label className="text-xs font-semibold text-slate-700 block mb-1">
-                        Selecione a Coluna de Destino:
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        1. Selecione a Coluna / Parâmetro da Filtragem:
                       </label>
                       <select
                         value={colunaSelecionadaParaColarFiltragem}
                         onChange={e => setColunaSelecionadaParaColarFiltragem(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 focus:bg-white focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                       >
                         {CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO.map(param => (
                           <option key={param.chave} value={param.chave}>
-                            {param.nome} ({param.rotuloFaixa})
+                            {param.nome} - Faixa: {param.rotuloFaixa}
                           </option>
                         ))}
                       </select>
                     </div>
 
-                    <div>
-                      <label className="text-xs font-semibold text-slate-700 block mb-1">
-                        Cole os Dados Copiados do Excel (7 Linhas - Seg a Dom):
-                      </label>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <span>2. Cole os dados copiados do Excel (7 linhas):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) setTextoColadoExcelFiltragem(text);
+                              }
+                            } catch (err) {
+                              console.warn("Clipboard read error:", err);
+                            }
+                          }}
+                          className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ClipboardPaste className="w-3 h-3" />
+                          <span>Colar do Clipboard</span>
+                        </button>
+                      </div>
                       <textarea
-                        rows={7}
+                        rows={6}
                         value={textoColadoExcelFiltragem}
                         onChange={e => setTextoColadoExcelFiltragem(e.target.value)}
-                        placeholder="Exemplo (copiado de uma coluna do Excel):&#10;325&#10;340&#10;310&#10;350&#10;325&#10;330&#10;325"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-mono text-slate-800 placeholder:text-slate-400 focus:bg-white focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
+                        placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n325\n340\n310\n350\n325\n330\n325"}
+                        className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
                       />
-                      <span className="text-[10px] text-slate-500 block mt-1">
-                        Dica: O assistente reconhece separadores por quebra de linha, vírgulas decimais e tabulações.
-                      </span>
                     </div>
+
+                    {/* Pré-visualização dos 7 dias */}
+                    {(() => {
+                      const paramConfig = CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO.find(p => p.chave === colunaSelecionadaParaColarFiltragem);
+                      const linhas = textoColadoExcelFiltragem.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                      return (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                          <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                            Pré-visualização do Mapeamento (Segunda a Domingo):
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                              const valLinha = linhas[idx] || "";
+                              const parsedVal = parseNumeroBritagem(valLinha);
+                              const hasVal = parsedVal !== null;
+                              const isFora = hasVal && paramConfig && (
+                                paramConfig.tipoLimite === "min"
+                                  ? parsedVal < paramConfig.minIdeal
+                                  : paramConfig.tipoLimite === "max"
+                                  ? parsedVal > paramConfig.maxIdeal
+                                  : (parsedVal < paramConfig.minIdeal || parsedVal > paramConfig.maxIdeal)
+                              );
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                    !hasVal
+                                      ? "bg-white border-slate-200 text-slate-400"
+                                      : isFora
+                                      ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                      : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                    {hasVal && (
+                                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                        isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                      }`}>
+                                        {isFora ? "Desvio" : "OK"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  {/* Modal Footer */}
+                  <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                     <button
                       type="button"
                       onClick={() => setModalColarColunaFiltragemAberto(false)}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -5426,10 +5552,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       type="button"
                       onClick={handleConfirmarColarModalFiltragem}
                       disabled={!textoColadoExcelFiltragem.trim()}
-                      className="px-4 py-1.5 text-xs font-bold rounded-lg bg-pink-700 hover:bg-pink-800 disabled:opacity-50 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
-                      <span>Aplicar Dados na Tabela</span>
+                      <span>Aplicar Valores na Coluna</span>
                     </button>
                   </div>
                 </div>
@@ -5536,87 +5662,47 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-cyan-800 bg-cyan-50 px-2.5 py-1 rounded-md border border-cyan-200 flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse"></span>
-                  <span>Reúso: {dadosCE.taxaRecirculacaoReuso || 0}%</span>
-                </span>
                 <button
                   type="button"
-                  onClick={handlePreencherPadraoUtilidadesETA}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center gap-1 transition cursor-pointer"
-                  title="Carregar valores de referência de Utilidades & ETA"
+                  onClick={() => abrirModalColarColunaUtilidades("pressaoRedeBar")}
+                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Abrir assistente para colar dados de coluna do Excel"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>Padrão</span>
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
+                  <span>Colar Coluna do Excel</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaUtilidadesETA}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center gap-1 transition cursor-pointer"
-                  title="Limpar todos os campos da tabela diária de Utilidades & ETA"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+                  title="Limpar tabela de Utilidades & ETA"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handlePreencherPadraoUtilidadesETA}
+                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
+                  title="Carregar valores de referência de Utilidades & ETA"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Padrão</span>
+                </button>
+
                 {desviosDetectadosUtilidadesETA.length > 0 && onChangeDiretrizes && (
                   <button
                     type="button"
                     onClick={handleSincronizarAcoesCorretivasUtilidadesETA}
-                    className="px-3 py-1 text-xs font-bold rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
                     title="Sincronizar desvios de Utilidades & ETA com a Matriz de Diretrizes"
                   >
                     <ShieldAlert className="w-3.5 h-3.5" />
                     <span>Sincronizar Diretrizes ({desviosDetectadosUtilidadesETA.length})</span>
                   </button>
                 )}
-              </div>
-            </div>
-
-            {/* Sub-painel: Status Operacional dos Equipamentos */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 bg-cyan-50/40 p-3 rounded-xl border border-cyan-100 text-xs">
-              <div>
-                <label className="text-[11px] font-bold text-cyan-950 block mb-1">
-                  Rede de Compressores de Ar (47-CO):
-                </label>
-                <select
-                  value={dadosCE.compressoresOp || "Todos em Operação"}
-                  onChange={e => setCE("compressoresOp", e.target.value)}
-                  className="w-full bg-white border border-cyan-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 cursor-pointer focus:border-cyan-500"
-                >
-                  <option value="Todos em Operação">Todos em Operação (001, 002 e 003)</option>
-                  <option value="Comp 01 e 02">Compressores 01 e 02 Ativos (003 Reserva)</option>
-                  <option value="Comp 02 e 03">Compressores 02 e 03 Ativos (001 Reserva)</option>
-                  <option value="Comp 01 e 03">Compressores 01 e 03 Ativos (002 Reserva)</option>
-                  <option value="1 em Manutenção">1 Compressor em Manutenção Corretiva</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-cyan-950 block mb-1">
-                  Bombas de Água Bruta & Processo (47-CP):
-                </label>
-                <select
-                  value={dadosCE.bombasAguaOp || "Ambas em Operação"}
-                  onChange={e => setCE("bombasAguaOp", e.target.value)}
-                  className="w-full bg-white border border-cyan-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800 cursor-pointer focus:border-cyan-500"
-                >
-                  <option value="Ambas em Operação">Ambas em Operação (Linha A e Linha B)</option>
-                  <option value="Apenas Bomba 01">Apenas Bomba 01 em Operação</option>
-                  <option value="Apenas Bomba 02">Apenas Bomba 02 em Operação</option>
-                  <option value="Rodízio Preventivo">Rodízio Preventivo em Andamento</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-bold text-cyan-950 block mb-1">
-                  Balanço Hídrico Geral:
-                </label>
-                <div className="bg-white border border-cyan-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-cyan-900 flex items-center justify-between">
-                  <span>{dadosCE.balancoHidricoStatus ? "Ativo e Monitorado" : "Estável"}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">
-                    Pressão Atual: {dadosCE.historicoDiarioUtilidadesETA?.[6]?.pressaoAr || 7.0} bar
-                  </span>
-                </div>
               </div>
             </div>
 
@@ -5649,14 +5735,11 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                     <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-sky-900 text-sky-100">
                       AR COMPRIMIDO
                     </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
+                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
                       BALANÇO HÍDRICO GLOBAL
                     </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-950 text-teal-100">
+                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-teal-950 text-teal-100">
                       QUALIDADE ETA & RESERVATÓRIOS
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-800 text-amber-200">
-                      CONFIABILIDADE OPERACIONAL
                     </th>
                   </tr>
 
@@ -5798,89 +5881,146 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                     );
                   })}
                 </tbody>
-
-                {/* Rodapé com Médias Semanais */}
-                <tfoot>
-                  <tr className="bg-slate-100 border-t-2 border-slate-300 font-bold text-slate-800 text-[10px]">
-                    <td className="p-2 border-r border-slate-200 text-left sticky left-0 bg-slate-100 z-10">
-                      MÉDIA SEMANAL
-                    </td>
-                    <td className="p-1 border-r border-slate-200 text-slate-500">-</td>
-                    <td className="p-1 border-r border-slate-200 text-slate-500">-</td>
-                    {CONFIG_PARAMETROS_UTILIDADES_ETA.map(param => {
-                      const vals = historicoDiarioUtilidadesETA
-                        .map(d => parseNumeroBritagem((d as any)[param.chave]))
-                        .filter((v): v is number => v !== null);
-                      const media = vals.length > 0 ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-
-                      return (
-                        <td key={param.chave} className="p-1 border-r border-slate-200 font-extrabold text-cyan-950 font-mono">
-                          {media !== null
-                            ? `${param.decimais > 0 ? media.toFixed(param.decimais).replace(".", ",") : Math.round(media)}`
-                            : "-"}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                </tfoot>
               </table>
             </div>
 
             {/* Modal de Colagem Rápida do Excel (Utilidades & ETA) */}
             {modalColarColunaUtilidadesAberto && (
-              <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-                <div className="bg-white rounded-2xl max-w-lg w-full p-5 shadow-2xl border border-slate-200 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <FileSpreadsheet className="w-5 h-5 text-cyan-600" />
-                      <h4 className="text-sm font-bold text-slate-900">
-                        Assistente de Colagem do Excel — Utilidades & ETA
-                      </h4>
+              <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                  {/* Modal Header */}
+                  <div className="bg-teal-900 text-white p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 bg-teal-950 rounded-lg">
+                        <FileSpreadsheet className="w-5 h-5 text-teal-300" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold">Colar Coluna do Excel (Utilidades & ETA)</h3>
+                        <p className="text-[11px] text-teal-200">
+                          Preenchimento automático para os 7 dias da semana (Segunda a Domingo)
+                        </p>
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => setModalColarColunaUtilidadesAberto(false)}
-                      className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition cursor-pointer"
+                      className="text-teal-200 hover:text-white p-1 rounded-md hover:bg-teal-800 transition cursor-pointer"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-5 h-5" />
                     </button>
                   </div>
 
-                  <div className="space-y-2 text-xs">
-                    <label className="font-bold text-slate-700 block">
-                      Coluna de Destino:
-                    </label>
-                    <select
-                      value={colunaSelecionadaParaColarUtilidades}
-                      onChange={e => setColunaSelecionadaParaColarUtilidades(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-800"
-                    >
-                      {CONFIG_PARAMETROS_UTILIDADES_ETA.map(p => (
-                        <option key={p.chave} value={p.chave}>
-                          {p.nome} (Ideal: {p.rotuloFaixa})
-                        </option>
-                      ))}
-                    </select>
+                  {/* Modal Body */}
+                  <div className="p-5 space-y-4 overflow-y-auto">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                        1. Selecione a Coluna / Parâmetro de Utilidades & ETA:
+                      </label>
+                      <select
+                        value={colunaSelecionadaParaColarUtilidades}
+                        onChange={e => setColunaSelecionadaParaColarUtilidades(e.target.value)}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-800 focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                      >
+                        {CONFIG_PARAMETROS_UTILIDADES_ETA.map(param => (
+                          <option key={param.chave} value={param.chave}>
+                            {param.nome} - Faixa: {param.rotuloFaixa}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                          <span>2. Cole os dados copiados do Excel (7 linhas):</span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              if (navigator.clipboard && navigator.clipboard.readText) {
+                                const text = await navigator.clipboard.readText();
+                                if (text) setTextoColadoExcelUtilidades(text);
+                              }
+                            } catch (err) {
+                              console.warn("Clipboard read error:", err);
+                            }
+                          }}
+                          className="text-[11px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 hover:bg-teal-100 px-2 py-0.5 rounded border border-teal-200 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          <ClipboardPaste className="w-3 h-3" />
+                          <span>Colar do Clipboard</span>
+                        </button>
+                      </div>
+                      <textarea
+                        rows={6}
+                        value={textoColadoExcelUtilidades}
+                        onChange={e => setTextoColadoExcelUtilidades(e.target.value)}
+                        placeholder={"Copie uma coluna no Excel com 7 linhas e cole aqui (Ctrl+V):\n7.0\n7.1\n6.9\n7.2\n7.0\n6.8\n7.0"}
+                        className="w-full font-mono text-xs p-3 rounded-lg border border-slate-300 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 bg-slate-50/50"
+                      />
+                    </div>
+
+                    {/* Pré-visualização dos 7 dias */}
+                    {(() => {
+                      const paramConfig = CONFIG_PARAMETROS_UTILIDADES_ETA.find(p => p.chave === colunaSelecionadaParaColarUtilidades);
+                      const linhas = textoColadoExcelUtilidades.trim().split(/\r\n|\r|\n/).filter(l => l.trim().length > 0);
+
+                      return (
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                          <span className="text-[11px] font-bold text-slate-700 block uppercase tracking-wide">
+                            Pré-visualização do Mapeamento (Segunda a Domingo):
+                          </span>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"].map((diaNome, idx) => {
+                              const valLinha = linhas[idx] || "";
+                              const parsedVal = parseNumeroBritagem(valLinha);
+                              const hasVal = parsedVal !== null;
+                              const isFora = hasVal && paramConfig && (
+                                paramConfig.tipoLimite === "min"
+                                  ? parsedVal < paramConfig.minIdeal
+                                  : paramConfig.tipoLimite === "max"
+                                  ? parsedVal > paramConfig.maxIdeal
+                                  : (parsedVal < paramConfig.minIdeal || parsedVal > paramConfig.maxIdeal)
+                              );
+
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`p-2 rounded-lg border text-xs flex flex-col justify-between ${
+                                    !hasVal
+                                      ? "bg-white border-slate-200 text-slate-400"
+                                      : isFora
+                                      ? "bg-rose-50 border-rose-300 text-rose-950 font-bold"
+                                      : "bg-teal-50 border-teal-200 text-teal-950 font-bold"
+                                  }`}
+                                >
+                                  <span className="text-[10px] text-slate-500 font-semibold">{diaNome}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className="text-xs">{hasVal ? `${parsedVal} ${paramConfig?.unidade || ""}` : "—"}</span>
+                                    {hasVal && (
+                                      <span className={`text-[9px] px-1 py-0.2 rounded font-bold ${
+                                        isFora ? "bg-rose-200 text-rose-800" : "bg-teal-200 text-teal-800"
+                                      }`}>
+                                        {isFora ? "Desvio" : "OK"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
-                  <div className="space-y-2 text-xs">
-                    <label className="font-bold text-slate-700 block">
-                      Cole aqui a coluna de dados copiada do Excel (7 valores em sequência, de Segunda a Domingo):
-                    </label>
-                    <textarea
-                      rows={7}
-                      value={textoColadoExcelUtilidades}
-                      onChange={e => setTextoColadoExcelUtilidades(e.target.value)}
-                      placeholder={"7.0\n7.1\n6.9\n7.2\n7.0\n6.8\n7.0"}
-                      className="w-full font-mono text-xs bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-slate-800 focus:bg-white focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                  {/* Modal Footer */}
+                  <div className="bg-slate-50 p-4 border-t border-slate-200 flex items-center justify-end gap-2.5">
                     <button
                       type="button"
                       onClick={() => setModalColarColunaUtilidadesAberto(false)}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg border border-slate-300 bg-white text-xs font-bold text-slate-700 hover:bg-slate-100 transition cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -5888,10 +6028,10 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       type="button"
                       onClick={handleConfirmarColarModalUtilidades}
                       disabled={!textoColadoExcelUtilidades.trim()}
-                      className="px-4 py-1.5 text-xs font-bold rounded-lg bg-cyan-700 hover:bg-cyan-800 disabled:opacity-50 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
+                      className="px-4 py-2 rounded-lg bg-teal-800 hover:bg-teal-900 disabled:opacity-50 text-xs font-bold text-white shadow-sm transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
-                      <span>Aplicar Dados na Tabela</span>
+                      <span>Aplicar Valores na Coluna</span>
                     </button>
                   </div>
                 </div>
@@ -5974,66 +6114,39 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Ajuste Direto dos Indicadores Globais & Status */}
-            <div className="pt-3 border-t border-slate-200">
-              <div className="text-xs font-bold text-slate-700 mb-2">
-                Parâmetros Consolidados & Status Operacional ETA:
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">Captação Água Bruta (m³/h)</label>
-                  <input
-                    type="number"
-                    value={dadosCE.captacaoAguaBrutaM3h || ""}
-                    onChange={e => setCE("captacaoAguaBrutaM3h", parseFloat(e.target.value) || "")}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold"
-                  />
-                </div>
+          {/* Bloco 2.6: Gargalos Operacionais & Plano de Contingência (Circuito Úmido) */}
+          <div className="bg-slate-50 rounded-xl p-5 border border-slate-200 space-y-3">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <h4 className="text-xs font-bold text-slate-900">Gargalos Operacionais & Plano de Contingência</h4>
+            </div>
 
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">Volume Tratado (m³/dia)</label>
-                  <input
-                    type="number"
-                    value={dadosCE.aguaTratadaM3Dia || ""}
-                    onChange={e => setCE("aguaTratadaM3Dia", parseFloat(e.target.value) || "")}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">Taxa de Reuso / Recirculação (%)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={dadosCE.taxaRecirculacaoReuso || ""}
-                    onChange={e => setCE("taxaRecirculacaoReuso", parseFloat(e.target.value) || "")}
-                    placeholder="Meta: > 85%"
-                    className="w-full bg-cyan-50 border border-cyan-300 rounded-lg px-2.5 py-1.5 text-xs font-extrabold text-cyan-900"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold text-slate-600 block mb-1">Turbidez Água Tratada (NTU)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={dadosCE.turbidezAguaTratadaNtu || ""}
-                    onChange={e => setCE("turbidezAguaTratadaNtu", parseFloat(e.target.value) || "")}
-                    placeholder="Meta: < 2.0"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold"
-                  />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+                  Gargalos Atuais no Circuito Úmido (Moagem / Flotação / ETA)
+                </label>
+                <textarea
+                  rows={2}
+                  value={dadosCE.gargalosAtuais || ""}
+                  onChange={e => setCE("gargalosAtuais", e.target.value)}
+                  placeholder="Ex: Oscilação de pressão na água de selagem das bombas, desgaste de telas ou revestimento..."
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800"
+                />
               </div>
 
-              <div className="pt-2">
-                <label className="text-[11px] font-semibold text-slate-600 block mb-1">Status do Balanço Hídrico & Dosagens ETA</label>
-                <input
-                  type="text"
-                  value={dadosCE.balancoHidricoStatus}
-                  onChange={e => setCE("balancoHidricoStatus", e.target.value)}
-                  placeholder="Ex: Operação superavitária com recirculação estável dos espessadores..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-800"
+              <div>
+                <label className="text-[11px] font-semibold text-slate-600 block mb-1">
+                  Plano de Contingência Operacional
+                </label>
+                <textarea
+                  rows={2}
+                  value={dadosCE.planoContingencia || ""}
+                  onChange={e => setCE("planoContingencia", e.target.value)}
+                  placeholder="Ex: Operação em modo contingencial, acionamento de bombas/compressores reservas e ajuste de dosagens..."
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2 text-xs text-slate-800"
                 />
               </div>
             </div>
