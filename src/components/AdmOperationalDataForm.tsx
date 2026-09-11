@@ -4334,18 +4334,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
                   <span>Padrão</span>
                 </button>
-
-                {desviosDetectadosEspessamentoRejeito.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleSincronizarAcoesCorretivasEspessamentoRejeito}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                    title="Exportar desvios detectados para a Matriz de Diretrizes Operacionais"
-                  >
-                    <Zap className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Sincronizar Ações ({desviosDetectadosEspessamentoRejeito.length})</span>
-                  </button>
-                )}
               </div>
             </div>
 
@@ -4780,18 +4768,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
                   <span>Padrão</span>
                 </button>
-
-                {desviosDetectadosEspessamentoConcentrado.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleSincronizarAcoesCorretivasEspessamentoConcentrado}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                    title="Exportar desvios detectados para a Matriz de Diretrizes Operacionais"
-                  >
-                    <Zap className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Sincronizar Ações ({desviosDetectadosEspessamentoConcentrado.length})</span>
-                  </button>
-                )}
               </div>
             </div>
 
@@ -5239,18 +5215,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
                   <span>Padrão</span>
                 </button>
-
-                {desviosDetectadosFiltragemConcentrado.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={handleSincronizarAcoesCorretivasFiltragemConcentrado}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                    title="Exportar desvios detectados para a Matriz de Diretrizes Operacionais"
-                  >
-                    <Zap className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Sincronizar Ações ({desviosDetectadosFiltragemConcentrado.length})</span>
-                  </button>
-                )}
               </div>
             </div>
 
@@ -5691,18 +5655,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
                   <span>Padrão</span>
                 </button>
-
-                {desviosDetectadosUtilidadesETA.length > 0 && onChangeDiretrizes && (
-                  <button
-                    type="button"
-                    onClick={handleSincronizarAcoesCorretivasUtilidadesETA}
-                    className="px-3 py-1.5 text-xs font-bold rounded-lg bg-teal-700 hover:bg-teal-800 text-white flex items-center gap-1.5 shadow-xs transition cursor-pointer"
-                    title="Sincronizar desvios de Utilidades & ETA com a Matriz de Diretrizes"
-                  >
-                    <ShieldAlert className="w-3.5 h-3.5" />
-                    <span>Sincronizar Diretrizes ({desviosDetectadosUtilidadesETA.length})</span>
-                  </button>
-                )}
               </div>
             </div>
 
