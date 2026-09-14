@@ -3225,16 +3225,16 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                       % SÓLIDOS DESCARGA (%)
                     </th>
                     <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-slate-850 text-amber-200">
-                      CONTROLE REPOSIÇÕES (kg/dia)
+                      REPOSIÇÃO DE BOLAS (g/t)
                     </th>
                     <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-900 text-teal-100">
                       PRESSÃO HIDROCICLONAGEM (kgf/cm²)
                     </th>
                     <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-slate-800 text-indigo-200">
-                      DENSIDADE POLPA (g/cm³)
+                      DENSIDADE POLPA (g/t)
                     </th>
                     <th colSpan={3} className="p-1.5 bg-slate-850 text-sky-200">
-                      PRESSÃO PSI (300 / 500)
+                      PSI 300 - 150# (%)
                     </th>
                   </tr>
 
