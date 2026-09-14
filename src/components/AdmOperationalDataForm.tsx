@@ -342,16 +342,51 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
   // Limpar todos os dados da tabela diária
   const handleLimparTabela = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário da britagem?")) {
-      const limpo = DADOS_DIARIOS_BRITAGEM_PADRAO.map(d => ({ ...d }));
-      const nextBR = { ...dadosBR, historicoDiarioBritagem: limpo };
-      sincronizarLeiturasAtuais(nextBR);
-      onChangeBR(nextBR);
+    const limpo: RegistroDiarioIndicadoresBritagem[] = DADOS_DIARIOS_BRITAGEM_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      produtividadeTph: "",
+      posicaoManto: "",
+      afericaoBritador: "",
+      vazaoOleoBuchaInterna: "",
+      vazaoOleoBuchaExterna: "",
+      pressaoOleoLubrificante: "",
+      pressaoArAcumulador: "",
+      pressaoArAc1: "",
+      pressaoArAc2: "",
+      pressaoAguaResfriamento: "",
+      amperagemMotor41TC001: "",
+      amperagemMotor41BR001: "",
+      temperaturaOleoRetorno: "",
+      temperaturaOleoBuchaExterna: "",
+      temperaturaOleoBuchaInterna: "",
+      observacao: ""
+    }));
+    const nextBR = {
+      ...dadosBR,
+      historicoDiarioBritagem: limpo,
+      taxaBritagem: "",
+      posicaoManto: "",
+      afericaoBritador: "",
+      vazaoOleoBuchaInterna: "",
+      vazaoOleoBuchaExterna: "",
+      pressaoOleoLubrificante: "",
+      pressaoArAcumulador: "",
+      pressaoArAc1: "",
+      pressaoArAc2: "",
+      pressaoAguaResfriamento: "",
+      amperagemMotor41TC001: "",
+      amperagemMotor41BR001: "",
+      temperaturaOleoRetorno: "",
+      temperaturaOleoBuchaExterna: "",
+      temperaturaOleoBuchaInterna: ""
+    };
+    sincronizarLeiturasAtuais(nextBR);
+    onChangeBR(nextBR);
 
-      setToastMensagem("Tabela de monitoramento diário limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário da Britagem limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   // Abrir Modal para colar coluna específica
@@ -549,16 +584,53 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaRebritagem = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário da Rebritagem?")) {
-      const limpo = DADOS_DIARIOS_REBRITAGEM_PADRAO.map(d => ({ ...d }));
-      const nextBR = { ...dadosBR, historicoDiarioRebritagem: limpo };
-      sincronizarLeiturasAtuaisRebritagem(nextBR);
-      onChangeBR(nextBR);
+    const limpo: RegistroDiarioIndicadoresRebritagem[] = DADOS_DIARIOS_REBRITAGEM_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      tempOleoLub_BR001: "",
+      tempOleoLub_BR002: "",
+      tempOleoLub_BR003: "",
+      tempOleoLub_BR004: "",
+      tempOleoLub_BR005: "",
+      tempOleoLub_BR006: "",
+      pressaoHydroset_BR003: "",
+      pressaoHydroset_BR004: "",
+      pressaoHydroset_BR005: "",
+      pressaoHydroset_BR006: "",
+      potencia_BR001: "",
+      potencia_BR002: "",
+      potencia_BR003: "",
+      potencia_BR004: "",
+      potencia_BR005: "",
+      potencia_BR006: "",
+      freqAlimentador_BR001: "",
+      freqAlimentador_BR002: "",
+      freqAlimentador_BR003: "",
+      freqAlimentador_BR004: "",
+      freqAlimentador_BR005: "",
+      freqAlimentador_BR006: "",
+      difTemp_BR001: "",
+      difTemp_BR002: "",
+      pressaoContraeixo_BR001: "",
+      pressaoContraeixo_BR002: "",
+      difPressao_BR001: "",
+      difPressao_BR002: "",
+      retidoMeiaPol: "",
+      produtividadeTph: "",
+      observacao: ""
+    }));
+    const nextBR = {
+      ...dadosBR,
+      historicoDiarioRebritagem: limpo,
+      retidoMeiaPol: "",
+      produtividadeRebritagem: ""
+    };
+    sincronizarLeiturasAtuaisRebritagem(nextBR);
+    onChangeBR(nextBR);
 
-      setToastMensagem("Tabela de monitoramento diário da Rebritagem limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário da Rebritagem limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const abrirModalColarColunaRebritagem = (chaveParametro: string) => {
@@ -775,16 +847,70 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaMoagem = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário da Moagem?")) {
-      const limpo = DADOS_DIARIOS_MOAGEM_PADRAO.map(d => ({ ...d }));
-      const nextCE = { ...dadosCE, historicoDiarioMoagem: limpo };
-      sincronizarLeiturasAtuaisMoagem(nextCE);
-      onChangeCE(nextCE);
+    const limpo: RegistroDiarioIndicadoresMoagem[] = DADOS_DIARIOS_MOAGEM_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      taxa_MI003: "",
+      taxa_MI004: "",
+      taxa_MI005: "",
+      potencia_MI003: "",
+      potencia_MI004: "",
+      potencia_MI005: "",
+      solidosOverflow_MI003: "",
+      solidosOverflow_MI004: "",
+      solidosOverflow_MI005: "",
+      solidosDescarga_MI003: "",
+      solidosDescarga_MI004: "",
+      solidosDescarga_MI005: "",
+      reposicoes_MI003: "",
+      reposicoes_MI004: "",
+      reposicoes_MI005: "",
+      pressaoHidrociclone_MI003: "",
+      pressaoHidrociclone_MI004: "",
+      pressaoHidrociclone_MI005: "",
+      densidade_MI003: "",
+      densidade_MI004: "",
+      densidade_MI005: "",
+      pressaoPsi_MI003: "",
+      pressaoPsi_MI004: "",
+      pressaoPsi_MI005: "",
+      observacao: ""
+    }));
+    const nextCE: DadosSetorConcentradorEta = {
+      ...dadosCE,
+      historicoDiarioMoagem: limpo,
+      taxaMi003: "",
+      taxaMi004: "",
+      taxaMi005: "",
+      taxaTotalMoagem: 0,
+      potenciaMi003: "",
+      potenciaMi004: "",
+      potenciaMi005: "",
+      solidosOverflowMi003: "",
+      solidosOverflowMi004: "",
+      solidosOverflowMi005: "",
+      solidosDescargaMi003: "",
+      solidosDescargaMi004: "",
+      solidosDescargaMi005: "",
+      reposicoesMi003: "",
+      reposicoesMi004: "",
+      reposicoesMi005: "",
+      pressaoHidrocicloneMi003: "",
+      pressaoHidrocicloneMi004: "",
+      pressaoHidrocicloneMi005: "",
+      densidadeMi003: "",
+      densidadeMi004: "",
+      densidadeMi005: "",
+      pressaoPsiMi003: "",
+      pressaoPsiMi004: "",
+      pressaoPsiMi005: ""
+    };
+    sincronizarLeiturasAtuaisMoagem(nextCE);
+    onChangeCE(nextCE);
 
-      setToastMensagem("Tabela de monitoramento diário da Moagem limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário da Moagem limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const abrirModalColarColunaMoagem = (chaveParametro: string) => {
@@ -940,28 +1066,26 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaRemoagem = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário da Remoagem?")) {
-      const limpo = DADOS_DIARIOS_REMOAGEM_PADRAO.map(d => ({
-        dia: d.dia,
-        diaLabel: d.diaLabel,
-        derrickIsoladas: "",
-        alimentacaoFeedF80: "",
-        produtoHigP80: "",
-        densidadeProdutoHig: "",
-        produtoHig74: "",
-        densidadeAlimDit006: "",
-        fluxoAlimFit403072: "",
-        fluxoAlimentacao: "",
-        potenciaKw: "",
-        torquePct: ""
-      }));
-      const nextCE = { ...dadosCE, historicoDiarioRemoagem: limpo };
-      onChangeCE(nextCE);
+    const limpo = DADOS_DIARIOS_REMOAGEM_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      derrickIsoladas: "",
+      alimentacaoFeedF80: "",
+      produtoHigP80: "",
+      densidadeProdutoHig: "",
+      produtoHig74: "",
+      densidadeAlimDit006: "",
+      fluxoAlimFit403072: "",
+      fluxoAlimentacao: "",
+      potenciaKw: "",
+      torquePct: ""
+    }));
+    const nextCE = { ...dadosCE, historicoDiarioRemoagem: limpo };
+    onChangeCE(nextCE);
 
-      setToastMensagem("Tabela de monitoramento diário da Remoagem limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário da Remoagem limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const handlePreencherPadraoRemoagem = () => {
@@ -1139,31 +1263,29 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaFlotacao = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário da Flotação?")) {
-      const limpo = DADOS_DIARIOS_FLOTACAO_PADRAO.map(d => ({
-        dia: d.dia,
-        diaLabel: d.diaLabel,
-        solidosRougher: "",
-        solidosCleaner: "",
-        solidosRecleaner: "",
-        solidosScsRougher: "",
-        dosagemCmc: "",
-        dosagemAmidex: "",
-        dosagemColetor: "",
-        dosagemEspumante: "",
-        phRougher: "",
-        phCleaner: "",
-        phJameson: "",
-        teorCf: "",
-        teorRf: ""
-      }));
-      const nextCE = { ...dadosCE, historicoDiarioFlotacao: limpo };
-      onChangeCE(nextCE);
+    const limpo = DADOS_DIARIOS_FLOTACAO_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      solidosRougher: "",
+      solidosCleaner: "",
+      solidosRecleaner: "",
+      solidosScsRougher: "",
+      dosagemCmc: "",
+      dosagemAmidex: "",
+      dosagemColetor: "",
+      dosagemEspumante: "",
+      phRougher: "",
+      phCleaner: "",
+      phJameson: "",
+      teorCf: "",
+      teorRf: ""
+    }));
+    const nextCE = { ...dadosCE, historicoDiarioFlotacao: limpo };
+    onChangeCE(nextCE);
 
-      setToastMensagem("Tabela de monitoramento diário da Flotação limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário da Flotação limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const handlePreencherPadraoFlotacao = () => {
@@ -1341,33 +1463,31 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaEspessamentoRejeito = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário do Espessamento de Rejeito?")) {
-      const limpo = DADOS_DIARIOS_ESPESSAMENTO_REJEITO_PADRAO.map(d => ({
-        dia: d.dia,
-        diaLabel: d.diaLabel,
-        densidadeUnderflowRej: "",
-        torqueRejEp001: "",
-        torqueRejEp002: "",
-        solidosRej45ep001: "",
-        solidosRej45ep002: "",
-        solidosRejBh01: "",
-        solidosRejBh02: "",
-        solidosRejBh03: "",
-        consumoFloculanteRej: "",
-        espessadorRejOp: "",
-        htrLinha1: "",
-        htrLinha2: "",
-        htrLinha3: "",
-        htrLinha4: "",
-        htrPastFill: ""
-      }));
-      const nextCE = { ...dadosCE, historicoDiarioEspessamentoRejeito: limpo };
-      onChangeCE(nextCE);
+    const limpo = DADOS_DIARIOS_ESPESSAMENTO_REJEITO_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      densidadeUnderflowRej: "",
+      torqueRejEp001: "",
+      torqueRejEp002: "",
+      solidosRej45ep001: "",
+      solidosRej45ep002: "",
+      solidosRejBh01: "",
+      solidosRejBh02: "",
+      solidosRejBh03: "",
+      consumoFloculanteRej: "",
+      espessadorRejOp: "",
+      htrLinha1: "",
+      htrLinha2: "",
+      htrLinha3: "",
+      htrLinha4: "",
+      htrPastFill: ""
+    }));
+    const nextCE = { ...dadosCE, historicoDiarioEspessamentoRejeito: limpo };
+    onChangeCE(nextCE);
 
-      setToastMensagem("Tabela de monitoramento diário do Espessamento de Rejeito limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário do Espessamento de Rejeito limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const handlePreencherPadraoEspessamentoRejeito = () => {
@@ -1545,28 +1665,26 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaEspessamentoConcentrado = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário do Espessamento de Concentrado?")) {
-      const limpo = DADOS_DIARIOS_ESPESSAMENTO_CONCENTRADO_PADRAO.map(d => ({
-        dia: d.dia,
-        diaLabel: d.diaLabel,
-        espessadorConcOp: "",
-        densidadeUnderflowConc: "",
-        solidosConc44ep001: "",
-        solidosConc44ep002: "",
-        nivelTanqueConc: "",
-        consumoFloculanteConc: "",
-        elevacaoRakeConcEp001: "",
-        elevacaoRakeConcEp002: "",
-        torqueConcEp001: "",
-        torqueConcEp002: ""
-      }));
-      const nextCE = { ...dadosCE, historicoDiarioEspessamentoConcentrado: limpo };
-      onChangeCE(nextCE);
+    const limpo = DADOS_DIARIOS_ESPESSAMENTO_CONCENTRADO_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      espessadorConcOp: "",
+      densidadeUnderflowConc: "",
+      solidosConc44ep001: "",
+      solidosConc44ep002: "",
+      nivelTanqueConc: "",
+      consumoFloculanteConc: "",
+      elevacaoRakeConcEp001: "",
+      elevacaoRakeConcEp002: "",
+      torqueConcEp001: "",
+      torqueConcEp002: ""
+    }));
+    const nextCE = { ...dadosCE, historicoDiarioEspessamentoConcentrado: limpo };
+    onChangeCE(nextCE);
 
-      setToastMensagem("Tabela de monitoramento diário do Espessamento de Concentrado limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário do Espessamento de Concentrado limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const handlePreencherPadraoEspessamentoConcentrado = () => {
@@ -1777,26 +1895,24 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaFiltragemConcentrado = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário da Filtragem de Concentrado?")) {
-      const limpo = DADOS_DIARIOS_FILTRAGEM_CONCENTRADO_PADRAO.map(d => ({
-        dia: d.dia,
-        diaLabel: d.diaLabel,
-        filtroConcOp: "",
-        producaoFiltragem: "",
-        produtividadeFiltro: "",
-        umidadeBolo: "",
-        ciclosFiltro: "",
-        pressaoCompactacao: "",
-        paradasManutencaoFiltro: "",
-        paradasOutrosFiltro: ""
-      }));
-      const nextCE = { ...dadosCE, historicoDiarioFiltragemConcentrado: limpo };
-      onChangeCE(nextCE);
+    const limpo = DADOS_DIARIOS_FILTRAGEM_CONCENTRADO_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      filtroConcOp: "",
+      producaoFiltragem: "",
+      produtividadeFiltro: "",
+      umidadeBolo: "",
+      ciclosFiltro: "",
+      pressaoCompactacao: "",
+      paradasManutencaoFiltro: "",
+      paradasOutrosFiltro: ""
+    }));
+    const nextCE = { ...dadosCE, historicoDiarioFiltragemConcentrado: limpo };
+    onChangeCE(nextCE);
 
-      setToastMensagem("Tabela de monitoramento diário da Filtragem de Concentrado limpa com sucesso.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    setToastMensagem("Tabela de monitoramento diário da Filtragem de Concentrado limpa com sucesso.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const handlePreencherPadraoFiltragemConcentrado = () => {
@@ -2009,28 +2125,26 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   };
 
   const handleLimparTabelaUtilidadesETA = () => {
-    if (window.confirm("Deseja realmente limpar todos os dados da tabela de monitoramento diário de Utilidades & ETA?")) {
-      const limpo = DADOS_DIARIOS_UTILIDADES_ETA_PADRAO.map(d => ({
-        dia: d.dia,
-        diaLabel: d.diaLabel,
-        compressoresOp: "",
-        bombasAguaOp: "",
-        pressaoAr: "",
-        captacaoAguaBruta: "",
-        volumeTratadoEta: "",
-        taxaRecirculacaoReuso: "",
-        turbidezAguaTratada: "",
-        nivelCamaraA: "",
-        etaAguaRecuperada: "",
-        disponibilidadeUtilidades: "",
-        paradasManutencaoUtilidades: ""
-      }));
-      const nextCE = { ...dadosCE, historicoDiarioUtilidadesETA: limpo as any };
-      onChangeCE(nextCE);
-      setToastMensagem("Dados diários de Utilidades & ETA zerados.");
-      setAcoesSincronizadasToast(true);
-      setTimeout(() => setAcoesSincronizadasToast(false), 3000);
-    }
+    const limpo = DADOS_DIARIOS_UTILIDADES_ETA_PADRAO.map(d => ({
+      dia: d.dia,
+      diaLabel: d.diaLabel,
+      compressoresOp: "",
+      bombasAguaOp: "",
+      pressaoAr: "",
+      captacaoAguaBruta: "",
+      volumeTratadoEta: "",
+      taxaRecirculacaoReuso: "",
+      turbidezAguaTratada: "",
+      nivelCamaraA: "",
+      etaAguaRecuperada: "",
+      disponibilidadeUtilidades: "",
+      paradasManutencaoUtilidades: ""
+    }));
+    const nextCE = { ...dadosCE, historicoDiarioUtilidadesETA: limpo as any };
+    onChangeCE(nextCE);
+    setToastMensagem("Dados diários de Utilidades & ETA zerados.");
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 3000);
   };
 
   const handlePreencherPadraoUtilidadesETA = () => {
@@ -3488,16 +3602,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handlePreencherPadraoRemoagem}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Padrão</span>
-                </button>
               </div>
             </div>
 
@@ -3896,16 +4000,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePreencherPadraoFlotacao}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Padrão</span>
                 </button>
               </div>
             </div>
@@ -4323,16 +4417,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePreencherPadraoEspessamentoRejeito}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência operacionais de espessamento"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Padrão</span>
                 </button>
               </div>
             </div>
@@ -4757,16 +4841,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePreencherPadraoEspessamentoConcentrado}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência operacionais do espessamento de concentrado"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Padrão</span>
                 </button>
               </div>
             </div>
@@ -5205,16 +5279,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handlePreencherPadraoFiltragemConcentrado}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência operacionais da filtragem de concentrado"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Padrão</span>
-                </button>
               </div>
             </div>
 
@@ -5644,16 +5708,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 >
                   <Trash2 className="w-3.5 h-3.5 text-rose-600" />
                   <span>Limpar</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handlePreencherPadraoUtilidadesETA}
-                  className="px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-lg transition flex items-center gap-1 cursor-pointer"
-                  title="Carregar valores de referência de Utilidades & ETA"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Padrão</span>
                 </button>
               </div>
             </div>

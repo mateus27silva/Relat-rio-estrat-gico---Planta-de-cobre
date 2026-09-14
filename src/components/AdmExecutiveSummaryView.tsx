@@ -1761,7 +1761,7 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
         </div>
 
         {/* Folha Branca com Estilo e Proporção de Documento Corporativo de Mineração */}
-        <div className="bg-white text-slate-900 rounded-2xl p-4 sm:p-7 shadow-xl border border-slate-300 space-y-6 max-w-6xl xl:max-w-7xl w-full mx-auto font-sans">
+        <div className="bg-white text-slate-900 rounded-2xl p-4 sm:p-7 shadow-xl border border-slate-300 space-y-6 w-full mx-auto font-sans">
           
           {/* ======================================================= */}
           {/* 1. CABEÇALHO CORPORATIVO FORMAL (PADRÃO GEBEN / ERO BRASIL) */}

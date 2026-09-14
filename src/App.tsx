@@ -622,10 +622,14 @@ export default function App() {
 
   const counts = getOverviewCounts();
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-start p-0 sm:p-4 overflow-x-hidden select-none">
+    <div className={`min-h-screen bg-slate-100 text-slate-800 flex flex-col items-center justify-start overflow-x-hidden select-none transition-all duration-300 ${
+      modoWeb ? "w-full px-2 sm:px-4 py-2 sm:py-3" : "p-0 sm:p-4"
+    }`}>
       
       {/* Top Application Header / Switcher */}
-      <header className="w-full max-w-6xl mb-3 sm:mb-4 px-2 sm:px-0 pt-2 sm:pt-0">
+      <header className={`w-full mb-3 sm:mb-4 pt-1 sm:pt-0 transition-all duration-300 ${
+        modoWeb ? "max-w-[99%] 2xl:max-w-[98.5%] px-0.5 sm:px-1" : "max-w-lg sm:max-w-[500px] px-2 sm:px-0"
+      }`}>
         <div className="bg-[#0A2028] text-white rounded-2xl px-4 py-3 sm:py-3.5 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-slate-800">
           {/* Brand Ero Brasil */}
           <div className="flex items-center gap-3">
@@ -716,7 +720,7 @@ export default function App() {
         /* Container Device Wrapper for mobile simulation or full web desktop layout */
         <div className={`w-full bg-white transition-all duration-300 flex flex-col justify-between border-0 sm:border border-slate-200 relative overflow-hidden ${
           modoWeb
-            ? "max-w-6xl sm:rounded-3xl shadow-xl sm:my-2 min-h-[880px]"
+            ? "w-full max-w-[99%] 2xl:max-w-[98.5%] sm:rounded-3xl shadow-xl sm:my-1 min-h-[880px]"
             : "w-full max-w-lg sm:max-w-[500px] sm:rounded-3xl shadow-xl min-h-screen sm:min-h-[850px] sm:my-2"
         }`}>
           
