@@ -56,6 +56,148 @@ interface AdmModuleProps {
   toggleModoWeb?: () => void;
 }
 
+function mesclarComExemplosCompletos(parsed: any, defaultInitial: RelatorioAdmPayload): RelatorioAdmPayload {
+  if (!parsed || typeof parsed !== "object") return defaultInitial;
+
+  const dataRef = parsed.dataEmissao || defaultInitial.dataEmissao;
+  const semanaAuto = calcularSemanaOperacional(dataRef);
+  const periodoRef =
+    parsed.periodoReferencia && !parsed.periodoReferencia.includes("Semana 34") && !parsed.periodoReferencia.includes("Semana Operacional 34")
+      ? parsed.periodoReferencia
+      : semanaAuto;
+
+  const brPadrao = defaultInitial.dadosBritagemRebritagem;
+  const brSalvo = parsed.dadosBritagemRebritagem || {};
+  
+  const histBritagem = (brSalvo.historicoDiarioBritagem && Array.isArray(brSalvo.historicoDiarioBritagem) && brSalvo.historicoDiarioBritagem.length === 7)
+    ? brSalvo.historicoDiarioBritagem.map((reg: any, i: number) => {
+        const padraoReg: any = brPadrao.historicoDiarioBritagem[i] || {};
+        return {
+          ...padraoReg,
+          ...reg,
+          produtividadeTph: reg.produtividadeTph !== "" && reg.produtividadeTph !== undefined ? reg.produtividadeTph : padraoReg.produtividadeTph,
+          posicaoManto: reg.posicaoManto !== "" && reg.posicaoManto !== undefined ? reg.posicaoManto : padraoReg.posicaoManto,
+          afericaoBritador: reg.afericaoBritador !== "" && reg.afericaoBritador !== undefined ? reg.afericaoBritador : padraoReg.afericaoBritador,
+          vazaoOleoBuchaInterna: reg.vazaoOleoBuchaInterna !== "" && reg.vazaoOleoBuchaInterna !== undefined ? reg.vazaoOleoBuchaInterna : padraoReg.vazaoOleoBuchaInterna,
+          vazaoOleoBuchaExterna: reg.vazaoOleoBuchaExterna !== "" && reg.vazaoOleoBuchaExterna !== undefined ? reg.vazaoOleoBuchaExterna : padraoReg.vazaoOleoBuchaExterna,
+          pressaoOleoLubrificante: reg.pressaoOleoLubrificante !== "" && reg.pressaoOleoLubrificante !== undefined ? reg.pressaoOleoLubrificante : padraoReg.pressaoOleoLubrificante,
+          pressaoArAcumulador: reg.pressaoArAcumulador !== "" && reg.pressaoArAcumulador !== undefined ? reg.pressaoArAcumulador : padraoReg.pressaoArAcumulador,
+          pressaoArAc1: reg.pressaoArAc1 !== "" && reg.pressaoArAc1 !== undefined ? reg.pressaoArAc1 : padraoReg.pressaoArAc1,
+          pressaoArAc2: reg.pressaoArAc2 !== "" && reg.pressaoArAc2 !== undefined ? reg.pressaoArAc2 : padraoReg.pressaoArAc2,
+          pressaoAguaResfriamento: reg.pressaoAguaResfriamento !== "" && reg.pressaoAguaResfriamento !== undefined ? reg.pressaoAguaResfriamento : padraoReg.pressaoAguaResfriamento,
+          amperagemMotor41TC001: reg.amperagemMotor41TC001 !== "" && reg.amperagemMotor41TC001 !== undefined ? reg.amperagemMotor41TC001 : padraoReg.amperagemMotor41TC001,
+          amperagemMotor41BR001: reg.amperagemMotor41BR001 !== "" && reg.amperagemMotor41BR001 !== undefined ? reg.amperagemMotor41BR001 : padraoReg.amperagemMotor41BR001,
+          temperaturaOleoRetorno: reg.temperaturaOleoRetorno !== "" && reg.temperaturaOleoRetorno !== undefined ? reg.temperaturaOleoRetorno : padraoReg.temperaturaOleoRetorno,
+          temperaturaOleoBuchaExterna: reg.temperaturaOleoBuchaExterna !== "" && reg.temperaturaOleoBuchaExterna !== undefined ? reg.temperaturaOleoBuchaExterna : padraoReg.temperaturaOleoBuchaExterna,
+          temperaturaOleoBuchaInterna: reg.temperaturaOleoBuchaInterna !== "" && reg.temperaturaOleoBuchaInterna !== undefined ? reg.temperaturaOleoBuchaInterna : padraoReg.temperaturaOleoBuchaInterna,
+          observacao: reg.observacao || padraoReg.observacao
+        };
+      })
+    : brPadrao.historicoDiarioBritagem;
+
+  const histRebritagem = (brSalvo.historicoDiarioRebritagem && Array.isArray(brSalvo.historicoDiarioRebritagem) && brSalvo.historicoDiarioRebritagem.length === 7)
+    ? brSalvo.historicoDiarioRebritagem.map((reg: any, i: number) => {
+        const padraoReg: any = brPadrao.historicoDiarioRebritagem[i] || {};
+        return {
+          ...padraoReg,
+          ...reg,
+          tempOleoLub_BR001: reg.tempOleoLub_BR001 !== "" && reg.tempOleoLub_BR001 !== undefined ? reg.tempOleoLub_BR001 : padraoReg.tempOleoLub_BR001,
+          tempOleoLub_BR002: reg.tempOleoLub_BR002 !== "" && reg.tempOleoLub_BR002 !== undefined ? reg.tempOleoLub_BR002 : padraoReg.tempOleoLub_BR002,
+          tempOleoLub_BR003: reg.tempOleoLub_BR003 !== "" && reg.tempOleoLub_BR003 !== undefined ? reg.tempOleoLub_BR003 : padraoReg.tempOleoLub_BR003,
+          tempOleoLub_BR004: reg.tempOleoLub_BR004 !== "" && reg.tempOleoLub_BR004 !== undefined ? reg.tempOleoLub_BR004 : padraoReg.tempOleoLub_BR004,
+          tempOleoLub_BR005: reg.tempOleoLub_BR005 !== "" && reg.tempOleoLub_BR005 !== undefined ? reg.tempOleoLub_BR005 : padraoReg.tempOleoLub_BR005,
+          tempOleoLub_BR006: reg.tempOleoLub_BR006 !== "" && reg.tempOleoLub_BR006 !== undefined ? reg.tempOleoLub_BR006 : padraoReg.tempOleoLub_BR006,
+          pressaoHydroset_BR003: reg.pressaoHydroset_BR003 !== "" && reg.pressaoHydroset_BR003 !== undefined ? reg.pressaoHydroset_BR003 : padraoReg.pressaoHydroset_BR003,
+          pressaoHydroset_BR004: reg.pressaoHydroset_BR004 !== "" && reg.pressaoHydroset_BR004 !== undefined ? reg.pressaoHydroset_BR004 : padraoReg.pressaoHydroset_BR004,
+          pressaoHydroset_BR005: reg.pressaoHydroset_BR005 !== "" && reg.pressaoHydroset_BR005 !== undefined ? reg.pressaoHydroset_BR005 : padraoReg.pressaoHydroset_BR005,
+          pressaoHydroset_BR006: reg.pressaoHydroset_BR006 !== "" && reg.pressaoHydroset_BR006 !== undefined ? reg.pressaoHydroset_BR006 : padraoReg.pressaoHydroset_BR006,
+          potencia_BR001: reg.potencia_BR001 !== "" && reg.potencia_BR001 !== undefined ? reg.potencia_BR001 : padraoReg.potencia_BR001,
+          potencia_BR002: reg.potencia_BR002 !== "" && reg.potencia_BR002 !== undefined ? reg.potencia_BR002 : padraoReg.potencia_BR002,
+          potencia_BR003: reg.potencia_BR003 !== "" && reg.potencia_BR003 !== undefined ? reg.potencia_BR003 : padraoReg.potencia_BR003,
+          potencia_BR004: reg.potencia_BR004 !== "" && reg.potencia_BR004 !== undefined ? reg.potencia_BR004 : padraoReg.potencia_BR004,
+          potencia_BR005: reg.potencia_BR005 !== "" && reg.potencia_BR005 !== undefined ? reg.potencia_BR005 : padraoReg.potencia_BR005,
+          potencia_BR006: reg.potencia_BR006 !== "" && reg.potencia_BR006 !== undefined ? reg.potencia_BR006 : padraoReg.potencia_BR006,
+          freqAlimentador_BR001: reg.freqAlimentador_BR001 !== "" && reg.freqAlimentador_BR001 !== undefined ? reg.freqAlimentador_BR001 : padraoReg.freqAlimentador_BR001,
+          freqAlimentador_BR002: reg.freqAlimentador_BR002 !== "" && reg.freqAlimentador_BR002 !== undefined ? reg.freqAlimentador_BR002 : padraoReg.freqAlimentador_BR002,
+          freqAlimentador_BR003: reg.freqAlimentador_BR003 !== "" && reg.freqAlimentador_BR003 !== undefined ? reg.freqAlimentador_BR003 : padraoReg.freqAlimentador_BR003,
+          freqAlimentador_BR004: reg.freqAlimentador_BR004 !== "" && reg.freqAlimentador_BR004 !== undefined ? reg.freqAlimentador_BR004 : padraoReg.freqAlimentador_BR004,
+          freqAlimentador_BR005: reg.freqAlimentador_BR005 !== "" && reg.freqAlimentador_BR005 !== undefined ? reg.freqAlimentador_BR005 : padraoReg.freqAlimentador_BR005,
+          freqAlimentador_BR006: reg.freqAlimentador_BR006 !== "" && reg.freqAlimentador_BR006 !== undefined ? reg.freqAlimentador_BR006 : padraoReg.freqAlimentador_BR006,
+          difTemp_BR001: reg.difTemp_BR001 !== "" && reg.difTemp_BR001 !== undefined ? reg.difTemp_BR001 : padraoReg.difTemp_BR001,
+          difTemp_BR002: reg.difTemp_BR002 !== "" && reg.difTemp_BR002 !== undefined ? reg.difTemp_BR002 : padraoReg.difTemp_BR002,
+          pressaoContraeixo_BR001: reg.pressaoContraeixo_BR001 !== "" && reg.pressaoContraeixo_BR001 !== undefined ? reg.pressaoContraeixo_BR001 : padraoReg.pressaoContraeixo_BR001,
+          pressaoContraeixo_BR002: reg.pressaoContraeixo_BR002 !== "" && reg.pressaoContraeixo_BR002 !== undefined ? reg.pressaoContraeixo_BR002 : padraoReg.pressaoContraeixo_BR002,
+          difPressao_BR001: reg.difPressao_BR001 !== "" && reg.difPressao_BR001 !== undefined ? reg.difPressao_BR001 : padraoReg.difPressao_BR001,
+          difPressao_BR002: reg.difPressao_BR002 !== "" && reg.difPressao_BR002 !== undefined ? reg.difPressao_BR002 : padraoReg.difPressao_BR002,
+          retidoMeiaPol: reg.retidoMeiaPol !== "" && reg.retidoMeiaPol !== undefined ? reg.retidoMeiaPol : padraoReg.retidoMeiaPol,
+          produtividadeTph: reg.produtividadeTph !== "" && reg.produtividadeTph !== undefined ? reg.produtividadeTph : padraoReg.produtividadeTph,
+          observacao: reg.observacao || padraoReg.observacao
+        };
+      })
+    : brPadrao.historicoDiarioRebritagem;
+
+  const dadosBritagemRebritagem = {
+    ...brPadrao,
+    ...brSalvo,
+    posicaoManto: brSalvo.posicaoManto || brPadrao.posicaoManto,
+    afericaoBritador: brSalvo.afericaoBritador || brPadrao.afericaoBritador,
+    vazaoOleoBuchaInterna: brSalvo.vazaoOleoBuchaInterna || brPadrao.vazaoOleoBuchaInterna,
+    vazaoOleoBuchaExterna: brSalvo.vazaoOleoBuchaExterna || brPadrao.vazaoOleoBuchaExterna,
+    pressaoOleoLubrificante: brSalvo.pressaoOleoLubrificante || brPadrao.pressaoOleoLubrificante,
+    pressaoArAcumulador: brSalvo.pressaoArAcumulador || brPadrao.pressaoArAcumulador,
+    pressaoArAc1: brSalvo.pressaoArAc1 || brPadrao.pressaoArAc1,
+    pressaoArAc2: brSalvo.pressaoArAc2 || brPadrao.pressaoArAc2,
+    pressaoAguaResfriamento: brSalvo.pressaoAguaResfriamento || brPadrao.pressaoAguaResfriamento,
+    amperagemMotor41TC001: brSalvo.amperagemMotor41TC001 || brPadrao.amperagemMotor41TC001,
+    amperagemMotor41BR001: brSalvo.amperagemMotor41BR001 || brPadrao.amperagemMotor41BR001,
+    temperaturaOleoRetorno: brSalvo.temperaturaOleoRetorno || brPadrao.temperaturaOleoRetorno,
+    temperaturaOleoBuchaExterna: brSalvo.temperaturaOleoBuchaExterna || brPadrao.temperaturaOleoBuchaExterna,
+    temperaturaOleoBuchaInterna: brSalvo.temperaturaOleoBuchaInterna || brPadrao.temperaturaOleoBuchaInterna,
+    historicoDiarioBritagem: histBritagem,
+    historicoDiarioRebritagem: histRebritagem,
+    anotacoesDesvios: brSalvo.anotacoesDesvios && Object.keys(brSalvo.anotacoesDesvios).length > 0
+      ? brSalvo.anotacoesDesvios
+      : brPadrao.anotacoesDesvios
+  };
+
+  const cePadrao = defaultInitial.dadosConcentradorEta;
+  const ceSalvo = parsed.dadosConcentradorEta || {};
+  const dadosConcentradorEta = {
+    ...cePadrao,
+    ...ceSalvo,
+    potenciaMi005: ceSalvo.potenciaMi005 || cePadrao.potenciaMi005,
+    solidosOverflowMi005: ceSalvo.solidosOverflowMi005 || cePadrao.solidosOverflowMi005,
+    solidosDescargaMi005: ceSalvo.solidosDescargaMi005 || cePadrao.solidosDescargaMi005,
+    reposicoesMi003: ceSalvo.reposicoesMi003 || cePadrao.reposicoesMi003,
+    reposicoesMi004: ceSalvo.reposicoesMi004 || cePadrao.reposicoesMi004,
+    reposicoesMi005: ceSalvo.reposicoesMi005 || cePadrao.reposicoesMi005,
+    hidrociclonesBh005: ceSalvo.hidrociclonesBh005 || cePadrao.hidrociclonesBh005,
+    densidadeMi005: ceSalvo.densidadeMi005 || cePadrao.densidadeMi005,
+    pressaoPsiMi004: ceSalvo.pressaoPsiMi004 || cePadrao.pressaoPsiMi004,
+    pressaoPsiMi005: ceSalvo.pressaoPsiMi005 || cePadrao.pressaoPsiMi005,
+    anotacoesDesviosMoagem: ceSalvo.anotacoesDesviosMoagem && Object.keys(ceSalvo.anotacoesDesviosMoagem).length > 0
+      ? ceSalvo.anotacoesDesviosMoagem
+      : cePadrao.anotacoesDesviosMoagem,
+    anotacoesDesviosFlotacao: ceSalvo.anotacoesDesviosFlotacao && Object.keys(ceSalvo.anotacoesDesviosFlotacao).length > 0
+      ? ceSalvo.anotacoesDesviosFlotacao
+      : cePadrao.anotacoesDesviosFlotacao
+  };
+
+  const diretrizesTurno = (parsed.diretrizesTurno && Array.isArray(parsed.diretrizesTurno) && parsed.diretrizesTurno.length >= 4)
+    ? parsed.diretrizesTurno
+    : defaultInitial.diretrizesTurno;
+
+  return {
+    ...defaultInitial,
+    ...parsed,
+    periodoReferencia: periodoRef,
+    circuitoTipo: defaultInitial.circuitoTipo,
+    dadosBritagemRebritagem,
+    dadosConcentradorEta,
+    diretrizesTurno
+  };
+}
+
 export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = true, toggleModoWeb }) => {
   const isSeco = circuitoTipo === "seco";
   const storageKey = isSeco ? "relatorio_adm_seco_draft_v2" : "relatorio_adm_umido_draft_v2";
@@ -83,14 +225,7 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        const dataRef = parsed.dataEmissao || defaultInitial.dataEmissao;
-        const semanaAuto = calcularSemanaOperacional(dataRef);
-        // Atualiza a semana automaticamente se não estiver customizada ou se for o padrão antigo
-        const periodoRef =
-          parsed.periodoReferencia && !parsed.periodoReferencia.includes("Semana 34") && !parsed.periodoReferencia.includes("Semana Operacional 34")
-            ? parsed.periodoReferencia
-            : semanaAuto;
-        return { ...defaultInitial, ...parsed, periodoReferencia: periodoRef, circuitoTipo };
+        return mesclarComExemplosCompletos(parsed, defaultInitial);
       }
     } catch (e) {
       console.error(`Erro ao carregar rascunho ADM ${circuitoTipo}`, e);
@@ -116,13 +251,7 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        const dataRef = parsed.dataEmissao || defaultInitial.dataEmissao;
-        const semanaAuto = calcularSemanaOperacional(dataRef);
-        const periodoRef =
-          parsed.periodoReferencia && !parsed.periodoReferencia.includes("Semana 34") && !parsed.periodoReferencia.includes("Semana Operacional 34")
-            ? parsed.periodoReferencia
-            : semanaAuto;
-        setPayload({ ...defaultInitial, ...parsed, periodoReferencia: periodoRef, circuitoTipo });
+        setPayload(mesclarComExemplosCompletos(parsed, defaultInitial));
       } else {
         setPayload(defaultInitial);
       }

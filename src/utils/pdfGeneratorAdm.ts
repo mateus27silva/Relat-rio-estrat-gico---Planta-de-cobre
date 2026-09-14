@@ -73,6 +73,54 @@ import {
 } from "../typesAdm";
 
 /**
+ * Sanitiza strings para as fontes nativas do jsPDF (Helvetica / WinAnsi).
+ * Converte símbolos matemáticos (<=, >=), traços, aspas, espaços especiais e marcadores,
+ * prevenindo bugs de codificação (como "d para <= e "e para >=) e quebras de texto.
+ */
+export function sanitizePdfText(str: any): string {
+  if (str === undefined || str === null) return "";
+  let s = String(str);
+
+  return s
+    .replace(/≤/g, "<= ")
+    .replace(/≥/g, ">= ")
+    .replace(/[\u2264]/g, "<= ")
+    .replace(/[\u2265]/g, ">= ")
+    .replace(/[\u2022\u2023\u25E6\u2043\u2219\u25CB\u25CF\u25AA\u25AB\u25A0\u25A1\u25B6\u25B8\u25BA\u27A4\u279C\u2794\u2192]/g, "- ")
+    .replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u2013\u2014\u2015]/g, "-")
+    .replace(/\u2026/g, "...")
+    .replace(/[\u00A0\u2000-\u200B\u202F\u205F\u3000]/g, " ")
+    .replace(/[\u2705\u2713\u2714]/g, "[OK]")
+    .replace(/[\u274C\u274E\u2716\u2717\u2718]/g, "[X]")
+    .replace(/[\u26A0\u26A1\u2699\u2692\uD800-\uDFFF]/g, "");
+}
+
+/**
+ * Invoca autoTable aplicando automaticamente a sanitização de texto em todas as células,
+ * prevenindo que caracteres Unicode não suportados gerem caracteres corrompidos no PDF.
+ */
+function autoTableSafe(docInstance: jsPDF, options: any) {
+  const originalDidParseCell = options.didParseCell;
+  const mergedOptions = {
+    ...options,
+    didParseCell: (data: any) => {
+      if (Array.isArray(data.cell.text)) {
+        data.cell.text = data.cell.text.map((t: string) => sanitizePdfText(t));
+      }
+      if (typeof data.cell.raw === "string") {
+        data.cell.raw = sanitizePdfText(data.cell.raw);
+      }
+      if (originalDidParseCell) {
+        originalDidParseCell(data);
+      }
+    },
+  };
+  return autoTable(docInstance, mergedOptions);
+}
+
+/**
  * Gerador de Relatório Gerencial Estratégico em PDF (Padrão Corporativo Vale / Ero Brasil)
  * Modelo formal de Governança Operacional, Controle Metalúrgico e Alinhamento Tático
  */
@@ -193,7 +241,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
   // =========================================================================
   // --- 1. CABEÇALHO FORMAL CORPORATIVO (PADRÃO VALE / ERO BRASIL) ---
   // =========================================================================
-  const headerHeight = 24;
+  const headerHeight = 26;
   const headerWidth = pageWidth - margin * 2;
 
   // Moldura Externa do Cabeçalho
@@ -202,113 +250,138 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
   doc.setLineWidth(0.6);
   doc.rect(margin, currentY, headerWidth, headerHeight, "FD");
 
-  // Coluna 1: Logo & Unidade (Largura: 42mm)
-  const colLogoW = 42;
+  // Coluna 1: Logo & Unidade (Largura: 38mm)
+  const colLogoW = 38;
   doc.setDrawColor(...corpBorder);
   doc.setLineWidth(0.3);
   doc.line(margin + colLogoW, currentY, margin + colLogoW, currentY + headerHeight);
 
   // Logo Ero Brasil Box
   doc.setFillColor(...corpPrimary);
-  doc.roundedRect(margin + 4, currentY + 3.5, 34, 7, 0.8, 0.8, "F");
+  doc.roundedRect(margin + 3, currentY + 3.0, 32, 6.5, 0.8, 0.8, "F");
   doc.setFont("helvetica", "black");
   doc.setFontSize(8.5);
   doc.setTextColor(20, 184, 166);
-  doc.text("ERO", margin + 6.5, currentY + 8.5);
+  doc.text("ERO", margin + 5.5, currentY + 7.5);
   doc.setTextColor(255, 255, 255);
-  doc.text("BRASIL", margin + 15, currentY + 8.5);
+  doc.text("BRASIL", margin + 13.5, currentY + 7.5);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(6);
+  doc.setFontSize(5.8);
   doc.setTextColor(...corpSlateDark);
-  doc.text("COMPLEXO INDUSTRIAL COBRE", margin + 4, currentY + 14.5);
+  doc.text("COMPLEXO INDUSTRIAL COBRE", margin + 3, currentY + 13.5);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(5.5);
+  doc.setFontSize(5.3);
   doc.setTextColor(...corpSlateMuted);
-  doc.text("ONEEro - Caraíba", margin + 4, currentY + 18);
-  doc.text("SGI - Sistema de Gestão Integrada", margin + 4, currentY + 21);
+  doc.text("ONEEro - Caraíba", margin + 3, currentY + 17.2);
+  doc.text("SGI - Sistema de Gestão Integrada", margin + 3, currentY + 21.0);
 
-  // Coluna 2: Título Central Oficial (Largura: 94mm)
-  const colTitleW = 94;
-  doc.line(margin + colLogoW + colTitleW, currentY, margin + colLogoW + colTitleW, currentY + headerHeight);
+  // Coluna 2: Título Central Oficial (Largura: 98mm)
+  const colTitleW = 98;
+  const colTitleX = margin + colLogoW;
+  doc.line(colTitleX + colTitleW, currentY, colTitleX + colTitleW, currentY + headerHeight);
 
+  const titleMain = "RELATÓRIO GERENCIAL ESTRATÉGICO DE OPERAÇÕES";
+  let tFontSize = 8.2;
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9.5);
+  doc.setFontSize(tFontSize);
   doc.setTextColor(...corpPrimary);
-  doc.text("RELATÓRIO GERENCIAL ESTRATÉGICO DE OPERAÇÕES", margin + colLogoW + 4, currentY + 6.5);
+  while (doc.getTextWidth(titleMain) > colTitleW - 6 && tFontSize > 5.5) {
+    tFontSize -= 0.2;
+    doc.setFontSize(tFontSize);
+  }
+  doc.text(titleMain, colTitleX + 3, currentY + 6.0);
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(...corpTeal);
   const circTitle = isSeco
     ? "DIRETRIZES TÁTICAS: CIRCUITO SECO (COMINUIÇÃO & BRITAGEM)"
     : "DIRETRIZES TÁTICAS: CIRCUITO ÚMIDO (BENEFICIAMENTO & MOAGEM)";
-  doc.text(circTitle, margin + colLogoW + 4, currentY + 12);
+  let subFontSize = 7.0;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(subFontSize);
+  doc.setTextColor(...corpTeal);
+  while (doc.getTextWidth(circTitle) > colTitleW - 6 && subFontSize > 5.0) {
+    subFontSize -= 0.2;
+    doc.setFontSize(subFontSize);
+  }
+  doc.text(circTitle, colTitleX + 3, currentY + 11.2);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(6.2);
-  doc.setTextColor(...corpSlateText);
   const circSub = isSeco
     ? "Escopo: Britagem Primária, Rebritagem, Pátios de ROM, Silos de Finos e Peneiramento"
     : "Escopo: Moagem, Flotação Cu, Espessamento, Filtragem Prensa/Desaguamento e ETA";
-  doc.text(circSub, margin + colLogoW + 4, currentY + 17);
+  let escopoFontSize = 5.8;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(escopoFontSize);
+  doc.setTextColor(...corpSlateText);
+  while (doc.getTextWidth(circSub) > colTitleW - 6 && escopoFontSize > 4.5) {
+    escopoFontSize -= 0.2;
+    doc.setFontSize(escopoFontSize);
+  }
+  doc.text(circSub, colTitleX + 3, currentY + 16.2);
 
+  const govStr = "Governança Operacional - Balanço Físico-Metalúrgico - Metas WTD / FDS / MTD";
   doc.setFont("helvetica", "italic");
-  doc.setFontSize(5.8);
+  doc.setFontSize(5.2);
   doc.setTextColor(...corpSlateMuted);
-  doc.text("Governança Operacional • Balanço Físico-Metalúrgico • Metas WTD / FDS / MTD", margin + colLogoW + 4, currentY + 21.5);
+  doc.text(govStr, colTitleX + 3, currentY + 21.2);
 
-  // Coluna 3: Metadados Formais / Controle Documental (Restante da Largura)
-  const colMetaX = margin + colLogoW + colTitleW;
-  
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.8);
-    doc.setTextColor(...corpSlateMuted);
-    doc.text("REVISÃO:", colMetaX + 3, currentY + 4.5);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(6.2);
-    doc.setTextColor(...corpPrimary);
-    doc.text("Revisão 01", colMetaX + 18, currentY + 4.5);
+  // Coluna 3: Metadados Formais / Controle Documental (Largura: 54mm)
+  const colMetaX = colTitleX + colTitleW;
+  const colMetaW = headerWidth - colLogoW - colTitleW;
+  const rowH = headerHeight / 4; // 6.5mm por linha
 
-    doc.line(colMetaX, currentY + 6.2, margin + headerWidth, currentY + 6.2);
+  // Linhas divisórias horizontais da Coluna 3
+  doc.setDrawColor(...corpBorder);
+  doc.setLineWidth(0.3);
+  doc.line(colMetaX, currentY + rowH * 1, margin + headerWidth, currentY + rowH * 1);
+  doc.line(colMetaX, currentY + rowH * 2, margin + headerWidth, currentY + rowH * 2);
+  doc.line(colMetaX, currentY + rowH * 3, margin + headerWidth, currentY + rowH * 3);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.8);
-    doc.setTextColor(...corpSlateMuted);
-    doc.text("CLASSIFICAÇÃO:", colMetaX + 3, currentY + 9.5);
-    doc.setFontSize(5.8);
-    doc.setTextColor(180, 83, 9);
-    doc.text("USO INTERNO / RESTRITO", colMetaX + 22, currentY + 9.5);
+  // Linha 0: REVISÃO
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.5);
+  doc.setTextColor(...corpSlateMuted);
+  doc.text("REVISÃO:", colMetaX + 2.5, currentY + 4.3);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.8);
+  doc.setTextColor(...corpPrimary);
+  doc.text("Revisão 01", colMetaX + 16, currentY + 4.3);
 
-    doc.line(colMetaX, currentY + 11.2, margin + headerWidth, currentY + 11.2);
+  // Linha 1: CLASSIFICAÇÃO
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.5);
+  doc.setTextColor(...corpSlateMuted);
+  doc.text("CLASSIFICAÇÃO:", colMetaX + 2.5, currentY + rowH * 1 + 4.3);
+  doc.setFontSize(5.3);
+  doc.setTextColor(180, 83, 9);
+  doc.text("USO INTERNO / RESTRITO", colMetaX + 22, currentY + rowH * 1 + 4.3);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.8);
-    doc.setTextColor(...corpSlateMuted);
-    doc.text("EMISSÃO:", colMetaX + 3, currentY + 14.5);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(6.0);
-    doc.setTextColor(...corpSlateDark);
-    doc.text(fmtData(dataEmissao), colMetaX + 18, currentY + 14.5);
+  // Linha 2: EMISSÃO
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.5);
+  doc.setTextColor(...corpSlateMuted);
+  doc.text("EMISSÃO:", colMetaX + 2.5, currentY + rowH * 2 + 4.3);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(5.8);
+  doc.setTextColor(...corpSlateDark);
+  doc.text(fmtData(dataEmissao), colMetaX + 16, currentY + rowH * 2 + 4.3);
 
-    doc.line(colMetaX, currentY + 16.2, margin + headerWidth, currentY + 16.2);
+  // Linha 3: PERÍODO REF
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(5.2);
+  doc.setTextColor(...corpSlateMuted);
+  doc.text("PERÍODO REF:", colMetaX + 2.5, currentY + rowH * 3 + 4.3);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(5.6);
-    doc.setTextColor(...corpSlateMuted);
-    doc.text("PERÍODO REF:", colMetaX + 3, currentY + 19.5);
-
-    const periodoStr = periodoReferencia || "Semana Atual";
-    let perFontSize = 5.6;
-    doc.setFont("helvetica", "bold");
+  const periodoStr = sanitizePdfText(periodoReferencia || "Semana Atual");
+  let perFontSize = 5.2;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(perFontSize);
+  const maxValWidth = colMetaW - 20;
+  while (doc.getTextWidth(periodoStr) > maxValWidth && perFontSize > 3.8) {
+    perFontSize -= 0.2;
     doc.setFontSize(perFontSize);
-    const maxValWidth = (headerWidth - (colLogoW + colTitleW)) - 20;
-    while (doc.getTextWidth(periodoStr) > maxValWidth && perFontSize > 4.0) {
-      perFontSize -= 0.2;
-      doc.setFontSize(perFontSize);
-    }
-    doc.setTextColor(...corpTealDark);
-    doc.text(periodoStr, colMetaX + 18, currentY + 19.5);
+  }
+  doc.setTextColor(...corpTealDark);
+  doc.text(periodoStr, colMetaX + 18, currentY + rowH * 3 + 4.3);
 
   currentY += headerHeight + 3.5;
 
@@ -401,7 +474,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -545,7 +618,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -686,7 +759,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -822,7 +895,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -969,7 +1042,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -1116,7 +1189,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -1266,7 +1339,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -1414,7 +1487,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -1563,7 +1636,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ];
       });
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -1701,12 +1774,12 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         [
           "Granulometria P80 (#105 µm)",
           `${ce.granulometria105 || "63,8"}%`,
-          "≥ 62,0%",
+          ">= 62,0%",
           calcAtingimento(ce.granulometria105 || 63.8, 62.0).pct,
           `${ce.granulometria105 || "63,8"}%`,
-          "≥ 62,0%",
+          ">= 62,0%",
           `${ce.granulometria105 || "63,8"}%`,
-          "≥ 62,0%"
+          ">= 62,0%"
         ],
         [
           "Recuperação Metalúrgica Global Cu (%)",
@@ -1741,12 +1814,12 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         [
           "Teor Rejeito Global Cu (%)",
           `${ce.teorRejeitoCu || "0,095"}%`,
-          "≤ 0,100%",
+          "<= 0,100%",
           "Conforme",
           `${ce.teorRejeitoCu || "0,095"}%`,
-          "≤ 0,100%",
+          "<= 0,100%",
           `${ce.teorRejeitoCu || "0,095"}%`,
-          "≤ 0,100%"
+          "<= 0,100%"
         ],
         [
           "Produção de Concentrado Seco (t)",
@@ -1771,26 +1844,26 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         [
           "Umidade do Bolo de Concentrado (%)",
           `${ce.umidadeBolo || "9,1"}%`,
-          `≤ ${ce.metaUmidadeBolo || "9,5"}%`,
+          `<= ${ce.metaUmidadeBolo || "9,5"}%`,
           "Aderente",
           `${ce.umidadeBolo || "9,1"}%`,
-          `≤ ${ce.metaUmidadeBolo || "9,5"}%`,
+          `<= ${ce.metaUmidadeBolo || "9,5"}%`,
           `${ce.umidadeBolo || "9,1"}%`,
-          `≤ ${ce.metaUmidadeBolo || "9,5"}%`
+          `<= ${ce.metaUmidadeBolo || "9,5"}%`
         ],
         [
           "Taxa de Reúso Hídrico ETA (%)",
           `${ce.taxaRecirculacaoReuso || "86,5"}%`,
-          `≥ ${ce.metaRecirculacao || "85"}%`,
+          `>= ${ce.metaRecirculacao || "85"}%`,
           calcAtingimento(ce.taxaRecirculacaoReuso || 86.5, ce.metaRecirculacao || 85).pct,
           `${ce.taxaRecirculacaoReuso || "86,5"}%`,
-          `≥ ${ce.metaRecirculacao || "85"}%`,
+          `>= ${ce.metaRecirculacao || "85"}%`,
           `${ce.taxaRecirculacaoReuso || "86,5"}%`,
-          `≥ ${ce.metaRecirculacao || "85"}%`
+          `>= ${ce.metaRecirculacao || "85"}%`
         ],
       ];
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -1851,7 +1924,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
     drawFormalSectionHeader(
       "2.0",
       "DIRECIONAMENTO ESTRATÉGICO & BALIZAMENTO POR HORIZONTE DE PLANEJAMENTO",
-      "GOVERNANÇA TÁTICA (WTD • FDS • PARADA • MTD)"
+      "GOVERNANÇA TÁTICA (WTD | FDS | PARADA | MTD)"
     );
 
     const allHorizontes = [
@@ -1908,17 +1981,17 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
       doc.setFontSize(7);
 
       const splitFoco = d.focoPrincipal && d.focoPrincipal.trim().length > 0
-        ? doc.splitTextToSize(`• Diretriz Principal & Foco Tático: ${d.focoPrincipal}`, contentWidth)
+        ? doc.splitTextToSize(`> Diretriz Principal & Foco Tático: ${d.focoPrincipal}`, contentWidth)
         : [];
 
       let metasText = "";
       if (isSeco) {
         if (d.metaAlimentacaoBritagem || d.metaTaxaHoraria || d.metaDisponibilidade) {
-          metasText = `• Balizamento Numérico: Britagem ROM: ${d.metaAlimentacaoBritagem ? d.metaAlimentacaoBritagem.toLocaleString("pt-BR") : "-"} t | Taxa Alimentação: ${d.metaTaxaHoraria || "-"} t/h | Disponibilidade: ${d.metaDisponibilidade || "-"}%`;
+          metasText = `> Balizamento Numérico: Britagem ROM: ${d.metaAlimentacaoBritagem ? d.metaAlimentacaoBritagem.toLocaleString("pt-BR") : "-"} t | Taxa Alimentação: ${d.metaTaxaHoraria || "-"} t/h | Disponibilidade: ${d.metaDisponibilidade || "-"}%`;
         }
       } else {
         if (d.metaAlimentacaoMoagem || d.metaProducaoCobreContido || d.metaRecuperacao) {
-          metasText = `• Balizamento Numérico: Moagem Planta: ${d.metaAlimentacaoMoagem ? d.metaAlimentacaoMoagem.toLocaleString("pt-BR") : "-"} t | Metal Cu Contido: ${d.metaProducaoCobreContido || "-"} t Cu | Rec. Global: ${d.metaRecuperacao || "-"}%`;
+          metasText = `> Balizamento Numérico: Moagem Planta: ${d.metaAlimentacaoMoagem ? d.metaAlimentacaoMoagem.toLocaleString("pt-BR") : "-"} t | Metal Cu Contido: ${d.metaProducaoCobreContido || "-"} t Cu | Rec. Global: ${d.metaRecuperacao || "-"}%`;
         }
       }
       const splitMetas = metasText ? doc.splitTextToSize(metasText, contentWidth) : [];
@@ -1927,7 +2000,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
       const dirsFormatted = dirsList.length > 0
         ? dirsList.map((dir, idx) => `  [${idx + 1}] ${dir}`).join("\n")
         : "  [1] Executar rotinas padrão de SSMA e controle de processo.";
-      const splitDirs = doc.splitTextToSize(`• Procedimentos & Diretrizes Prioritárias:\n${dirsFormatted}`, contentWidth);
+      const splitDirs = doc.splitTextToSize(`> Procedimentos & Diretrizes Prioritárias:\n${dirsFormatted}`, contentWidth);
 
       let extraText = "";
       if (d.recursosManutencao) {
@@ -1935,16 +2008,16 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
           ? d.recursosManutencao.filter(x => x && x.trim().length > 0).join("; ")
           : d.recursosManutencao;
         if (recText && recText.trim().length > 0) {
-          extraText += `• Intervenções de Manutenção / Gestão de Ativos: ${recText}\n`;
+          extraText += `> Intervenções de Manutenção / Gestão de Ativos: ${recText}\n`;
         }
       }
       if (d.alertasOperacionais && d.alertasOperacionais.length > 0) {
-        extraText += `• Pontos Críticos & Gerenciamento de Risco: ${d.alertasOperacionais.join("; ")}\n`;
+        extraText += `> Pontos Críticos & Gerenciamento de Risco: ${d.alertasOperacionais.join("; ")}\n`;
       }
       if (d.planoAlinhamentoParada || (hz.codigo === "ALINHAMENTO DE PARADA" && d.planoBlindagemFds)) {
-        extraText += `• Protocolo Formal de Alinhamento de Parada: ${d.planoAlinhamentoParada || d.planoBlindagemFds}\n`;
+        extraText += `> Protocolo Formal de Alinhamento de Parada: ${d.planoAlinhamentoParada || d.planoBlindagemFds}\n`;
       } else if (d.planoBlindagemFds) {
-        extraText += `• Protocolo Formal de Blindagem FDS: ${d.planoBlindagemFds}\n`;
+        extraText += `> Protocolo Formal de Blindagem FDS: ${d.planoBlindagemFds}\n`;
       }
       const splitExtra = extraText ? doc.splitTextToSize(extraText.trim(), contentWidth) : [];
 
@@ -2034,7 +2107,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
       ];
     });
 
-    autoTable(doc, {
+    autoTableSafe(doc, {
       startY: currentY,
       head: [
         [
@@ -2651,7 +2724,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
               ]
           );
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -2725,7 +2798,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         ac.metaEsperada || "Estabilidade operacional e conformidade metalúrgica"
       ]);
 
-      autoTable(doc, {
+      autoTableSafe(doc, {
         startY: currentY,
         head: [
           [
@@ -2798,12 +2871,12 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(5.5);
         doc.setTextColor(185, 28, 28);
-        doc.text("• DIAGNÓSTICO DE GARGALOS & RESTRIÇÕES OPERACIONAIS:", margin + 2, currentY + 2.8);
+        doc.text("> DIAGNÓSTICO DE GARGALOS & RESTRIÇÕES OPERACIONAIS:", margin + 2, currentY + 2.8);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(5.2);
         doc.setTextColor(...corpSlateDark);
-        const splitGargalos = doc.splitTextToSize(textoGargalos, boxWidth - 4);
+        const splitGargalos = doc.splitTextToSize(sanitizePdfText(textoGargalos), boxWidth - 4);
         doc.text(splitGargalos.slice(0, 2), margin + 2, currentY + 5.8);
 
         currentY += 9.5;
@@ -2818,12 +2891,12 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(5.5);
         doc.setTextColor(...corpPrimary);
-        doc.text("• PLANO DE CONTINGÊNCIA OPERACIONAL & RECOMENDAÇÕES DA SUPERVISÃO:", margin + 2, currentY + 2.8);
+        doc.text("> PLANO DE CONTINGÊNCIA OPERACIONAL & RECOMENDAÇÕES DA SUPERVISÃO:", margin + 2, currentY + 2.8);
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(5.2);
         doc.setTextColor(...corpSlateDark);
-        const splitConting = doc.splitTextToSize(textoContingencia, boxWidth - 4);
+        const splitConting = doc.splitTextToSize(sanitizePdfText(textoContingencia), boxWidth - 4);
         doc.text(splitConting.slice(0, 2), margin + 2, currentY + 5.8);
 
         currentY += 9.5;
@@ -2845,11 +2918,11 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(6);
       doc.setTextColor(...corpSlateMuted);
-      doc.text("ERO BRASIL • ONEEro - Caraíba", margin, margin - 1.5);
+      doc.text("ERO BRASIL | ONEEro - Caraíba", margin, margin - 1.5);
       
       const docHeaderRun = isSeco
-        ? "RELATÓRIO GERENCIAL ESTRATÉGICO • CIRCUITO SECO (Revisão 01)"
-        : "RELATÓRIO GERENCIAL ESTRATÉGICO • CIRCUITO ÚMIDO (Revisão 01)";
+        ? "RELATÓRIO GERENCIAL ESTRATÉGICO | CIRCUITO SECO (Revisão 01)"
+        : "RELATÓRIO GERENCIAL ESTRATÉGICO | CIRCUITO ÚMIDO (Revisão 01)";
       doc.text(docHeaderRun, pageWidth - margin, margin - 1.5, { align: "right" });
 
       doc.setDrawColor(...corpBorder);
@@ -2872,7 +2945,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
     doc.setTextColor(...corpSlateMuted);
     const circuitoNome = isSeco ? "Circuito Seco (Cominuição)" : "Circuito Úmido (Beneficiamento)";
     doc.text(
-      ` | Planta Cobre • Gestão Estratégica ADM — ${circuitoNome} • Emissão: ${fmtData(dataEmissao)} • Classificação: USO INTERNO`,
+      ` | Planta Cobre | Gestão Estratégica ADM - ${circuitoNome} | Emissão: ${fmtData(dataEmissao)} | Classificação: USO INTERNO`,
       margin + 15,
       pageHeight - 4.5
     );
@@ -2955,10 +3028,10 @@ function renderCartaControlePdf(
   
   if (isMinOnly) {
     doc.setTextColor(37, 99, 235); // LIC blue
-    doc.text(p.rotuloFaixa ? `LIMITE: ${p.rotuloFaixa}` : `LIC: > ${p.minIdeal} ${p.unidade}`, x + 2, y + 7.8);
+    doc.text(p.rotuloFaixa ? sanitizePdfText(`LIMITE: ${p.rotuloFaixa}`) : `LIC: > ${p.minIdeal} ${p.unidade}`, x + 2, y + 7.8);
   } else if (isMaxOnly) {
     doc.setTextColor(225, 29, 72); // LSC rose
-    doc.text(p.rotuloFaixa ? `LIMITE: ${p.rotuloFaixa}` : `LSC: < ${p.maxIdeal} ${p.unidade}`, x + 2, y + 7.8);
+    doc.text(p.rotuloFaixa ? sanitizePdfText(`LIMITE: ${p.rotuloFaixa}`) : `LSC: < ${p.maxIdeal} ${p.unidade}`, x + 2, y + 7.8);
   } else {
     doc.setTextColor(37, 99, 235); // LIC blue
     doc.text(`LIC: ${p.minIdeal}`, x + 2, y + 7.8);

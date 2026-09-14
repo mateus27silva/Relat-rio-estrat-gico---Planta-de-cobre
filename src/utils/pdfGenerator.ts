@@ -30,6 +30,10 @@ export function sanitizePdfText(str: any): string {
 
   // Normalize Unicode bullets, arrows, list symbols to clean standard markers
   s = s
+    .replace(/≤/g, "<= ")
+    .replace(/≥/g, ">= ")
+    .replace(/[\u2264]/g, "<= ")
+    .replace(/[\u2265]/g, ">= ")
     .replace(/[\u2022\u2023\u25E6\u2043\u2219\u25CB\u25CF\u25AA\u25AB\u25A0\u25A1\u25B6\u25B8\u25BA\u27A4\u279C\u2794\u2192]/g, "- ")
     .replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"')
     .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
