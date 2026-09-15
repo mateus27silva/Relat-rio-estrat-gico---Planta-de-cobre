@@ -23,6 +23,7 @@ import {
   obterAcaoEstrategicaRebritagem,
   calcularCartasControleRebritagem,
   EstatisticaCartaControleRebritagem,
+  detectarDesviosRebritagem,
   CONFIG_PARAMETROS_MOAGEM,
   DADOS_DIARIOS_MOAGEM_PADRAO,
   obterLeituraAtualMoagem,
@@ -2657,7 +2658,15 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
     const histDiario = br.historicoDiarioBritagem && br.historicoDiarioBritagem.length === 7
       ? br.historicoDiarioBritagem
       : DADOS_DIARIOS_BRITAGEM_PADRAO;
-    const desviosDetectadosSeco = isSeco ? detectarDesviosBritagem(histDiario, br.anotacoesDesvios) : [];
+    const histDiarioRebritagem = br.historicoDiarioRebritagem && br.historicoDiarioRebritagem.length === 7
+      ? br.historicoDiarioRebritagem
+      : DADOS_DIARIOS_REBRITAGEM_PADRAO;
+    const desviosDetectadosSeco = isSeco
+      ? [
+          ...detectarDesviosBritagem(histDiario, br.anotacoesDesvios),
+          ...detectarDesviosRebritagem(histDiarioRebritagem, br.anotacoesDesviosRebritagem)
+        ]
+      : [];
 
     const desviosMoagem = !isSeco ? detectarDesviosMoagem(ce.historicoDiarioMoagem, ce.anotacoesDesviosMoagem) : [];
     const desviosRemoagem = !isSeco ? detectarDesviosRemoagem(ce.historicoDiarioRemoagem, ce.anotacoesDesviosRemoagem) : [];

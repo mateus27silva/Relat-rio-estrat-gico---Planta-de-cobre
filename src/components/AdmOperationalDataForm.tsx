@@ -102,6 +102,7 @@ import {
   detectarDesviosUtilidadesETA,
   calcularCartasControleUtilidadesETA
 } from "../typesAdm";
+import { AdmOperationalTransposedTable } from "./AdmOperationalTransposedTable";
 
 interface AdmOperationalDataFormProps {
   circuitoTipo?: CircuitoTipo;
@@ -431,7 +432,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
       const impactoTexto = anotacao?.impactoPerda?.trim() || "";
 
       return {
-        id: `ACT-DEV-${Date.now()}-${i}`,
+        id: `ACT-DEV-BRI-${Date.now()}-${i}`,
         setor: "Cominuição & Britagem Primária",
         acaoEstrategica: `[DESVIO OPERACIONAL - ${desvio.parametro.nome.toUpperCase()} (${desvio.diaLabel})] ${acaoTexto}`,
         responsavelTurma: "Todas as Turmas",
@@ -445,7 +446,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
     // Mescla com as existentes sem duplicar
     const existentes = (diretrizes || []).filter(
-      d => !(d.id && d.id.startsWith("ACT-DEV-")) && !(d.acaoEstrategica && d.acaoEstrategica.startsWith("[DESVIO OPERACIONAL"))
+      d => !(d.id && d.id.startsWith("ACT-DEV-BRI-")) && !(d.acaoEstrategica && d.acaoEstrategica.startsWith("[DESVIO OPERACIONAL") && d.setor.includes("Britagem Primária"))
     );
     onChangeDiretrizes([...novasAcoes, ...existentes]);
 
@@ -671,7 +672,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
     });
 
     const existentes = (diretrizes || []).filter(
-      d => !(d.id && d.id.startsWith("ACT-DEV-REB-")) && !(d.acaoEstrategica && d.acaoEstrategica.startsWith("[DESVIO OPERACIONAL - ") && d.acaoEstrategica.includes("BR00"))
+      d => !(d.id && d.id.startsWith("ACT-DEV-REB-")) && !(d.acaoEstrategica && d.acaoEstrategica.startsWith("[DESVIO OPERACIONAL") && d.setor.includes("Rebritagem"))
     );
     onChangeDiretrizes([...novasAcoes, ...existentes]);
 
@@ -2371,7 +2372,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 <div className="flex items-center gap-2">
                   <ClipboardPaste className="w-3.5 h-3.5 text-teal-600 shrink-0" />
                   <span>
-                    <strong className="text-slate-800">Preenchimento Fácil com Excel:</strong> Você pode copiar uma coluna (7 valores) ou a planilha inteira no Excel e pressionar <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-mono font-bold text-slate-700 shadow-2xs">Ctrl + V</kbd> diretamente em qualquer célula da tabela abaixo, ou clicar em <strong>"Colar"</strong> no topo da coluna.
+                    <strong className="text-slate-800">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela estruturada com parâmetros em linhas e os 7 dias da semana (Segunda a Domingo) em colunas. Copie valores no Excel e pressione <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-mono font-bold text-slate-700 shadow-2xs">Ctrl + V</kbd> em qualquer célula, ou clique no botão <strong>"Colar"</strong> na linha do indicador.
                   </span>
                 </div>
               </div>
@@ -2384,98 +2385,23 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
               )}
 
-              <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-                <table className="w-full text-center border-collapse text-[11px]">
-                  <thead>
-                    <tr className="bg-slate-800 text-white font-bold text-[10px]">
-                      <th className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-800 z-10">
-                        Dia da Semana
-                      </th>
-                      {CONFIG_PARAMETROS_BRITAGEM.map((param, paramIdx) => (
-                        <th key={param.chave} className="p-2 border-r border-slate-700 min-w-[100px] align-top">
-                          <div className="flex flex-col items-center justify-between h-full gap-1">
-                            <div>
-                              <span>{param.nomeCurto || param.nome}</span><br />
-                              <span className="text-[9px] font-normal text-slate-300">
-                                {param.minIdeal}-{param.maxIdeal} {param.unidade}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => abrirModalColarColuna(param.chave)}
-                              className="mt-1 px-1.5 py-0.5 rounded bg-slate-700 hover:bg-teal-700 text-[9px] text-slate-200 hover:text-white transition flex items-center gap-1 cursor-pointer"
-                              title={`Colar valores do Excel na coluna de ${param.nome}`}
-                            >
-                              <ClipboardPaste className="w-2.5 h-2.5" />
-                              <span>Colar</span>
-                            </button>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historicoDiario.map((item, diaIdx) => {
-                      return (
-                        <tr key={item.dia} className="border-b border-slate-200 hover:bg-slate-50/80 transition">
-                          <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                              <span>{item.diaLabel}</span>
-                            </div>
-                          </td>
-
-                          {CONFIG_PARAMETROS_BRITAGEM.map((param, paramIdx) => {
-                            const valor = item[param.chave];
-                            const numVal = typeof valor === "number" && !isNaN(valor) ? valor : null;
-                            const isFora = numVal !== null && (numVal > param.maxIdeal || numVal < param.minIdeal);
-                            const isAlto = numVal !== null && numVal > param.maxIdeal;
-
-                            return (
-                              <td
-                                key={param.chave}
-                                className={`p-1 border-r border-slate-200 ${
-                                  isFora
-                                    ? "bg-rose-50/80 font-bold text-rose-900"
-                                    : "bg-white"
-                                }`}
-                                title={
-                                  isFora
-                                    ? `Alerta: Valor de ${numVal} ${param.unidade} está ${isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.minIdeal} - ${param.maxIdeal} ${param.unidade})`
-                                    : `Faixa Ideal: ${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`
-                                }
-                              >
-                                <div className="relative">
-                                  <input
-                                    id={`input-britagem-${diaIdx}-${paramIdx}`}
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={valor === "" || valor === undefined ? "" : valor}
-                                    onChange={e => handleUpdateDiario(diaIdx, param.chave, e.target.value)}
-                                    onPaste={e => handlePasteCelula(e, diaIdx, paramIdx)}
-                                    onKeyDown={e => handleKeyDownCelula(e, diaIdx, paramIdx)}
-                                    placeholder="—"
-                                    className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-teal-600 transition ${
-                                      isFora
-                                        ? "border border-rose-400 bg-rose-50 text-rose-950 font-bold"
-                                        : "border border-slate-200 bg-transparent text-slate-900 hover:border-slate-300"
-                                    }`}
-                                  />
-                                  {isFora && (
-                                    <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
-                                      !
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              {/* TABELA DE BRITAGEM PRIMÁRIA TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+              <AdmOperationalTransposedTable
+                prefixId="britagem"
+                accentColor="teal"
+                parametros={CONFIG_PARAMETROS_BRITAGEM}
+                historico={historicoDiario}
+                onUpdateCell={(diaIdx, chave, val) => handleUpdateDiario(diaIdx, chave as any, val)}
+                onBulkUpdate={(novoHist, count) => {
+                  const nextBR = { ...dadosBR, historicoDiarioBritagem: novoHist as any };
+                  sincronizarLeiturasAtuais(nextBR);
+                  onChangeBR(nextBR);
+                  setToastMensagem(`✅ ${count} valor(es) do Excel aplicados na Britagem com sucesso!`);
+                  setAcoesSincronizadasToast(true);
+                  setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+                }}
+                onAbrirModalColar={(chave) => abrirModalColarColuna(chave)}
+              />
 
               {/* MODAL: ASSISTENTE DE COLAGEM DE COLUNA DO EXCEL */}
               {modalColarColunaAberto && (
@@ -2765,134 +2691,28 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 <div className="flex items-center gap-2">
                   <ClipboardPaste className="w-3.5 h-3.5 text-blue-700 shrink-0" />
                   <span>
-                    <strong className="text-blue-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-blue-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Rebritagem, ou clique em <strong>"Colar"</strong> no cabeçalho do indicador correspondente.
+                    <strong className="text-blue-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Rebritagem estruturada com parâmetros em linhas (organizados por subsistema) e os 7 dias em colunas. Copie valores no Excel e pressione <kbd className="px-1 py-0.5 bg-white border border-blue-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula, ou use o botão <strong>"Colar"</strong> na linha do indicador.
                   </span>
                 </div>
               </div>
 
-              {/* TABELA DE REBRITAGEM MULTI-COLUNA */}
-              <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-                <table className="w-full text-center border-collapse text-[11px]">
-                  <thead>
-                    {/* Linha 1: Agrupamentos Principais */}
-                    <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                      <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                        Dia da Semana
-                      </th>
-                      <th colSpan={6} className="p-1.5 border-r border-slate-700 bg-slate-800 text-teal-200">
-                        TEMPERATURA DO ÓLEO LUBRIFICANTE (°C)
-                      </th>
-                      <th colSpan={4} className="p-1.5 border-r border-slate-700 bg-slate-850 text-cyan-200">
-                        PRESSÃO DE ÓLEO NO HYDROSET (MPa)
-                      </th>
-                      <th colSpan={6} className="p-1.5 border-r border-slate-700 bg-slate-800 text-amber-200">
-                        POTÊNCIA (kW)
-                      </th>
-                      <th colSpan={6} className="p-1.5 border-r border-slate-700 bg-slate-850 text-emerald-200">
-                        FREQUÊNCIA DO ALIMENTADOR (Hz)
-                      </th>
-                      <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-800 text-rose-200">
-                        DIF. TEMP (°C)
-                      </th>
-                      <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-850 text-indigo-200">
-                        PRESSÃO CONTRAEIXO (MPa)
-                      </th>
-                      <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-800 text-orange-200">
-                        DIF. PRESSÃO (MPa)
-                      </th>
-                      <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-slate-850 text-purple-200">
-                        GRANULOMETRIA (%)
-                      </th>
-                      <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-slate-800 text-sky-200">
-                        PRODUTIVIDADE (tph)
-                      </th>
-                    </tr>
-
-                    {/* Linha 2: Equipamentos e Faixas */}
-                    <tr className="bg-slate-800 text-white font-bold text-[9.5px]">
-                      {CONFIG_PARAMETROS_REBRITAGEM.map((param, paramIdx) => (
-                        <th key={param.chave} className="p-1.5 border-r border-slate-700 min-w-[76px] align-top bg-slate-800">
-                          <div className="flex flex-col items-center justify-between h-full gap-0.5">
-                            <span className="font-extrabold text-white text-[10px]">{param.equipamento}</span>
-                            <span className="text-[8.5px] font-normal text-slate-300 whitespace-nowrap">
-                              {param.minIdeal}-{param.maxIdeal} {param.unidade}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => abrirModalColarColunaRebritagem(param.chave)}
-                              className="mt-0.5 px-1 py-0.2 rounded bg-slate-700 hover:bg-blue-700 text-[8.5px] text-slate-200 hover:text-white transition flex items-center gap-0.5 cursor-pointer"
-                              title={`Colar valores do Excel para ${param.nome}`}
-                            >
-                              <ClipboardPaste className="w-2.5 h-2.5" />
-                              <span>Colar</span>
-                            </button>
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {historicoDiarioRebritagem.map((item, diaIdx) => {
-                      return (
-                        <tr key={item.dia} className="border-b border-slate-200 hover:bg-slate-50/80 transition">
-                          <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                              <span>{item.diaLabel}</span>
-                            </div>
-                          </td>
-
-                          {CONFIG_PARAMETROS_REBRITAGEM.map((param, paramIdx) => {
-                            const valor = item[param.chave];
-                            const numVal = typeof valor === "number" && !isNaN(valor) ? valor : null;
-                            const isFora = numVal !== null && (numVal > param.maxIdeal || numVal < param.minIdeal);
-                            const isAlto = numVal !== null && numVal > param.maxIdeal;
-
-                            return (
-                              <td
-                                key={param.chave}
-                                className={`p-0.5 border-r border-slate-200 ${
-                                  isFora
-                                    ? "bg-rose-50/80 font-bold text-rose-900"
-                                    : "bg-white"
-                                }`}
-                                title={
-                                  isFora
-                                    ? `Alerta: ${param.nome} (${param.equipamento}) = ${numVal} ${param.unidade} está ${isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.minIdeal} - ${param.maxIdeal} ${param.unidade})`
-                                    : `Faixa Ideal: ${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`
-                                }
-                              >
-                                <div className="relative">
-                                  <input
-                                    id={`input-rebritagem-${diaIdx}-${paramIdx}`}
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={valor === "" || valor === undefined ? "" : valor}
-                                    onChange={e => handleUpdateDiarioRebritagem(diaIdx, param.chave, e.target.value)}
-                                    onPaste={e => handlePasteCelulaRebritagem(e, diaIdx, paramIdx)}
-                                    onKeyDown={e => handleKeyDownCelulaRebritagem(e, diaIdx, paramIdx)}
-                                    placeholder="—"
-                                    className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-blue-600 transition ${
-                                      isFora
-                                        ? "border border-rose-400 bg-rose-50 text-rose-950 font-bold"
-                                        : "border border-slate-200 bg-transparent text-slate-900 hover:border-slate-300"
-                                    }`}
-                                  />
-                                  {isFora && (
-                                    <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
-                                      !
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              {/* TABELA DE REBRITAGEM TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+              <AdmOperationalTransposedTable
+                prefixId="rebritagem"
+                accentColor="blue"
+                parametros={CONFIG_PARAMETROS_REBRITAGEM}
+                historico={historicoDiarioRebritagem}
+                onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioRebritagem(diaIdx, chave as any, val)}
+                onBulkUpdate={(novoHist, count) => {
+                  const nextBR = { ...dadosBR, historicoDiarioRebritagem: novoHist as any };
+                  sincronizarLeiturasAtuaisRebritagem(nextBR);
+                  onChangeBR(nextBR);
+                  setToastMensagem(`✅ ${count} valor(es) do Excel aplicados na Rebritagem com sucesso!`);
+                  setAcoesSincronizadasToast(true);
+                  setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+                }}
+                onAbrirModalColar={(chave) => abrirModalColarColunaRebritagem(chave)}
+              />
 
               {/* MODAL: ASSISTENTE DE COLAGEM DE COLUNA DO EXCEL PARA REBRITAGEM */}
               {modalColarColunaRebritagemAberto && (
@@ -3042,77 +2862,99 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
               )}
 
-              {/* PAINEL DE DESVIOS DETECTADOS & AÇÕES DA REBRITAGEM */}
-              {desviosDetectadosRebritagem.length > 0 && (
-                <div className="bg-rose-50/60 border border-rose-200 rounded-xl p-4 space-y-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <ShieldAlert className="w-4 h-4 text-rose-700 shrink-0" />
-                      <h4 className="text-xs font-black text-rose-900 uppercase tracking-wide">
-                        Desvios Operacionais Identificados na Rebritagem ({desviosDetectadosRebritagem.length} desvios na semana)
+              {/* PAINEL DE GESTÃO DE DESVIOS E GERAÇÃO DE AÇÕES CORRETIVAS NA REBRITAGEM */}
+              <div className="bg-amber-50/80 rounded-xl p-4 border border-amber-200 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wide">
+                        Gestão de Desvios & Gatilho de Ações Corretivas para a Semana
                       </h4>
+                      <span className="text-[10px] text-amber-800 block">
+                        Apenas indicadores fora da faixa ideal são listados. O supervisor registra o impacto/perda e a ação recomendada.
+                      </span>
                     </div>
+                  </div>
+
+                  {desviosDetectadosRebritagem.length > 0 && (
                     <button
                       type="button"
                       onClick={handleSincronizarAcoesCorretivasRebritagem}
-                      className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      className="bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm transition cursor-pointer self-start sm:self-auto shrink-0"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                      <span>Sincronizar Ações com Diretrizes da Semana</span>
+                      <Zap className="w-3.5 h-3.5" />
+                      <span>Gerar Ações Corretivas nos Horizontes ({desviosDetectadosRebritagem.length})</span>
                     </button>
-                  </div>
-
-                  <p className="text-[11px] text-rose-800">
-                    Os pontos abaixo ultrapassaram os limites ideais de operação dos britadores cônicos/alimentadores. Registre o impacto e a tratativa técnica:
-                  </p>
-
-                  <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                    {desviosDetectadosRebritagem.map((desvio, idx) => {
-                      const keyDesvio = `${desvio.chave}_${desvio.dia}`;
-                      const anotacao = dadosBR.anotacoesDesviosRebritagem?.[keyDesvio] || {
-                        impactoPerda: "",
-                        acaoRecomendada: ""
-                      };
-
-                      return (
-                        <div key={keyDesvio} className="bg-white p-3 rounded-lg border border-rose-200 shadow-2xs space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-900">
-                              {desvio.parametro.nome} ({desvio.parametro.equipamento}) - {desvio.diaLabel}
-                            </span>
-                            <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-200">
-                              Lido: {desvio.valorLido} {desvio.parametro.unidade} (Faixa: {desvio.parametro.minIdeal} a {desvio.parametro.maxIdeal} {desvio.parametro.unidade})
-                            </span>
-                          </div>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div>
-                              <label className="text-[10px] font-bold text-slate-600 block mb-0.5">Impacto / Causa Raiz:</label>
-                              <input
-                                type="text"
-                                value={anotacao.impactoPerda}
-                                onChange={e => handleUpdateAnotacaoDesvioRebritagem(keyDesvio, "impactoPerda", e.target.value)}
-                                placeholder="Ex: Sobrecarga por granulometria grossa..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-slate-800"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-[10px] font-bold text-slate-600 block mb-0.5">Ação Recomendada / Diretriz:</label>
-                              <input
-                                type="text"
-                                value={anotacao.acaoRecomendada}
-                                onChange={e => handleUpdateAnotacaoDesvioRebritagem(keyDesvio, "acaoRecomendada", e.target.value)}
-                                placeholder="Ex: Ajustar abertura de descarga e inspecionar óleo..."
-                                className="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs text-slate-800"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                  )}
                 </div>
-              )}
+
+                {desviosDetectadosRebritagem.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                      {desviosDetectadosRebritagem.map((desvio, idx) => {
+                        const keyDesvio = `${desvio.chave}_${desvio.dia}`;
+                        const anotacao = dadosBR.anotacoesDesviosRebritagem?.[keyDesvio] || {
+                          impactoPerda: "",
+                          acaoRecomendada: ""
+                        };
+
+                        return (
+                          <div
+                            key={keyDesvio}
+                            className="bg-white p-3.5 rounded-lg border border-amber-300 shadow-xs space-y-2.5"
+                          >
+                            <div className="flex items-center justify-between border-b border-amber-100 pb-2">
+                              <span className="font-bold text-xs text-slate-900 flex items-center gap-1.5">
+                                <span className="w-5 h-5 rounded-full bg-rose-600 text-white text-[10px] flex items-center justify-center font-black shrink-0">
+                                  {idx + 1}
+                                </span>
+                                {desvio.parametro.nome} — {desvio.diaLabel}
+                              </span>
+                              <span className="bg-rose-100 text-rose-800 font-bold text-[10px] px-2 py-0.5 rounded-md">
+                                {desvio.valorLido} {desvio.parametro.unidade} ({desvio.tipoDesvio === "alto" ? "LSC" : "LIC"}: {desvio.tipoDesvio === "alto" ? desvio.parametro.maxIdeal : desvio.parametro.minIdeal} {desvio.parametro.unidade})
+                              </span>
+                            </div>
+
+                            {/* Campo para o supervisor escrever o Impacto / Perda */}
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold text-slate-700 block">
+                                Impacto Operacional / Perda Quantificada:
+                              </label>
+                              <input
+                                type="text"
+                                value={anotacao.impactoPerda || ""}
+                                onChange={e => handleUpdateAnotacaoDesvioRebritagem(keyDesvio, "impactoPerda", e.target.value)}
+                                placeholder="Descreva o impacto ou perda operacional observada..."
+                                className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded-md bg-slate-50/50 focus:bg-white focus:border-amber-500 focus:outline-none"
+                              />
+                            </div>
+
+                            {/* Campo para o supervisor escrever a Ação Recomendada */}
+                            <div className="space-y-1">
+                              <label className="text-[11px] font-bold text-teal-800 block">
+                                Ação Recomendada / Diretriz de Mitigação:
+                              </label>
+                              <input
+                                type="text"
+                                value={anotacao.acaoRecomendada || ""}
+                                onChange={e => handleUpdateAnotacaoDesvioRebritagem(keyDesvio, "acaoRecomendada", e.target.value)}
+                                placeholder="Descreva a ação recomendada e diretriz para a turma..."
+                                className="w-full text-xs px-2.5 py-1.5 border border-teal-300 rounded-md bg-teal-50/30 focus:bg-white focus:border-teal-600 focus:outline-none"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white/80 p-3 rounded-lg border border-amber-100 flex items-center gap-2 text-xs font-semibold text-teal-800">
+                    <CheckCircle className="w-4 h-4 text-teal-600 shrink-0" />
+                    <span>Nenhum desvio detectado. Todos os indicadores operacionais da rebritagem (BR001 a BR006 / Peneiramento) estão rigorosamente dentro da faixa ideal.</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -3195,131 +3037,28 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <ClipboardPaste className="w-3.5 h-3.5 text-teal-700 shrink-0" />
                 <span>
-                  <strong className="text-teal-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-teal-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Moagem, ou clique em <strong>"Colar"</strong> no cabeçalho do parâmetro.
+                  <strong className="text-teal-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Moagem estruturada com parâmetros em linhas (organizados por grupos operacionais) e os 7 dias em colunas. Copie valores no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-teal-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula, ou use o botão <strong>"Colar"</strong> na linha do parâmetro.
                 </span>
               </div>
             </div>
 
-            {/* Tabela de Monitoramento Diário da Moagem */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-900 text-teal-100">
-                      TONELAGEM (t/h)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-slate-850 text-cyan-200">
-                      POTÊNCIA (kW)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-900 text-teal-100">
-                      % SÓLIDOS OVERFLOW (%)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-slate-800 text-emerald-200">
-                      % SÓLIDOS DESCARGA (%)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-slate-850 text-amber-200">
-                      REPOSIÇÃO DE BOLAS (g/t)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-900 text-teal-100">
-                      PRESSÃO HIDROCICLONAGEM (kgf/cm²)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-slate-800 text-indigo-200">
-                      DENSIDADE POLPA (g/t)
-                    </th>
-                    <th colSpan={3} className="p-1.5 bg-slate-850 text-sky-200">
-                      PSI 300 - 150# (%)
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Equipamentos e Faixas */}
-                  <tr className="bg-slate-800 text-white font-bold text-[9.5px]">
-                    {CONFIG_PARAMETROS_MOAGEM.map((param, paramIdx) => (
-                      <th key={param.chave} className="p-1.5 border-r border-slate-700 min-w-[76px] align-top bg-slate-800">
-                        <div className="flex flex-col items-center justify-between h-full gap-0.5">
-                          <span className="font-extrabold text-white text-[10px]">{param.equipamento}</span>
-                          <span className="text-[8.5px] font-normal text-slate-300 whitespace-nowrap">
-                            {param.minIdeal}-{param.maxIdeal} {param.unidade}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaMoagem(param.chave)}
-                            className="mt-0.5 px-1 py-0.2 rounded bg-slate-700 hover:bg-teal-700 text-[8.5px] text-slate-200 hover:text-white transition flex items-center gap-0.5 cursor-pointer"
-                            title={`Colar valores do Excel para ${param.nome}`}
-                          >
-                            <ClipboardPaste className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {historicoDiarioMoagem.map((item, diaIdx) => {
-                    return (
-                      <tr key={item.dia} className="border-b border-slate-200 hover:bg-teal-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                            <span>{item.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {CONFIG_PARAMETROS_MOAGEM.map((param, paramIdx) => {
-                          const valor = (item as any)[param.chave];
-                          const numVal = typeof valor === "number" && !isNaN(valor) ? valor : null;
-                          const isFora = numVal !== null && (numVal > param.maxIdeal || numVal < param.minIdeal);
-                          const isAlto = numVal !== null && numVal > param.maxIdeal;
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-0.5 border-r border-slate-200 ${
-                                isFora
-                                  ? "bg-rose-50/80 font-bold text-rose-900"
-                                  : "bg-white"
-                              }`}
-                              title={
-                                isFora
-                                  ? `Alerta: ${param.nome} (${param.equipamento}) = ${numVal} ${param.unidade} está ${isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.minIdeal} - ${param.maxIdeal} ${param.unidade})`
-                                  : `Faixa Ideal: ${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`
-                              }
-                            >
-                              <div className="relative">
-                                <input
-                                  id={`input-moagem-${diaIdx}-${paramIdx}`}
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={valor === "" || valor === undefined ? "" : valor}
-                                  onChange={e => handleUpdateDiarioMoagem(diaIdx, param.chave as any, e.target.value)}
-                                  onPaste={e => handlePasteCelulaMoagem(e, diaIdx, paramIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaMoagem(e, diaIdx, paramIdx)}
-                                  placeholder="—"
-                                  className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-teal-600 transition ${
-                                    isFora
-                                      ? "border border-rose-400 bg-rose-50 text-rose-950 font-bold"
-                                      : "border border-slate-200 bg-transparent text-slate-900 hover:border-slate-300"
-                                  }`}
-                                />
-                                {isFora && (
-                                  <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
-                                    !
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {/* TABELA DE MOAGEM TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="moagem"
+              accentColor="emerald"
+              parametros={CONFIG_PARAMETROS_MOAGEM}
+              historico={historicoDiarioMoagem}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioMoagem(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioMoagem: novoHist as any };
+                sincronizarLeiturasAtuaisMoagem(nextCE);
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados na Moagem com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaMoagem(chave)}
+            />
 
             {/* MODAL: ASSISTENTE DE COLAGEM DE COLUNA DO EXCEL PARA MOAGEM */}
             {modalColarColunaMoagemAberto && (
@@ -3607,119 +3346,27 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <ClipboardPaste className="w-3.5 h-3.5 text-purple-700 shrink-0" />
                 <span>
-                  <strong className="text-purple-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-purple-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Remoagem, ou clique em <strong>"Colar"</strong> no cabeçalho do parâmetro.
+                  <strong className="text-purple-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Remoagem estruturada com parâmetros em linhas e os 7 dias em colunas. Copie valores no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-purple-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Remoagem, ou clique em <strong>"Colar"</strong> na linha do parâmetro.
                 </span>
               </div>
             </div>
 
-            {/* Tabela de Monitoramento Diário da Remoagem */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais com colSpan */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-purple-900 text-purple-100">
-                      PENEIRAMENTO DERRICK (un)
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-850 text-purple-200">
-                      GRANULOMETRIA & PRODUTO HIG (%)
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-purple-900 text-purple-100">
-                      DENSIDADE FEED & FLUXO (g/t / tph)
-                    </th>
-                    <th colSpan={2} className="p-1.5 bg-slate-850 text-amber-200">
-                      POTÊNCIA & TORQUE HIG
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Indicadores e Faixas */}
-                  <tr className="bg-slate-800 text-white font-bold text-[9.5px]">
-                    {CONFIG_PARAMETROS_REMOAGEM.map(param => (
-                      <th key={param.chave} className="p-1.5 border-r border-slate-700 min-w-[80px] align-top bg-slate-800">
-                        <div className="flex flex-col items-center justify-between h-full gap-0.5">
-                          <span className="font-extrabold text-white text-[10px] leading-tight text-center">{param.nomeCurto}</span>
-                          <span className="text-[8.5px] font-normal text-purple-200 whitespace-nowrap">
-                            {param.minIdeal}-{param.maxIdeal} {param.unidade}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaRemoagem(param.chave)}
-                            className="mt-0.5 px-1 py-0.2 rounded bg-slate-700 hover:bg-purple-700 text-[8.5px] text-slate-200 hover:text-white transition flex items-center gap-0.5 cursor-pointer"
-                            title={`Colar valores do Excel para ${param.nome}`}
-                          >
-                            <ClipboardPaste className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {historicoDiarioRemoagem.map((diaObj, diaIdx) => {
-                    return (
-                      <tr key={diaObj.dia} className="border-b border-slate-200 hover:bg-purple-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-purple-600"></span>
-                            <span>{diaObj.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {CONFIG_PARAMETROS_REMOAGEM.map((param, paramIdx) => {
-                          const val = (diaObj as any)[param.chave];
-                          const valNum = parseNumeroBritagem(val);
-                          const isFora = valNum !== null && (valNum < param.minIdeal || valNum > param.maxIdeal);
-                          const isAlto = valNum !== null && valNum > param.maxIdeal;
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-0.5 border-r border-slate-200 ${
-                                isFora
-                                  ? "bg-rose-50/80 font-bold text-rose-900"
-                                  : "bg-white"
-                              }`}
-                              title={
-                                isFora
-                                  ? `Alerta: ${param.nome} = ${valNum} ${param.unidade} está ${isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.minIdeal} - ${param.maxIdeal} ${param.unidade})`
-                                  : `Faixa Ideal: ${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`
-                              }
-                            >
-                              <div className="relative">
-                                <input
-                                  id={`input-remoagem-${diaIdx}-${paramIdx}`}
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={val === "" || val === undefined ? "" : val}
-                                  onChange={e => handleUpdateDiarioRemoagem(diaIdx, param.chave, e.target.value)}
-                                  onPaste={e => handlePasteCelulaRemoagem(e, diaIdx, paramIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaRemoagem(e, diaIdx, paramIdx)}
-                                  placeholder="—"
-                                  className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-purple-600 transition ${
-                                    isFora
-                                      ? "border border-rose-400 bg-rose-50 text-rose-950 font-bold"
-                                      : "border border-slate-200 bg-transparent text-slate-900 hover:border-slate-300"
-                                  }`}
-                                />
-                                {isFora && (
-                                  <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
-                                    !
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {/* TABELA DE REMOAGEM TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="remoagem"
+              accentColor="purple"
+              parametros={CONFIG_PARAMETROS_REMOAGEM}
+              historico={historicoDiarioRemoagem}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioRemoagem(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioRemoagem: novoHist as any };
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados na Remoagem com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaRemoagem(chave)}
+            />
 
             {/* Modal para Colar Coluna do Excel (Remoagem) */}
             {modalColarColunaRemoagemAberto && (
@@ -4006,129 +3653,27 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <ClipboardPaste className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
                 <span>
-                  <strong className="text-cyan-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-cyan-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Flotação, ou clique em <strong>"Colar"</strong> no cabeçalho do parâmetro correspondente.
+                  <strong className="text-cyan-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Flotação estruturada com parâmetros em linhas e os 7 dias em colunas. Copie valores no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-cyan-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula da Flotação, ou clique em <strong>"Colar"</strong> na linha do parâmetro correspondente.
                 </span>
               </div>
             </div>
 
-            {/* Tabela de Monitoramento Diário da Flotação */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais com colSpan */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th colSpan={4} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
-                      % SÓLIDOS DAS ETAPAS (%)
-                    </th>
-                    <th colSpan={4} className="p-1.5 border-r border-slate-700 bg-slate-850 text-emerald-200">
-                      DOSAGEM DE REAGENTES (g/t)
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
-                      CONTROLE DE pH
-                    </th>
-                    <th colSpan={2} className="p-1.5 bg-amber-950 text-amber-200">
-                      CONTROLE DE TEORES (%)
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Indicadores e Faixas */}
-                  <tr className="bg-slate-800 text-white font-bold text-[9.5px]">
-                    {CONFIG_PARAMETROS_FLOTACAO.map(param => (
-                      <th key={param.chave} className="p-1.5 border-r border-slate-700 min-w-[80px] align-top bg-slate-800">
-                        <div className="flex flex-col items-center justify-between h-full gap-0.5">
-                          <span className="font-extrabold text-white text-[10px] leading-tight text-center">{param.nomeCurto}</span>
-                          <span className="text-[8.5px] font-normal text-cyan-200 whitespace-nowrap">
-                            {param.rotuloFaixa || `${param.minIdeal}-${param.maxIdeal} ${param.unidade}`}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaFlotacao(param.chave)}
-                            className="mt-0.5 px-1 py-0.2 rounded bg-slate-700 hover:bg-cyan-700 text-[8.5px] text-slate-200 hover:text-white transition flex items-center gap-0.5 cursor-pointer"
-                            title={`Colar valores do Excel para ${param.nome}`}
-                          >
-                            <ClipboardPaste className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {historicoDiarioFlotacao.map((diaObj, diaIdx) => {
-                    return (
-                      <tr key={diaObj.dia} className="border-b border-slate-200 hover:bg-cyan-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-600"></span>
-                            <span>{diaObj.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {CONFIG_PARAMETROS_FLOTACAO.map((param, paramIdx) => {
-                          const val = (diaObj as any)[param.chave];
-                          const valNum = parseNumeroBritagem(val);
-                          const isFora = valNum !== null && (
-                            param.tipoLimite === "min"
-                              ? valNum < param.minIdeal
-                              : param.tipoLimite === "max"
-                              ? valNum > param.maxIdeal
-                              : (valNum < param.minIdeal || valNum > param.maxIdeal)
-                          );
-                          const isAlto = valNum !== null && (
-                            param.tipoLimite === "min"
-                              ? false
-                              : valNum > param.maxIdeal
-                          );
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-0.5 border-r border-slate-200 ${
-                                isFora
-                                  ? "bg-rose-50/80 font-bold text-rose-900"
-                                  : "bg-white"
-                              }`}
-                              title={
-                                isFora
-                                  ? `Alerta: ${param.nome} = ${valNum} ${param.unidade} está ${param.tipoLimite === "min" ? "ABAIXO do limite (> 33,5%)" : param.tipoLimite === "max" ? "ACIMA do limite (< 0,1%)" : isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.rotuloFaixa || `${param.minIdeal} - ${param.maxIdeal} ${param.unidade}`})`
-                                  : `Faixa Ideal: ${param.rotuloFaixa || `${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`}`
-                              }
-                            >
-                              <div className="relative">
-                                <input
-                                  id={`input-flotacao-${diaIdx}-${paramIdx}`}
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={val === "" || val === undefined ? "" : val}
-                                  onChange={e => handleUpdateDiarioFlotacao(diaIdx, param.chave, e.target.value)}
-                                  onPaste={e => handlePasteCelulaFlotacao(e, diaIdx, paramIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaFlotacao(e, diaIdx, paramIdx)}
-                                  placeholder="—"
-                                  className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-cyan-600 transition ${
-                                    isFora
-                                      ? "border border-rose-400 bg-rose-50 text-rose-950 font-bold"
-                                      : "border border-slate-200 bg-transparent text-slate-900 hover:border-slate-300"
-                                  }`}
-                                />
-                                {isFora && (
-                                  <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
-                                    !
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {/* TABELA DE FLOTAÇÃO TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="flotacao"
+              accentColor="cyan"
+              parametros={CONFIG_PARAMETROS_FLOTACAO}
+              historico={historicoDiarioFlotacao}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioFlotacao(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioFlotacao: novoHist as any };
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados na Flotação com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaFlotacao(chave)}
+            />
 
             {/* Modal para Colar Coluna do Excel (Flotação) */}
             {modalColarColunaFlotacaoAberto && (
@@ -4423,129 +3968,27 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <ClipboardPaste className="w-3.5 h-3.5 text-teal-700 shrink-0" />
                 <span>
-                  <strong className="text-teal-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-teal-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula do Espessamento de Rejeito, ou clique em <strong>"Colar"</strong> no cabeçalho do parâmetro correspondente.
+                  <strong className="text-teal-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Espessamento de Rejeito estruturada com parâmetros em linhas e os 7 dias em colunas. Copie valores no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-teal-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula, ou use o botão <strong>"Colar"</strong> na linha do parâmetro correspondente.
                 </span>
               </div>
             </div>
 
-            {/* Tabela de Monitoramento Diário do Espessamento de Rejeito */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais com colSpan */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-900 text-teal-100">
-                      DENSIDADE & TORQUES
-                    </th>
-                    <th colSpan={5} className="p-1.5 border-r border-slate-700 bg-slate-850 text-cyan-200">
-                      % SÓLIDOS DO REJEITO (%)
-                    </th>
-                    <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-emerald-950 text-emerald-200">
-                      FLOCULANTE (g/t)
-                    </th>
-                    <th colSpan={5} className="p-1.5 bg-amber-950 text-amber-200">
-                      HTR LINHAS & PAST FILL (h)
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Indicadores e Faixas */}
-                  <tr className="bg-slate-800 text-white font-bold text-[9.5px]">
-                    {CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO.map(param => (
-                      <th key={param.chave} className="p-1.5 border-r border-slate-700 min-w-[80px] align-top bg-slate-800">
-                        <div className="flex flex-col items-center justify-between h-full gap-0.5">
-                          <span className="font-extrabold text-white text-[10px] leading-tight text-center">{param.nomeCurto}</span>
-                          <span className="text-[8.5px] font-normal text-teal-200 whitespace-nowrap">
-                            {param.rotuloFaixa || `${param.minIdeal}-${param.maxIdeal} ${param.unidade}`}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaEspessamentoRejeito(param.chave)}
-                            className="mt-0.5 px-1 py-0.2 rounded bg-slate-700 hover:bg-teal-700 text-[8.5px] text-slate-200 hover:text-white transition flex items-center gap-0.5 cursor-pointer"
-                            title={`Colar valores do Excel para ${param.nome}`}
-                          >
-                            <ClipboardPaste className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {historicoDiarioEspessamentoRejeito.map((diaObj, diaIdx) => {
-                    return (
-                      <tr key={diaObj.dia} className="border-b border-slate-200 hover:bg-teal-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                            <span>{diaObj.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO.map((param, paramIdx) => {
-                          const val = (diaObj as any)[param.chave];
-                          const valNum = parseNumeroBritagem(val);
-                          const isFora = valNum !== null && (
-                            param.tipoLimite === "min"
-                              ? valNum < param.minIdeal
-                              : param.tipoLimite === "max"
-                              ? valNum > param.maxIdeal
-                              : (valNum < param.minIdeal || valNum > param.maxIdeal)
-                          );
-                          const isAlto = valNum !== null && (
-                            param.tipoLimite === "min"
-                              ? false
-                              : valNum > param.maxIdeal
-                          );
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-0.5 border-r border-slate-200 ${
-                                isFora
-                                  ? "bg-rose-50/80 font-bold text-rose-900"
-                                  : "bg-white"
-                              }`}
-                              title={
-                                isFora
-                                  ? `Alerta: ${param.nome} = ${valNum} ${param.unidade} está ${param.tipoLimite === "min" ? "ABAIXO do limite" : param.tipoLimite === "max" ? "ACIMA do limite" : isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.rotuloFaixa || `${param.minIdeal} - ${param.maxIdeal} ${param.unidade}`})`
-                                  : `Faixa Ideal: ${param.rotuloFaixa || `${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`}`
-                              }
-                            >
-                              <div className="relative">
-                                <input
-                                  id={`input-espessamento-${diaIdx}-${paramIdx}`}
-                                  type="text"
-                                  inputMode="decimal"
-                                  value={val === "" || val === undefined ? "" : val}
-                                  onChange={e => handleUpdateDiarioEspessamentoRejeito(diaIdx, param.chave, e.target.value)}
-                                  onPaste={e => handlePasteCelulaEspessamentoRejeito(e, diaIdx, paramIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaEspessamentoRejeito(e, diaIdx, paramIdx)}
-                                  placeholder="—"
-                                  className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-teal-600 transition ${
-                                    isFora
-                                      ? "border border-rose-400 bg-rose-50 text-rose-950 font-bold"
-                                      : "border border-slate-200 bg-transparent text-slate-900 hover:border-slate-300"
-                                  }`}
-                                />
-                                {isFora && (
-                                  <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
-                                    !
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            {/* TABELA DE ESPESSAMENTO DE REJEITO TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="esprejeito"
+              accentColor="teal"
+              parametros={CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO}
+              historico={historicoDiarioEspessamentoRejeito}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioEspessamentoRejeito(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioEspessamentoRejeito: novoHist as any };
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados no Espessamento de Rejeito com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaEspessamentoRejeito(chave)}
+            />
 
             {/* Modal para Colar Coluna do Excel (Espessamento de Rejeito) */}
             {modalColarColunaEspessamentoRejeitoAberto && (
@@ -4847,142 +4290,60 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <ClipboardPaste className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                 <span>
-                  <strong className="text-emerald-950">Preenchimento Rápido com Excel:</strong> Copie a coluna no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-emerald-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula do Espessamento de Concentrado, ou clique em <strong>"Colar"</strong> no cabeçalho do parâmetro correspondente.
+                  <strong className="text-emerald-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Espessamento de Concentrado com parâmetros em linhas e os 7 dias em colunas. Copie valores no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-emerald-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula, ou use o botão <strong>"Colar"</strong> na linha do parâmetro correspondente.
                 </span>
               </div>
             </div>
 
-            {/* Tabela de Monitoramento Diário do Espessamento de Concentrado */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais com colSpan */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[95px] bg-slate-850 text-slate-200 align-middle">
-                      OPERAÇÃO
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-emerald-900 text-emerald-100">
-                      DENSIDADE & SÓLIDOS
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-800 text-cyan-200">
-                      NÍVEL & FLOCULANTE
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-teal-950 text-teal-200">
-                      ELEVAÇÃO DO RAKE (Pol)
-                    </th>
-                    <th colSpan={2} className="p-1.5 bg-cyan-950 text-cyan-200">
-                      TORQUE DO ACIONAMENTO (%)
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Indicadores e Faixas */}
-                  <tr className="bg-slate-800 text-white font-bold text-[9.5px]">
-                    {CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO.map(param => (
-                      <th key={param.chave} className="p-1.5 border-r border-slate-700 min-w-[85px] align-top bg-slate-800">
-                        <div className="flex flex-col items-center justify-between h-full gap-0.5">
-                          <span className="font-extrabold text-white text-[10px] leading-tight text-center">{param.nomeCurto}</span>
-                          <span className="text-[8.5px] font-normal text-emerald-200 whitespace-nowrap">
-                            {param.rotuloFaixa || `${param.minIdeal}-${param.maxIdeal} ${param.unidade}`}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaEspessamentoConcentrado(param.chave)}
-                            className="mt-0.5 px-1 py-0.2 rounded bg-slate-700 hover:bg-emerald-700 text-[8.5px] text-slate-200 hover:text-white transition flex items-center gap-0.5 cursor-pointer"
-                            title={`Colar valores do Excel para ${param.nome}`}
-                          >
-                            <ClipboardPaste className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {historicoDiarioEspessamentoConcentrado.map((diaObj, diaIdx) => {
-                    return (
-                      <tr key={diaObj.dia} className="border-b border-slate-200 hover:bg-emerald-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-                            <span>{diaObj.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {/* Espessador em Operação */}
-                        <td className="p-1 border-r border-slate-200 bg-white">
-                          <select
-                            value={diaObj.espessadorConcOp || "Ambos"}
-                            onChange={e => handleUpdateDiarioEspessamentoConcentrado(diaIdx, "espessadorConcOp" as any, e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-slate-800 focus:bg-white focus:border-emerald-500 text-center"
-                          >
-                            <option value="Ambos">Ambos</option>
-                            <option value="44EP001">44EP001</option>
-                            <option value="44EP002">44EP002</option>
-                          </select>
-                        </td>
-
-                        {CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO.map((param, paramIdx) => {
-                          const val = (diaObj as any)[param.chave];
-                          const valNum = parseNumeroBritagem(val);
-                          const isFora = valNum !== null && (
-                            param.tipoLimite === "min"
-                              ? valNum < param.minIdeal
-                              : param.tipoLimite === "max"
-                              ? valNum > param.maxIdeal
-                              : (valNum < param.minIdeal || valNum > param.maxIdeal)
-                          );
-                          const isAlto = valNum !== null && (
-                            param.tipoLimite === "min"
-                              ? false
-                              : valNum > param.maxIdeal
-                          );
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-0.5 border-r border-slate-200 ${
-                                isFora
-                                  ? "bg-rose-50/80 font-bold text-rose-900"
-                                  : "bg-white"
-                              }`}
-                              title={
-                                isFora
-                                  ? `Alerta: ${param.nome} = ${valNum} ${param.unidade} está ${param.tipoLimite === "min" ? "ABAIXO do limite" : param.tipoLimite === "max" ? "ACIMA do limite" : isAlto ? "ACIMA" : "ABAIXO"} da faixa ideal (${param.rotuloFaixa || `${param.minIdeal} - ${param.maxIdeal} ${param.unidade}`})`
-                                  : `Faixa Ideal: ${param.rotuloFaixa || `${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`}`
-                              }
-                            >
-                              <div className="relative">
-                                <input
-                                  id={`input-espessamento-conc-${diaIdx}-${paramIdx}`}
-                                  type="text"
-                                  value={val === undefined || val === null ? "" : val}
-                                  onChange={e => handleUpdateDiarioEspessamentoConcentrado(diaIdx, param.chave, e.target.value)}
-                                  onPaste={e => handlePasteCelulaEspessamentoConcentrado(e, diaIdx, paramIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaEspessamentoConcentrado(e, diaIdx, paramIdx)}
-                                  className={`w-full text-center py-1.5 px-0.5 text-xs font-semibold rounded transition focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:bg-white ${
-                                    isFora
-                                      ? "text-rose-700 bg-rose-50/60 font-black"
-                                      : "text-slate-800 hover:bg-slate-50"
-                                  }`}
-                                  placeholder="—"
-                                />
-                                {isFora && (
-                                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-rose-500 pointer-events-none" />
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Configuração de Espessador em Operação por Dia da Semana */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                <span className="text-xs font-bold text-slate-800">Espessador de Concentrado em Operação:</span>
+                <span className="text-[11px] text-slate-500">(Selecione o equipamento ativo para cada dia)</span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {[
+                  { dia: "Seg", idx: 0 },
+                  { dia: "Ter", idx: 1 },
+                  { dia: "Qua", idx: 2 },
+                  { dia: "Qui", idx: 3 },
+                  { dia: "Sex", idx: 4 },
+                  { dia: "Sáb", idx: 5 },
+                  { dia: "Dom", idx: 6 }
+                ].map(({ dia, idx }) => (
+                  <div key={dia} className="flex flex-col items-center bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs">
+                    <span className="text-[9px] font-extrabold text-slate-600 uppercase">{dia}</span>
+                    <select
+                      value={historicoDiarioEspessamentoConcentrado[idx]?.espessadorConcOp || "Ambos"}
+                      onChange={e => handleUpdateDiarioEspessamentoConcentrado(idx, "espessadorConcOp" as any, e.target.value)}
+                      className="bg-transparent border-0 font-bold text-[10px] text-slate-800 focus:ring-0 p-0 text-center cursor-pointer"
+                    >
+                      <option value="Ambos">Ambos</option>
+                      <option value="44EP001">44EP001</option>
+                      <option value="44EP002">44EP002</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* TABELA DE ESPESSAMENTO DE CONCENTRADO TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="espconc"
+              accentColor="emerald"
+              parametros={CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO}
+              historico={historicoDiarioEspessamentoConcentrado}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioEspessamentoConcentrado(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioEspessamentoConcentrado: novoHist as any };
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados no Espessamento de Concentrado com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaEspessamentoConcentrado(chave)}
+            />
 
             {/* Modal para Colar Coluna do Excel (Espessamento de Concentrado) */}
             {modalColarColunaEspessamentoConcentradoAberto && (
@@ -5279,159 +4640,65 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
             </div>
 
-            {/* Tabela de Monitoramento Diário da Filtragem de Concentrado */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais com colSpan */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[95px] bg-slate-850 text-slate-200 align-middle">
-                      OPERAÇÃO
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-pink-900 text-pink-100">
-                      PRODUÇÃO & PRODUTIVIDADE
-                    </th>
-                    <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-rose-950 text-rose-100">
-                      QUALIDADE DO BOLO
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-800 text-cyan-200">
-                      CICLOS & PRESSÃO
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Parâmetros Individuais com botões de Colar */}
-                  <tr className="bg-slate-800 text-white font-semibold text-[10px] border-b border-slate-300">
-                    {CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO.map((param, pIdx) => (
-                      <th
-                        key={param.chave}
-                        className="p-1.5 border-r border-slate-700 min-w-[100px] text-center align-top group hover:bg-slate-750 transition"
-                        title={`${param.nome} (${param.equipamento} - ${param.subsistema})\nAlvo: ${param.alvo} ${param.unidade} | Faixa Ideal: ${param.rotuloFaixa}`}
-                      >
-                        <div className="flex flex-col items-center justify-between h-full gap-1">
-                          <span className="font-bold text-slate-100 leading-tight">
-                            {param.nomeCurto}
-                          </span>
-                          <span className="text-[9px] text-slate-400 font-mono">
-                            {param.rotuloFaixa}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaFiltragem(param.chave)}
-                            className="mt-0.5 px-1.5 py-0.5 rounded bg-slate-700 hover:bg-pink-600 text-[9px] text-slate-300 hover:text-white flex items-center gap-1 transition cursor-pointer opacity-80 hover:opacity-100"
-                            title={`Colar valores do Excel na coluna ${param.nomeCurto}`}
-                          >
-                            <FileSpreadsheet className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {historicoDiarioFiltragemConcentrado.map((diaObj, diaIdx) => {
-                    return (
-                      <tr key={diaObj.dia} className="border-b border-slate-200 hover:bg-pink-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-pink-600"></span>
-                            <span>{diaObj.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {/* Equipamento em Operação */}
-                        <td className="p-1 border-r border-slate-200 bg-slate-50/60">
-                          <select
-                            value={diaObj.filtroConcOp || "Ambos"}
-                            onChange={e => handleUpdateDiarioFiltragemConcentrado(diaIdx, "filtroConcOp" as any, e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded px-1.5 py-1 text-[10px] font-bold text-slate-800 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 cursor-pointer"
-                          >
-                            <option value="Ambos">Ambos (001 e 002)</option>
-                            <option value="43FP001">Apenas 43FP001</option>
-                            <option value="43FP002">Apenas 43FP002</option>
-                          </select>
-                        </td>
-
-                        {/* Parâmetros Operacionais */}
-                        {CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO.map((param, pIdx) => {
-                          const valRaw = (diaObj as any)[param.chave];
-                          const valNum = parseNumeroBritagem(valRaw);
-
-                          let isFora = false;
-                          let isAlto = false;
-                          let isBaixo = false;
-
-                          if (valNum !== null) {
-                            if (param.tipoLimite === "min") {
-                              if (valNum < param.minIdeal) {
-                                isFora = true;
-                                isBaixo = true;
-                              }
-                            } else if (param.tipoLimite === "max") {
-                              if (valNum > param.maxIdeal) {
-                                isFora = true;
-                                isAlto = true;
-                              }
-                            } else {
-                              if (valNum > param.maxIdeal) {
-                                isFora = true;
-                                isAlto = true;
-                              } else if (valNum < param.minIdeal) {
-                                isFora = true;
-                                isBaixo = true;
-                              }
-                            }
-                          }
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-1 border-r border-slate-200 transition ${
-                                isFora ? "bg-rose-50/70" : ""
-                              }`}
-                            >
-                              <div className="relative flex items-center">
-                                <input
-                                  id={`input-filtragem-conc-${diaIdx}-${pIdx}`}
-                                  type="number"
-                                  step={param.decimais > 0 ? (param.decimais === 1 ? "0.1" : "0.01") : "1"}
-                                  value={valRaw !== undefined && valRaw !== null ? valRaw : ""}
-                                  placeholder="-"
-                                  onChange={e => handleUpdateDiarioFiltragemConcentrado(diaIdx, param.chave, e.target.value)}
-                                  onPaste={e => handlePasteCelulaFiltragemConcentrado(e, diaIdx, pIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaFiltragemConcentrado(e, diaIdx, pIdx)}
-                                  title={
-                                    isFora
-                                      ? `⚠️ Desvio detectado (${isAlto ? "Acima" : "Abaixo"} do limite ideal: ${param.rotuloFaixa}).\nAlvo: ${param.alvo} ${param.unidade}\nAção: ${param.acaoRecomendada}`
-                                      : `${param.nome}\nAlvo: ${param.alvo} ${param.unidade} (Ideal: ${param.rotuloFaixa})`
-                                  }
-                                  className={`w-full text-center font-bold rounded py-1 px-1 text-xs border transition ${
-                                    isFora
-                                      ? "bg-rose-100 text-rose-950 border-rose-300 font-black ring-1 ring-rose-400"
-                                      : "bg-white text-slate-800 border-slate-200 hover:border-slate-300 focus:border-pink-500 focus:ring-1 focus:ring-pink-500"
-                                  }`}
-                                />
-                                {isFora && (
-                                  <span
-                                    className="absolute right-1 text-[9px] font-black text-rose-700 pointer-events-none"
-                                    title={isAlto ? "Acima da meta" : "Abaixo da meta"}
-                                  >
-                                    {isAlto ? "▲" : "▼"}
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Dica de Agilidade Excel */}
+            <div className="bg-pink-50/60 border border-pink-200 rounded-lg px-3 py-2 flex items-center justify-between gap-2 text-[11px] text-slate-700">
+              <div className="flex items-center gap-2">
+                <ClipboardPaste className="w-3.5 h-3.5 text-pink-700 shrink-0" />
+                <span>
+                  <strong className="text-pink-950">Visualização Otimizada & Preenchimento com Excel:</strong> Tabela de Filtragem estruturada com parâmetros em linhas e os 7 dias em colunas. Copie valores no Excel e dê <kbd className="px-1 py-0.5 bg-white border border-pink-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula, ou use o botão <strong>"Colar"</strong> na linha do parâmetro correspondente.
+                </span>
+              </div>
             </div>
+
+            {/* Configuração de Filtro Prensa em Operação por Dia da Semana */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-pink-600"></span>
+                <span className="text-xs font-bold text-slate-800">Filtro Prensa em Operação:</span>
+                <span className="text-[11px] text-slate-500">(Selecione o equipamento ativo para cada dia)</span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {[
+                  { dia: "Seg", idx: 0 },
+                  { dia: "Ter", idx: 1 },
+                  { dia: "Qua", idx: 2 },
+                  { dia: "Qui", idx: 3 },
+                  { dia: "Sex", idx: 4 },
+                  { dia: "Sáb", idx: 5 },
+                  { dia: "Dom", idx: 6 }
+                ].map(({ dia, idx }) => (
+                  <div key={dia} className="flex flex-col items-center bg-white border border-slate-200 rounded-lg px-2 py-1 shadow-2xs">
+                    <span className="text-[9px] font-extrabold text-slate-600 uppercase">{dia}</span>
+                    <select
+                      value={historicoDiarioFiltragemConcentrado[idx]?.filtroConcOp || "Ambos"}
+                      onChange={e => handleUpdateDiarioFiltragemConcentrado(idx, "filtroConcOp" as any, e.target.value)}
+                      className="bg-transparent border-0 font-bold text-[10px] text-slate-800 focus:ring-0 p-0 text-center cursor-pointer"
+                    >
+                      <option value="Ambos">Ambos</option>
+                      <option value="43FP001">43FP001</option>
+                      <option value="43FP002">43FP002</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* TABELA DE FILTRAGEM DE CONCENTRADO TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="filtragem"
+              accentColor="pink"
+              parametros={CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO}
+              historico={historicoDiarioFiltragemConcentrado}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioFiltragemConcentrado(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioFiltragemConcentrado: novoHist as any };
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados na Filtragem com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaFiltragem(chave)}
+            />
 
             {/* Modal para Colar Coluna do Excel (Filtragem de Concentrado) */}
             {modalColarColunaFiltragemAberto && (
@@ -5712,180 +4979,85 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
             {/* Dica de usabilidade do Excel */}
             <div className="flex items-center justify-between text-[11px] bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-600">
               <div className="flex items-center gap-1.5">
-                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-cyan-600" />
                 <span>
-                  <strong>Dica de Produtividade:</strong> Cole colunas inteiras do Excel ou navegue entre células usando as teclas de setas e Enter.
+                  <strong>Visualização Otimizada & Produtividade com Excel:</strong> Tabela de Utilidades & ETA estruturada com parâmetros em linhas e os 7 dias em colunas. Cole dados do Excel com <kbd className="px-1 py-0.5 bg-white border border-slate-300 rounded text-[10px] font-mono font-bold text-slate-800 shadow-2xs">Ctrl + V</kbd> em qualquer célula ou clique em <strong>"Colar"</strong> na linha do parâmetro.
                 </span>
               </div>
               <span className="text-[10px] text-slate-400 font-mono">Segunda a Domingo (7 dias)</span>
             </div>
 
-            {/* Tabela de Monitoramento Diário de Utilidades & ETA */}
-            <div className="overflow-x-auto rounded-xl border border-slate-300 shadow-2xs bg-white">
-              <table className="w-full text-center border-collapse text-[11px]">
-                <thead>
-                  {/* Linha 1: Grupos Principais com colSpan */}
-                  <tr className="bg-slate-900 text-white font-bold text-[10px]">
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[105px] text-left sticky left-0 bg-slate-900 z-20 align-middle">
-                      Dia da Semana
-                    </th>
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[95px] bg-slate-850 text-slate-200 align-middle">
-                      COMPRESSOR
-                    </th>
-                    <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[95px] bg-slate-850 text-slate-200 align-middle">
-                      BOMBAS ÁGUA
-                    </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-sky-900 text-sky-100">
-                      REDE DE AR INDUSTRIAL
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
-                      SISTEMAS DE ÁGUA & PROCESSO
-                    </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-950 text-teal-100">
-                      ESTAÇÃO TRATAMENTO DE ÁGUA (ETA)
-                    </th>
-                  </tr>
-
-                  {/* Linha 2: Parâmetros Individuais com botões de Colar */}
-                  <tr className="bg-slate-800 text-white font-semibold text-[10px] border-b border-slate-300">
-                    {CONFIG_PARAMETROS_UTILIDADES_ETA.map((param) => (
-                      <th
-                        key={param.chave}
-                        className="p-1.5 border-r border-slate-700 min-w-[100px] text-center align-top group hover:bg-slate-750 transition"
-                        title={`${param.nome} (${param.equipamento} - ${param.subsistema})\nAlvo: ${param.alvo} ${param.unidade} | Faixa Ideal: ${param.rotuloFaixa}`}
-                      >
-                        <div className="flex flex-col items-center justify-between h-full gap-1">
-                          <span className="font-bold text-slate-100 leading-tight">
-                            {param.nomeCurto}
-                          </span>
-                          <span className="text-[9px] text-slate-400 font-mono">
-                            {param.rotuloFaixa}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => abrirModalColarColunaUtilidades(param.chave)}
-                            className="mt-0.5 px-1.5 py-0.5 rounded bg-slate-700 hover:bg-cyan-600 text-[9px] text-slate-300 hover:text-white flex items-center gap-1 transition cursor-pointer opacity-80 hover:opacity-100"
-                            title={`Colar valores do Excel na coluna ${param.nomeCurto}`}
-                          >
-                            <FileSpreadsheet className="w-2.5 h-2.5" />
-                            <span>Colar</span>
-                          </button>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {historicoDiarioUtilidadesETA.map((diaObj, diaIdx) => {
-                    return (
-                      <tr key={diaObj.dia} className="border-b border-slate-200 hover:bg-cyan-50/30 transition">
-                        <td className="p-2 border-r border-slate-200 font-bold text-slate-800 text-left bg-slate-50 sticky left-0 z-10">
-                          <div className="flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-cyan-600"></span>
-                            <span>{diaObj.diaLabel}</span>
-                          </div>
-                        </td>
-
-                        {/* Status Compressores */}
-                        <td className="p-1 border-r border-slate-200 bg-slate-50/60">
-                          <select
-                            value={diaObj.compressoresOp || "Todos em Operação"}
-                            onChange={e => handleUpdateDiarioUtilidadesETA(diaIdx, "compressoresOp" as any, e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded px-1 py-1 text-[10px] font-bold text-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 cursor-pointer"
-                          >
-                            <option value="Todos em Operação">Todos Ativos</option>
-                            <option value="Comp 01 e 02">01 e 02</option>
-                            <option value="Comp 02 e 03">02 e 03</option>
-                            <option value="Comp 01 e 03">01 e 03</option>
-                            <option value="1 em Manutenção">1 Manut.</option>
-                          </select>
-                        </td>
-
-                        {/* Status Bombas Água */}
-                        <td className="p-1 border-r border-slate-200 bg-slate-50/60">
-                          <select
-                            value={diaObj.bombasAguaOp || "Ambas em Operação"}
-                            onChange={e => handleUpdateDiarioUtilidadesETA(diaIdx, "bombasAguaOp" as any, e.target.value)}
-                            className="w-full bg-white border border-slate-200 rounded px-1 py-1 text-[10px] font-bold text-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 cursor-pointer"
-                          >
-                            <option value="Ambas em Operação">Ambas Ativas</option>
-                            <option value="Apenas Bomba 01">Apenas 01</option>
-                            <option value="Apenas Bomba 02">Apenas 02</option>
-                            <option value="Rodízio Preventivo">Rodízio</option>
-                          </select>
-                        </td>
-
-                        {/* Parâmetros Operacionais */}
-                        {CONFIG_PARAMETROS_UTILIDADES_ETA.map((param, pIdx) => {
-                          const valRaw = (diaObj as any)[param.chave];
-                          const valNum = parseNumeroBritagem(valRaw);
-
-                          let isFora = false;
-                          let isAlto = false;
-
-                          if (valNum !== null) {
-                            if (param.tipoLimite === "min") {
-                              if (valNum < param.minIdeal) isFora = true;
-                            } else if (param.tipoLimite === "max") {
-                              if (valNum > param.maxIdeal) {
-                                isFora = true;
-                                isAlto = true;
-                              }
-                            } else {
-                              if (valNum > param.maxIdeal) {
-                                isFora = true;
-                                isAlto = true;
-                              } else if (valNum < param.minIdeal) {
-                                isFora = true;
-                              }
-                            }
-                          }
-
-                          return (
-                            <td
-                              key={param.chave}
-                              className={`p-1 border-r border-slate-200 transition ${
-                                isFora ? "bg-rose-50/70" : ""
-                              }`}
-                            >
-                              <div className="relative flex items-center">
-                                <input
-                                  id={`input-utilidades-${diaIdx}-${pIdx}`}
-                                  type="number"
-                                  step={param.decimais > 0 ? (param.decimais === 1 ? "0.1" : "0.01") : "1"}
-                                  value={valRaw !== undefined && valRaw !== null ? valRaw : ""}
-                                  placeholder="-"
-                                  onChange={e => handleUpdateDiarioUtilidadesETA(diaIdx, param.chave, e.target.value)}
-                                  onPaste={e => handlePasteCelulaUtilidadesETA(e, diaIdx, pIdx)}
-                                  onKeyDown={e => handleKeyDownCelulaUtilidadesETA(e, diaIdx, pIdx)}
-                                  title={
-                                    isFora
-                                      ? `⚠️ Desvio detectado (${isAlto ? "Acima" : "Abaixo"} do limite ideal: ${param.rotuloFaixa}).\nAlvo: ${param.alvo} ${param.unidade}\nAção: ${param.acaoRecomendada}`
-                                      : `${param.nome}\nAlvo: ${param.alvo} ${param.unidade} (Ideal: ${param.rotuloFaixa})`
-                                  }
-                                  className={`w-full text-center font-bold rounded py-1 px-1 text-xs border transition ${
-                                    isFora
-                                      ? "bg-rose-100 text-rose-950 border-rose-300 font-black ring-1 ring-rose-400"
-                                      : "bg-white text-slate-800 border-slate-200 hover:border-slate-300 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-                                  }`}
-                                />
-                                {isFora && (
-                                  <span
-                                    className="absolute right-1 w-1.5 h-1.5 rounded-full bg-rose-600 pointer-events-none"
-                                    title="Ponto fora da faixa operacional recomendada"
-                                  />
-                                )}
-                              </div>
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Configuração de Compressores e Bombas em Operação por Dia */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-600"></span>
+                <span className="text-xs font-bold text-slate-800">Equipamentos em Operação por Dia da Semana:</span>
+                <span className="text-[11px] text-slate-500">(Compressores e Bombas de Água)</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                {[
+                  { dia: "Segunda", diaCurto: "Seg", idx: 0 },
+                  { dia: "Terça", diaCurto: "Ter", idx: 1 },
+                  { dia: "Quarta", diaCurto: "Qua", idx: 2 },
+                  { dia: "Quinta", diaCurto: "Qui", idx: 3 },
+                  { dia: "Sexta", diaCurto: "Sex", idx: 4 },
+                  { dia: "Sábado", diaCurto: "Sáb", idx: 5 },
+                  { dia: "Domingo", diaCurto: "Dom", idx: 6 }
+                ].map(({ diaCurto, idx }) => (
+                  <div key={idx} className="bg-white border border-slate-200 rounded-lg p-2 flex flex-col gap-1 shadow-2xs">
+                    <span className="text-[9px] font-extrabold text-cyan-800 uppercase border-b border-slate-100 pb-0.5 text-center">
+                      {diaCurto}
+                    </span>
+                    <div className="flex flex-col gap-1">
+                      <div>
+                        <span className="text-[8px] text-slate-400 font-bold block">COMPRESSOR</span>
+                        <select
+                          value={historicoDiarioUtilidadesETA[idx]?.compressoresOp || "Todos em Operação"}
+                          onChange={e => handleUpdateDiarioUtilidadesETA(idx, "compressoresOp" as any, e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9.5px] font-bold text-slate-800 focus:bg-white"
+                        >
+                          <option value="Todos em Operação">Todos Ativos</option>
+                          <option value="Comp 01 e 02">01 e 02</option>
+                          <option value="Comp 02 e 03">02 e 03</option>
+                          <option value="Comp 01 e 03">01 e 03</option>
+                          <option value="1 em Manutenção">1 Manut.</option>
+                        </select>
+                      </div>
+                      <div>
+                        <span className="text-[8px] text-slate-400 font-bold block">BOMBAS ÁGUA</span>
+                        <select
+                          value={historicoDiarioUtilidadesETA[idx]?.bombasAguaOp || "Ambas em Operação"}
+                          onChange={e => handleUpdateDiarioUtilidadesETA(idx, "bombasAguaOp" as any, e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded px-1 py-0.5 text-[9.5px] font-bold text-slate-800 focus:bg-white"
+                        >
+                          <option value="Ambas em Operação">Ambas Ativas</option>
+                          <option value="Apenas Bomba 01">Apenas 01</option>
+                          <option value="Apenas Bomba 02">Apenas 02</option>
+                          <option value="Rodízio Preventivo">Rodízio</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {/* TABELA DE UTILIDADES & ETA TRANSPOSTA (LINHAS = PARÂMETROS, COLUNAS = DIAS) */}
+            <AdmOperationalTransposedTable
+              prefixId="utilidades"
+              accentColor="cyan"
+              parametros={CONFIG_PARAMETROS_UTILIDADES_ETA}
+              historico={historicoDiarioUtilidadesETA}
+              onUpdateCell={(diaIdx, chave, val) => handleUpdateDiarioUtilidadesETA(diaIdx, chave as any, val)}
+              onBulkUpdate={(novoHist, count) => {
+                const nextCE = { ...dadosCE, historicoDiarioUtilidadesETA: novoHist as any };
+                onChangeCE(nextCE);
+                setToastMensagem(`✅ ${count} valor(es) do Excel aplicados em Utilidades & ETA com sucesso!`);
+                setAcoesSincronizadasToast(true);
+                setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+              }}
+              onAbrirModalColar={(chave) => abrirModalColarColunaUtilidades(chave)}
+            />
 
             {/* Modal de Colagem Rápida do Excel (Utilidades & ETA) */}
             {modalColarColunaUtilidadesAberto && (

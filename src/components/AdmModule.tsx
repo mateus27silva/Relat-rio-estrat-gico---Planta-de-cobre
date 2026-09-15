@@ -96,7 +96,10 @@ function mesclarComExemplosCompletos(parsed: any, defaultInitial: RelatorioAdmPa
     historicoDiarioRebritagem: histRebritagem,
     anotacoesDesvios: brSalvo.anotacoesDesvios && Object.keys(brSalvo.anotacoesDesvios).length > 0
       ? brSalvo.anotacoesDesvios
-      : brPadrao.anotacoesDesvios
+      : brPadrao.anotacoesDesvios,
+    anotacoesDesviosRebritagem: brSalvo.anotacoesDesviosRebritagem && Object.keys(brSalvo.anotacoesDesviosRebritagem).length > 0
+      ? brSalvo.anotacoesDesviosRebritagem
+      : brPadrao.anotacoesDesviosRebritagem
   };
 
   const cePadrao = defaultInitial.dadosConcentradorEta;
@@ -107,9 +110,24 @@ function mesclarComExemplosCompletos(parsed: any, defaultInitial: RelatorioAdmPa
     anotacoesDesviosMoagem: ceSalvo.anotacoesDesviosMoagem && Object.keys(ceSalvo.anotacoesDesviosMoagem).length > 0
       ? ceSalvo.anotacoesDesviosMoagem
       : cePadrao.anotacoesDesviosMoagem,
+    anotacoesDesviosRemoagem: ceSalvo.anotacoesDesviosRemoagem && Object.keys(ceSalvo.anotacoesDesviosRemoagem).length > 0
+      ? ceSalvo.anotacoesDesviosRemoagem
+      : cePadrao.anotacoesDesviosRemoagem,
     anotacoesDesviosFlotacao: ceSalvo.anotacoesDesviosFlotacao && Object.keys(ceSalvo.anotacoesDesviosFlotacao).length > 0
       ? ceSalvo.anotacoesDesviosFlotacao
-      : cePadrao.anotacoesDesviosFlotacao
+      : cePadrao.anotacoesDesviosFlotacao,
+    anotacoesDesviosEspessamentoRejeito: ceSalvo.anotacoesDesviosEspessamentoRejeito && Object.keys(ceSalvo.anotacoesDesviosEspessamentoRejeito).length > 0
+      ? ceSalvo.anotacoesDesviosEspessamentoRejeito
+      : cePadrao.anotacoesDesviosEspessamentoRejeito,
+    anotacoesDesviosEspessamentoConcentrado: ceSalvo.anotacoesDesviosEspessamentoConcentrado && Object.keys(ceSalvo.anotacoesDesviosEspessamentoConcentrado).length > 0
+      ? ceSalvo.anotacoesDesviosEspessamentoConcentrado
+      : cePadrao.anotacoesDesviosEspessamentoConcentrado,
+    anotacoesDesviosFiltragemConcentrado: ceSalvo.anotacoesDesviosFiltragemConcentrado && Object.keys(ceSalvo.anotacoesDesviosFiltragemConcentrado).length > 0
+      ? ceSalvo.anotacoesDesviosFiltragemConcentrado
+      : cePadrao.anotacoesDesviosFiltragemConcentrado,
+    anotacoesDesviosUtilidadesETA: ceSalvo.anotacoesDesviosUtilidadesETA && Object.keys(ceSalvo.anotacoesDesviosUtilidadesETA).length > 0
+      ? ceSalvo.anotacoesDesviosUtilidadesETA
+      : cePadrao.anotacoesDesviosUtilidadesETA
   };
 
   const diretrizesTurno = (parsed.diretrizesTurno && Array.isArray(parsed.diretrizesTurno) && parsed.diretrizesTurno.length >= 4)

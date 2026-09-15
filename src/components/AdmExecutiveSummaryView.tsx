@@ -53,6 +53,7 @@ import {
   obterLeituraAtualRebritagem,
   obterAcaoEstrategicaRebritagem,
   calcularCartasControleRebritagem,
+  detectarDesviosRebritagem,
   CONFIG_PARAMETROS_MOAGEM,
   DADOS_DIARIOS_MOAGEM_PADRAO,
   calcularCartasControleMoagem,
@@ -275,8 +276,16 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
             .filter((v): v is number => v !== null && !isNaN(v));
           const minLido = valoresValidos.length > 0 ? Math.min(...valoresValidos) : p.minIdeal;
           const maxLido = valoresValidos.length > 0 ? Math.max(...valoresValidos) : p.maxIdeal;
-          const yMin = isMinOnly ? Math.min(p.minIdeal * 0.95, minLido * 0.98) : isMaxOnly ? 0 : Math.min(p.minIdeal * 0.94, minLido * 0.97);
-          const yMax = isMaxOnly ? Math.max(p.maxIdeal * 1.25, maxLido * 1.1) : isMinOnly ? Math.max(p.alvo * 1.05, maxLido * 1.02) : Math.max(p.maxIdeal * 1.06, maxLido * 1.03);
+          const yMin = isMinOnly
+            ? Math.min(p.minIdeal * 0.94, minLido * 0.97)
+            : isMaxOnly
+            ? 0
+            : Math.min(p.minIdeal * 0.94, minLido * 0.97);
+          const yMax = isMaxOnly
+            ? Math.max(p.maxIdeal * 1.06, maxLido * 1.03)
+            : isMinOnly
+            ? Math.max(p.alvo * 1.06, maxLido * 1.03)
+            : Math.max(p.maxIdeal * 1.06, maxLido * 1.03);
           const ySpan = yMax - yMin || 1;
 
           // SVG dimensions
@@ -301,7 +310,11 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
             const x = padL + (d / 6) * plotW;
             const val = item.valor;
             const isFora = val !== null && (
-              isMinOnly ? val < p.minIdeal : isMaxOnly ? val > p.maxIdeal : (val > p.maxIdeal || val < p.minIdeal)
+              isMinOnly
+                ? val < p.minIdeal
+                : isMaxOnly
+                ? val > p.maxIdeal
+                : (val > p.maxIdeal || val < p.minIdeal)
             );
             const y = val !== null ? getY(val) : null;
             return { x, y, val, isFora, diaLabel: dayLabelsMin[d] };
@@ -313,6 +326,14 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
           );
           const polylinePts = validPoints.map(pt => `${pt.x},${pt.y}`).join(" ");
 
+          const equipText =
+            p.equipamento &&
+            !p.nome.includes(p.equipamento) &&
+            !(p.nomeCurto && p.nomeCurto.includes(p.equipamento))
+              ? ` • ${p.equipamento}`
+              : "";
+          const nomeDisplay = p.nomeCurto || p.nome;
+
           return (
             <div
               key={p.chave || idx}
@@ -323,7 +344,7 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
             >
               <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
                 <span className="font-bold text-xs text-slate-900 truncate">
-                  {idx + 1}. {p.nomeCurto || p.nome} {p.equipamento ? `(${p.equipamento})` : `(${p.unidade})`}
+                  {idx + 1}. {nomeDisplay} ({p.unidade}){equipText}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <span className="text-[9px] font-semibold text-slate-500">
@@ -342,27 +363,17 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
               </div>
 
               <div className="flex items-center justify-between text-[10px] font-semibold flex-wrap gap-1">
-                {isMinOnly ? (
-                  <span className="text-blue-600 flex items-center gap-1 font-bold">
+                {!isMaxOnly && (
+                  <span className="text-blue-600 flex items-center gap-1 font-semibold">
                     <span className="w-2.5 h-0.5 bg-blue-500 inline-block border-t border-dashed"></span>
-                    Limite Mínimo: {(p as any).rotuloFaixa || `> ${p.minIdeal} ${p.unidade}`}
+                    LIC: {p.minIdeal} {p.unidade}
                   </span>
-                ) : isMaxOnly ? (
-                  <span className="text-rose-600 flex items-center gap-1 font-bold">
+                )}
+                {!isMinOnly && (
+                  <span className="text-rose-600 flex items-center gap-1 font-semibold">
                     <span className="w-2.5 h-0.5 bg-rose-500 inline-block border-t border-dashed"></span>
-                    Limite Máximo: {(p as any).rotuloFaixa || `< ${p.maxIdeal} ${p.unidade}`}
+                    LSC: {p.maxIdeal} {p.unidade}
                   </span>
-                ) : (
-                  <>
-                    <span className="text-blue-600 flex items-center gap-1">
-                      <span className="w-2.5 h-0.5 bg-blue-500 inline-block border-t border-dashed"></span>
-                      LIC: {p.minIdeal} {p.unidade}
-                    </span>
-                    <span className="text-rose-600 flex items-center gap-1">
-                      <span className="w-2.5 h-0.5 bg-rose-500 inline-block border-t border-dashed"></span>
-                      LSC: {p.maxIdeal} {p.unidade}
-                    </span>
-                  </>
                 )}
                 <span className="text-emerald-800 font-bold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
@@ -370,80 +381,81 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
                 </span>
               </div>
 
-              <div className="w-full overflow-hidden">
-                <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-auto max-h-[110px]">
-                  {/* Faixa Ideal */}
-                  {isMinOnly ? (
-                    <rect
-                      x={padL}
-                      y={padT}
-                      width={plotW}
-                      height={Math.max(0, licY - padT)}
-                      fill="#f0fdf4"
-                      opacity="0.9"
-                    />
-                  ) : isMaxOnly ? (
-                    <rect
-                      x={padL}
-                      y={lscY}
-                      width={plotW}
-                      height={Math.max(0, (padT + plotH) - lscY)}
-                      fill="#f0fdf4"
-                      opacity="0.9"
-                    />
-                  ) : (
-                    <rect
-                      x={padL}
-                      y={Math.min(lscY, licY)}
-                      width={plotW}
-                      height={Math.abs(licY - lscY)}
-                      fill="#f0fdf4"
-                      opacity="0.9"
-                    />
-                  )}
-
+              {/* Gráfico SVG da Carta de Shewhart */}
+              <div className="w-full overflow-hidden bg-slate-50/90 rounded border border-slate-200 p-1">
+                <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-auto">
                   {/* Linhas de Limite */}
+                  {/* LSC */}
                   {!isMinOnly && (
-                    <line
-                      x1={padL}
-                      y1={lscY}
-                      x2={padL + plotW}
-                      y2={lscY}
-                      stroke="#ef4444"
-                      strokeWidth="1.2"
-                      strokeDasharray="3,2"
-                    />
-                  )}
-                  {!isMaxOnly && (
-                    <line
-                      x1={padL}
-                      y1={licY}
-                      x2={padL + plotW}
-                      y2={licY}
-                      stroke="#3b82f6"
-                      strokeWidth="1.2"
-                      strokeDasharray="3,2"
-                    />
+                    <>
+                      <line
+                        x1={padL}
+                        y1={lscY}
+                        x2={svgW - padR}
+                        y2={lscY}
+                        stroke="#f43f5e"
+                        strokeWidth="1"
+                        strokeDasharray="4 2"
+                      />
+                      <text
+                        x={padL - 4}
+                        y={lscY + 3}
+                        textAnchor="end"
+                        fontSize="7.5"
+                        fill="#f43f5e"
+                        fontWeight="bold"
+                      >
+                        LSC
+                      </text>
+                    </>
                   )}
 
-                  {/* Polyline */}
+                  {/* LIC */}
+                  {!isMaxOnly && (
+                    <>
+                      <line
+                        x1={padL}
+                        y1={licY}
+                        x2={svgW - padR}
+                        y2={licY}
+                        stroke="#2563eb"
+                        strokeWidth="1"
+                        strokeDasharray="4 2"
+                      />
+                      <text
+                        x={padL - 4}
+                        y={licY + 3}
+                        textAnchor="end"
+                        fontSize="7.5"
+                        fill="#2563eb"
+                        fontWeight="bold"
+                      >
+                        LIC
+                      </text>
+                    </>
+                  )}
+
+                  {/* Linha da Série do Realizado */}
                   {polylinePts && (
                     <polyline
                       fill="none"
-                      stroke="#0f766e"
-                      strokeWidth="2.2"
+                      stroke="#047857"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       points={polylinePts}
                     />
                   )}
 
-                  {/* Pontos Diários */}
-                  {points.map((pt, d) => (
-                    <g key={d}>
+                  {/* Pontos diários */}
+                  {points.map((pt, pIdx) => (
+                    <g key={pIdx}>
+                      {/* Eixo X Rótulo */}
                       <text
                         x={pt.x}
                         y={svgH - 4}
                         textAnchor="middle"
-                        fontSize="8.5"
+                        fontSize="8"
                         fontWeight="600"
                         fill="#475569"
                       >
@@ -462,7 +474,15 @@ const GradeCartasControle: React.FC<GradeCartasControleProps> = ({
                           />
                           <text
                             x={pt.x}
-                            y={pt.y < (lscY + licY) / 2 ? pt.y - 6 : pt.y + 11}
+                            y={
+                              isMinOnly
+                                ? pt.y - 6
+                                : isMaxOnly
+                                ? pt.y + 11
+                                : pt.y < (lscY + licY) / 2
+                                ? pt.y - 6
+                                : pt.y + 11
+                            }
                             textAnchor="middle"
                             fontSize="7.5"
                             fontWeight={pt.isFora ? "bold" : "600"}
@@ -2060,203 +2080,13 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
 
               {/* 1.1 CARTAS DE CONTROLE ESTATÍSTICO (CEP) & MONITORAMENTO INDIVIDUAL */}
               {isSeco && (
-                <div className="pt-3 space-y-2">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-[11px] font-black text-[#0A2028] uppercase tracking-wide flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5 text-[#007369]" />
-                        1.1 Cartas de Controle Estatístico (CEP) — Monitoramento Individual (41BR001 / 41TC001)
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-500">
-                        14 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias
-                      </span>
-                    </div>
-
-                    {(() => {
-                      const histDiario = br.historicoDiarioBritagem && br.historicoDiarioBritagem.length === 7
-                        ? br.historicoDiarioBritagem
-                        : DADOS_DIARIOS_BRITAGEM_PADRAO;
-                      const estatisticasCartas = calcularCartasControleBritagem(histDiario);
-                      const dayLabelsMin = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-
-                      return (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {estatisticasCartas.map((stat, idx) => {
-                            const p = stat.parametro;
-                            const temDesvio = stat.pontosForaFaixa > 0;
-                            const valoresValidos = stat.valoresPorDia
-                              .map(v => v.valor)
-                              .filter((v): v is number => v !== null && !isNaN(v));
-                            const minLido = valoresValidos.length > 0 ? Math.min(...valoresValidos) : p.minIdeal;
-                            const maxLido = valoresValidos.length > 0 ? Math.max(...valoresValidos) : p.maxIdeal;
-                            const yMin = Math.min(p.minIdeal * 0.94, minLido * 0.97);
-                            const yMax = Math.max(p.maxIdeal * 1.06, maxLido * 1.03);
-                            const ySpan = yMax - yMin || 1;
-
-                            // SVG dimensions
-                            const svgW = 320;
-                            const svgH = 95;
-                            const padL = 32;
-                            const padR = 18;
-                            const padT = 14;
-                            const padB = 22;
-                            const plotW = svgW - padL - padR;
-                            const plotH = svgH - padT - padB;
-
-                            const getY = (val: number) => {
-                              const clamped = Math.max(yMin, Math.min(yMax, val));
-                              return padT + plotH - ((clamped - yMin) / ySpan) * plotH;
-                            };
-
-                            const lscY = getY(p.maxIdeal);
-                            const lcY = getY(p.alvo);
-                            const licY = getY(p.minIdeal);
-
-                            const points = stat.valoresPorDia.map((item, d) => {
-                              const x = padL + (d / 6) * plotW;
-                              const val = item.valor;
-                              const isFora = val !== null && (val > p.maxIdeal || val < p.minIdeal);
-                              const y = val !== null ? getY(val) : null;
-                              return { x, y, val, isFora, diaLabel: dayLabelsMin[d] };
-                            });
-
-                            const validPoints = points.filter((pt): pt is { x: number; y: number; val: number; isFora: boolean; diaLabel: string } => pt.val !== null && pt.y !== null);
-                            const polylinePts = validPoints.map(pt => `${pt.x},${pt.y}`).join(" ");
-
-                            return (
-                              <div
-                                key={p.chave}
-                                className={`bg-white rounded-lg border p-3 shadow-2xs space-y-2 ${
-                                  temDesvio ? "border-rose-300 bg-rose-50/20" : "border-slate-300"
-                                }`}
-                              >
-                                <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                                  <span className="font-bold text-xs text-slate-900 truncate">
-                                    {idx + 1}. {p.nomeCurto} ({p.unidade})
-                                  </span>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="text-[9px] font-semibold text-slate-500">
-                                      Média: {stat.media} {p.unidade}
-                                    </span>
-                                    <span
-                                      className={`text-[9.5px] font-bold px-2 py-0.5 rounded-md ${
-                                        temDesvio
-                                          ? "bg-rose-100 text-rose-800 border border-rose-200"
-                                          : "bg-teal-50 text-teal-800 border border-teal-200"
-                                      }`}
-                                    >
-                                      {temDesvio ? `Desvio (${stat.pontosForaFaixa}x)` : "Controlado"}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div className="flex items-center justify-between text-[10px] font-semibold flex-wrap gap-1">
-                                  <span className="text-blue-600 flex items-center gap-1">
-                                    <span className="w-2.5 h-0.5 bg-blue-500 inline-block border-t border-dashed"></span>
-                                    LIC: {p.minIdeal} {p.unidade}
-                                  </span>
-                                  <span className="text-rose-600 flex items-center gap-1">
-                                    <span className="w-2.5 h-0.5 bg-rose-500 inline-block border-t border-dashed"></span>
-                                    LSC: {p.maxIdeal} {p.unidade}
-                                  </span>
-                                  <span className="text-emerald-800 font-bold flex items-center gap-1">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
-                                    Realizado (Curva Diária)
-                                  </span>
-                                </div>
-
-                                {/* Gráfico SVG da Carta de Shewhart */}
-                                <div className="w-full overflow-hidden bg-slate-50/90 rounded border border-slate-200 p-1">
-                                  <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-auto">
-                                    {/* Linhas de Limite */}
-                                    {/* LSC */}
-                                    <line
-                                      x1={padL}
-                                      y1={lscY}
-                                      x2={svgW - padR}
-                                      y2={lscY}
-                                      stroke="#f43f5e"
-                                      strokeWidth="1"
-                                      strokeDasharray="4 2"
-                                    />
-                                    <text x={padL - 4} y={lscY + 3} textAnchor="end" fontSize="7.5" fill="#f43f5e" fontWeight="bold">
-                                      LSC
-                                    </text>
-
-                                    {/* LIC */}
-                                    <line
-                                      x1={padL}
-                                      y1={licY}
-                                      x2={svgW - padR}
-                                      y2={licY}
-                                      stroke="#2563eb"
-                                      strokeWidth="1"
-                                      strokeDasharray="4 2"
-                                    />
-                                    <text x={padL - 4} y={licY + 3} textAnchor="end" fontSize="7.5" fill="#2563eb" fontWeight="bold">
-                                      LIC
-                                    </text>
-
-                                    {/* Linha da Série do Realizado */}
-                                    {polylinePts && (
-                                      <polyline
-                                        fill="none"
-                                        stroke="#047857"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        points={polylinePts}
-                                      />
-                                    )}
-
-                                    {/* Pontos diários */}
-                                    {points.map((pt, pIdx) => (
-                                      <g key={pIdx}>
-                                        {/* Eixo X Rótulo */}
-                                        <text
-                                          x={pt.x}
-                                          y={svgH - 4}
-                                          textAnchor="middle"
-                                          fontSize="8"
-                                          fontWeight="600"
-                                          fill="#475569"
-                                        >
-                                          {pt.diaLabel}
-                                        </text>
-
-                                        {pt.val !== null && pt.y !== null && (
-                                          <>
-                                            <circle
-                                              cx={pt.x}
-                                              cy={pt.y}
-                                              r={pt.isFora ? "4" : "3"}
-                                              fill={pt.isFora ? "#e11d48" : "#047857"}
-                                              stroke="#ffffff"
-                                              strokeWidth="1.5"
-                                            />
-                                            <text
-                                              x={pt.x}
-                                              y={pt.y < (lscY + licY) / 2 ? pt.y - 6 : pt.y + 11}
-                                              textAnchor="middle"
-                                              fontSize="7.5"
-                                              fontWeight={pt.isFora ? "bold" : "600"}
-                                              fill={pt.isFora ? "#be123c" : "#0f172a"}
-                                            >
-                                              {p.decimais > 0 ? pt.val.toFixed(p.decimais).replace(".", ",") : pt.val}
-                                            </text>
-                                          </>
-                                        )}
-                                      </g>
-                                    ))}
-                                  </svg>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
+                <GradeCartasControle
+                  idPrefix="cep-britagem"
+                  titulo="1.1 Cartas de Controle Estatístico (CEP) — Monitoramento Individual (41BR001 / 41TC001)"
+                  subtitulo="14 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                  estatisticas={estatisticasBritagem}
+                />
+              )}
 
                 {/* 1.2 MONITORAMENTO OPERACIONAL E MECÂNICO: REBRITAGEM & PENEIRAMENTO (BR001 a BR006) */}
                 {isSeco && (
@@ -2351,192 +2181,12 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
 
                 {/* 1.3 CARTAS DE CONTROLE ESTATÍSTICO (CEP) & MONITORAMENTO REBRITAGEM */}
                 {isSeco && (
-                  <div className="pt-3 space-y-2">
-                    <div className="flex items-center justify-between border-b border-slate-200 pb-1.5">
-                      <span className="text-[11px] font-black text-[#0A2028] uppercase tracking-wide flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5 text-[#007369]" />
-                        1.3 Cartas de Controle Estatístico (CEP) — Rebritagem & Peneiramento (BR001 a BR006)
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-500">
-                        28 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias
-                      </span>
-                    </div>
-
-                    {(() => {
-                      const histDiario = br.historicoDiarioRebritagem && br.historicoDiarioRebritagem.length === 7
-                        ? br.historicoDiarioRebritagem
-                        : DADOS_DIARIOS_REBRITAGEM_PADRAO;
-                      const estatisticasCartas = calcularCartasControleRebritagem(histDiario);
-                      const dayLabelsMin = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-
-                      return (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {estatisticasCartas.map((stat, idx) => {
-                            const p = stat.parametro;
-                            const temDesvio = stat.pontosForaFaixa > 0;
-                            const valoresValidos = stat.valoresPorDia
-                              .map(v => v.valor)
-                              .filter((v): v is number => v !== null && !isNaN(v));
-                            const minLido = valoresValidos.length > 0 ? Math.min(...valoresValidos) : p.minIdeal;
-                            const maxLido = valoresValidos.length > 0 ? Math.max(...valoresValidos) : p.maxIdeal;
-                            const yMin = Math.min(p.minIdeal * 0.94, minLido * 0.97);
-                            const yMax = Math.max(p.maxIdeal * 1.06, maxLido * 1.03);
-                            const ySpan = yMax - yMin || 1;
-
-                            // SVG dimensions
-                            const svgW = 320;
-                            const svgH = 95;
-                            const padL = 32;
-                            const padR = 18;
-                            const padT = 14;
-                            const padB = 22;
-                            const plotW = svgW - padL - padR;
-                            const plotH = svgH - padT - padB;
-
-                            const getY = (val: number) => {
-                              const clamped = Math.max(yMin, Math.min(yMax, val));
-                              return padT + plotH - ((clamped - yMin) / ySpan) * plotH;
-                            };
-
-                            const lscY = getY(p.maxIdeal);
-                            const licY = getY(p.minIdeal);
-
-                            const points = stat.valoresPorDia.map((item, d) => {
-                              const x = padL + (d / 6) * plotW;
-                              const val = item.valor;
-                              const isFora = val !== null && (val > p.maxIdeal || val < p.minIdeal);
-                              const y = val !== null ? getY(val) : null;
-                              return { x, y, val, isFora, diaLabel: dayLabelsMin[d] };
-                            });
-
-                            const validPoints = points.filter((pt): pt is { x: number; y: number; val: number; isFora: boolean; diaLabel: string } => pt.val !== null && pt.y !== null);
-                            const polylinePts = validPoints.map(pt => `${pt.x},${pt.y}`).join(" ");
-
-                            return (
-                              <div
-                                key={p.chave}
-                                className={`bg-white rounded-lg border p-3 shadow-2xs space-y-2 ${
-                                  temDesvio ? "border-rose-300 bg-rose-50/20" : "border-slate-300"
-                                }`}
-                              >
-                                <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
-                                  <span className="font-bold text-xs text-slate-900 truncate">
-                                    {idx + 1}. {p.nome} ({p.equipamento})
-                                  </span>
-                                  <div className="flex items-center gap-1.5">
-                                    <span
-                                      className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                                        temDesvio
-                                          ? "bg-rose-100 text-rose-800 border border-rose-200"
-                                          : "bg-teal-100 text-teal-800 border border-teal-200"
-                                      }`}
-                                    >
-                                      {temDesvio ? `Desvio (${stat.pontosForaFaixa}x)` : "Controlado"}
-                                    </span>
-                                  </div>
-                                </div>
-
-                                <div className="flex justify-between text-[10px] font-mono">
-                                  <span className="text-blue-700 font-bold">
-                                    LIC: {p.minIdeal} {p.unidade}
-                                  </span>
-                                  <span className="text-red-700 font-bold">
-                                    LSC: {p.maxIdeal} {p.unidade}
-                                  </span>
-                                </div>
-
-                                <div className="w-full overflow-hidden">
-                                  <svg
-                                    viewBox={`0 0 ${svgW} ${svgH}`}
-                                    className="w-full h-auto max-h-[110px]"
-                                  >
-                                    {/* Faixa Ideal */}
-                                    <rect
-                                      x={padL}
-                                      y={Math.min(lscY, licY)}
-                                      width={plotW}
-                                      height={Math.abs(licY - lscY)}
-                                      fill="#f0fdf4"
-                                      opacity="0.9"
-                                    />
-
-                                    {/* Linhas de Limite */}
-                                    <line
-                                      x1={padL}
-                                      y1={lscY}
-                                      x2={padL + plotW}
-                                      y2={lscY}
-                                      stroke="#ef4444"
-                                      strokeWidth="1.2"
-                                      strokeDasharray="3,2"
-                                    />
-                                    <line
-                                      x1={padL}
-                                      y1={licY}
-                                      x2={padL + plotW}
-                                      y2={licY}
-                                      stroke="#3b82f6"
-                                      strokeWidth="1.2"
-                                      strokeDasharray="3,2"
-                                    />
-
-                                    {/* Polyline */}
-                                    {polylinePts && (
-                                      <polyline
-                                        fill="none"
-                                        stroke="#0f766e"
-                                        strokeWidth="2.2"
-                                        points={polylinePts}
-                                      />
-                                    )}
-
-                                    {/* Pontos Diários */}
-                                    {points.map((pt, d) => (
-                                      <g key={d}>
-                                        <text
-                                          x={pt.x}
-                                          y={svgH - 4}
-                                          textAnchor="middle"
-                                          fontSize="8.5"
-                                          fontWeight="600"
-                                          fill="#475569"
-                                        >
-                                          {pt.diaLabel}
-                                        </text>
-
-                                        {pt.val !== null && pt.y !== null && (
-                                          <>
-                                            <circle
-                                              cx={pt.x}
-                                              cy={pt.y}
-                                              r={pt.isFora ? "4" : "3"}
-                                              fill={pt.isFora ? "#e11d48" : "#047857"}
-                                              stroke="#ffffff"
-                                              strokeWidth="1.5"
-                                            />
-                                            <text
-                                              x={pt.x}
-                                              y={pt.y < (lscY + licY) / 2 ? pt.y - 6 : pt.y + 11}
-                                              textAnchor="middle"
-                                              fontSize="7.5"
-                                              fontWeight={pt.isFora ? "bold" : "600"}
-                                              fill={pt.isFora ? "#be123c" : "#0f172a"}
-                                            >
-                                              {p.decimais > 0 ? pt.val.toFixed(p.decimais).replace(".", ",") : pt.val}
-                                            </text>
-                                          </>
-                                        )}
-                                      </g>
-                                    ))}
-                                  </svg>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    })()}
-                  </div>
+                  <GradeCartasControle
+                    idPrefix="cep-rebritagem"
+                    titulo="1.3 Cartas de Controle Estatístico (CEP) — Rebritagem & Peneiramento (BR001 a BR006)"
+                    subtitulo="28 Parâmetros • Curva Diária 7 Dias (Seg-Dom) • Sem Médias"
+                    estatisticas={estatisticasRebritagem}
+                  />
                 )}
             </div>
           )}
@@ -2563,6 +2213,12 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                         ? br.historicoDiarioBritagem
                         : DADOS_DIARIOS_BRITAGEM_PADRAO,
                       br.anotacoesDesvios
+                    ),
+                    ...detectarDesviosRebritagem(
+                      br.historicoDiarioRebritagem && br.historicoDiarioRebritagem.length === 7
+                        ? br.historicoDiarioRebritagem
+                        : DADOS_DIARIOS_REBRITAGEM_PADRAO,
+                      br.anotacoesDesviosRebritagem
                     )
                   ]
                 : [
