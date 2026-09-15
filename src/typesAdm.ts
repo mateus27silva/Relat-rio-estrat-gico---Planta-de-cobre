@@ -268,7 +268,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "produtividadeTph",
     equipamento: "41BR001",
-    nome: "Produtividade (tph)",
+    nome: "Produtividade",
     nomeCurto: "Produtividade",
     subsistema: "Desempenho Britagem",
     unidade: "tph",
@@ -282,7 +282,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "posicaoManto",
     equipamento: "41BR001",
-    nome: "Posição do Manto (%)",
+    nome: "Posição do Manto",
     nomeCurto: "Pos. Manto",
     subsistema: "Câmara de Britagem",
     unidade: "%",
@@ -296,7 +296,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "afericaoBritador",
     equipamento: "41BR001",
-    nome: "Aferição do Britador (\")",
+    nome: "Aferição do Britador",
     nomeCurto: "Aferição",
     subsistema: "GAP Hidráulico",
     unidade: '"',
@@ -310,7 +310,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "vazaoOleoBuchaInterna",
     equipamento: "41BR001",
-    nome: "Vazão de Óleo - Bucha Interna (l/m)",
+    nome: "Vazão de Óleo - Bucha Interna",
     nomeCurto: "Vazão B. Interna",
     subsistema: "Conjunto Excêntrico",
     unidade: "l/m",
@@ -324,7 +324,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "vazaoOleoBuchaExterna",
     equipamento: "41BR001",
-    nome: "Vazão de Óleo - Bucha Externa (l/m)",
+    nome: "Vazão de Óleo - Bucha Externa",
     nomeCurto: "Vazão B. Externa",
     subsistema: "Mancal Cônico Externo",
     unidade: "l/m",
@@ -338,7 +338,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "pressaoOleoLubrificante",
     equipamento: "41BR001",
-    nome: "Pressão do Óleo Lubrificante (Kg/cm²)",
+    nome: "Pressão do Óleo Lubrificante",
     nomeCurto: "Pressão Óleo Lub.",
     subsistema: "Skid de Lubrificação",
     unidade: "Kg/cm²",
@@ -352,7 +352,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "pressaoArAcumulador",
     equipamento: "41BR001",
-    nome: "Pressão Óleo Hidráulico (kg/cm²)",
+    nome: "Pressão Óleo Hidráulico",
     nomeCurto: "Pressão Óleo Hidr.",
     subsistema: "Sistema Hidráulico",
     unidade: "kg/cm²",
@@ -366,7 +366,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "pressaoArAc1",
     equipamento: "41BR001",
-    nome: "Pressão Ar - Acumulador 1 (kg/cm²)",
+    nome: "Pressão Ar - Acumulador 1",
     nomeCurto: "Pressão Ar Ac. 1",
     subsistema: "Banco de Alívio (Ac. 1)",
     unidade: "kg/cm²",
@@ -380,7 +380,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "pressaoArAc2",
     equipamento: "41BR001",
-    nome: "Pressão Ar - Acumulador 2 (kg/cm²)",
+    nome: "Pressão Ar - Acumulador 2",
     nomeCurto: "Pressão Ar Ac. 2",
     subsistema: "Banco de Alívio (Ac. 2)",
     unidade: "kg/cm²",
@@ -394,7 +394,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "pressaoAguaResfriamento",
     equipamento: "41BR001",
-    nome: "Pressão da Água de Resfriamento (Kg/cm²)",
+    nome: "Pressão da Água de Resfriamento",
     nomeCurto: "Pressão Água Resfr.",
     subsistema: "Trocador de Calor",
     unidade: "Kg/cm²",
@@ -408,7 +408,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "amperagemMotor41TC001",
     equipamento: "41TC001",
-    nome: "41TC001 - Amperagem do Motor (A)",
+    nome: "41TC001 - Amperagem do Motor",
     nomeCurto: "Amp. 41TC001",
     subsistema: "Transportador 41TC001",
     unidade: "A",
@@ -422,7 +422,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "amperagemMotor41BR001",
     equipamento: "41BR001",
-    nome: "41BR001 - Amperagem do Motor (A)",
+    nome: "41BR001 - Amperagem do Motor",
     nomeCurto: "Amp. 41BR001",
     subsistema: "Britador 41BR001",
     unidade: "A",
@@ -436,7 +436,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "temperaturaOleoRetorno",
     equipamento: "41BR001",
-    nome: "Temperatura Óleo - Retorno (ºC)",
+    nome: "Temperatura Óleo - Retorno",
     nomeCurto: "Temp. Retorno",
     subsistema: "Circuito de Retorno",
     unidade: "ºC",
@@ -450,7 +450,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "temperaturaOleoBuchaExterna",
     equipamento: "41BR001",
-    nome: "Temperatura Óleo - Bucha Externa (ºC)",
+    nome: "Temperatura Óleo - Bucha Externa",
     nomeCurto: "Temp. B. Externa",
     subsistema: "Mancal Externo",
     unidade: "ºC",
@@ -464,7 +464,7 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
   {
     chave: "temperaturaOleoBuchaInterna",
     equipamento: "41BR001",
-    nome: "Temperatura Óleo - Bucha Interna (ºC)",
+    nome: "Temperatura Óleo - Bucha Interna",
     nomeCurto: "Temp. B. Interna",
     subsistema: "Mancal Interno",
     unidade: "ºC",
@@ -1482,8 +1482,8 @@ export const CONFIG_PARAMETROS_REMOAGEM: ParametroConfigRemoagem[] = [
   },
   {
     chave: "densidadeProdutoHig",
-    nome: "Densidade feed (g/t)",
-    nomeCurto: "Densidade feed (g/t)",
+    nome: "Densidade feed",
+    nomeCurto: "Densidade feed",
     unidade: "g/t",
     minIdeal: 1.44,
     maxIdeal: 1.55,
@@ -1799,8 +1799,8 @@ export const CONFIG_PARAMETROS_FLOTACAO: ParametroConfigFlotacao[] = [
   },
   {
     chave: "dosagemCmc",
-    nome: "Dosagem de CMC (g/t)",
-    nomeCurto: "Dosagem de CMC (g/t)",
+    nome: "Dosagem de CMC",
+    nomeCurto: "Dosagem de CMC",
     unidade: "g/t",
     minIdeal: 140,
     maxIdeal: 240,
@@ -1811,8 +1811,8 @@ export const CONFIG_PARAMETROS_FLOTACAO: ParametroConfigFlotacao[] = [
   },
   {
     chave: "dosagemAmidex",
-    nome: "Dosagem de AMIDEX (g/t)",
-    nomeCurto: "Dosagem de AMIDEX (g/t)",
+    nome: "Dosagem de AMIDEX",
+    nomeCurto: "Dosagem de AMIDEX",
     unidade: "g/t",
     minIdeal: 35,
     maxIdeal: 80,
@@ -1823,8 +1823,8 @@ export const CONFIG_PARAMETROS_FLOTACAO: ParametroConfigFlotacao[] = [
   },
   {
     chave: "dosagemColetor",
-    nome: "Dosagem de Coletor (g/t)",
-    nomeCurto: "Dosagem de Coletor (g/t)",
+    nome: "Dosagem de Coletor",
+    nomeCurto: "Dosagem de Coletor",
     unidade: "g/t",
     minIdeal: 20,
     maxIdeal: 45,
@@ -1835,8 +1835,8 @@ export const CONFIG_PARAMETROS_FLOTACAO: ParametroConfigFlotacao[] = [
   },
   {
     chave: "dosagemEspumante",
-    nome: "Dosagem de Espumante (g/t)",
-    nomeCurto: "Dosagem de Espumante (g/t)",
+    nome: "Dosagem de Espumante",
+    nomeCurto: "Dosagem de Espumante",
     unidade: "g/t",
     minIdeal: 15,
     maxIdeal: 35,
@@ -1886,8 +1886,8 @@ export const CONFIG_PARAMETROS_FLOTACAO: ParametroConfigFlotacao[] = [
   },
   {
     chave: "teorCf",
-    nome: "Teor de CF (%)",
-    nomeCurto: "Teor de CF (%)",
+    nome: "Teor de CF",
+    nomeCurto: "Teor de CF",
     unidade: "%",
     minIdeal: 33.5,
     maxIdeal: 40.0,
@@ -1903,8 +1903,8 @@ export const CONFIG_PARAMETROS_FLOTACAO: ParametroConfigFlotacao[] = [
   },
   {
     chave: "teorRf",
-    nome: "Teor de RF (%)",
-    nomeCurto: "Teor de RF (%)",
+    nome: "Teor de RF",
+    nomeCurto: "Teor de RF",
     unidade: "%",
     minIdeal: 0.0,
     maxIdeal: 0.1,
@@ -2187,7 +2187,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
   },
   {
     chave: "torqueRejEp001",
-    nome: "Torque 45EP001 (%)",
+    nome: "Torque 45EP001",
     nomeCurto: "Torque 45EP001",
     unidade: "%",
     minIdeal: 0,
@@ -2204,7 +2204,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
   },
   {
     chave: "torqueRejEp002",
-    nome: "Torque 45EP002 (%)",
+    nome: "Torque 45EP002",
     nomeCurto: "Torque 45EP002",
     unidade: "%",
     minIdeal: 0,
@@ -2296,8 +2296,8 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
   },
   {
     chave: "consumoFloculanteRej",
-    nome: "Consumo Floculante (g/t)",
-    nomeCurto: "Floculante (g/t)",
+    nome: "Consumo Floculante",
+    nomeCurto: "Floculante",
     unidade: "g/t",
     minIdeal: 15,
     maxIdeal: 35,
@@ -2311,8 +2311,8 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
   },
   {
     chave: "htrLinha1",
-    nome: "HTR Linha 1 (h)",
-    nomeCurto: "HTR L1 (h)",
+    nome: "HTR Linha 1",
+    nomeCurto: "HTR L1",
     unidade: "h",
     minIdeal: 0,
     maxIdeal: 12,
@@ -2322,14 +2322,14 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
     rotuloFaixa: "≤ 12 h",
     equipamento: "Linha 1 Rejeito",
     subsistema: "Disposição Rejeito",
-    grupo: "HTR Linhas (h)",
+    grupo: "HTR Linhas",
     impactoDesvio: "Horas de operação da Linha 1 abaixo da meta podem indicar restrição de bombeamento.",
     acaoRecomendada: "Verificar bombas de polpa da Linha 1 e vazão manométrica."
   },
   {
     chave: "htrLinha2",
-    nome: "HTR Linha 2 (h)",
-    nomeCurto: "HTR L2 (h)",
+    nome: "HTR Linha 2",
+    nomeCurto: "HTR L2",
     unidade: "h",
     minIdeal: 0,
     maxIdeal: 12,
@@ -2339,14 +2339,14 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
     rotuloFaixa: "≤ 12 h",
     equipamento: "Linha 2 Rejeito",
     subsistema: "Disposição Rejeito",
-    grupo: "HTR Linhas (h)",
+    grupo: "HTR Linhas",
     impactoDesvio: "Parada na Linha 2 de transporte de rejeito.",
     acaoRecomendada: "Checar integridade da tubulação e gaxetas de vedação."
   },
   {
     chave: "htrLinha3",
-    nome: "HTR Linha 3 (h)",
-    nomeCurto: "HTR L3 (h)",
+    nome: "HTR Linha 3",
+    nomeCurto: "HTR L3",
     unidade: "h",
     minIdeal: 0,
     maxIdeal: 12,
@@ -2356,14 +2356,14 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
     rotuloFaixa: "≤ 12 h",
     equipamento: "Linha 3 Rejeito",
     subsistema: "Disposição Rejeito",
-    grupo: "HTR Linhas (h)",
+    grupo: "HTR Linhas",
     impactoDesvio: "Linha 3 com tempo operacional divergente do planejamento de disposição.",
     acaoRecomendada: "Acompanhar ciclo de bombeamento para os setores de empilhamento."
   },
   {
     chave: "htrLinha4",
-    nome: "HTR Linha 4 (h)",
-    nomeCurto: "HTR L4 (h)",
+    nome: "HTR Linha 4",
+    nomeCurto: "HTR L4",
     unidade: "h",
     minIdeal: 0,
     maxIdeal: 12,
@@ -2373,14 +2373,14 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
     rotuloFaixa: "≤ 12 h",
     equipamento: "Linha 4 Rejeito",
     subsistema: "Disposição Rejeito",
-    grupo: "HTR Linhas (h)",
+    grupo: "HTR Linhas",
     impactoDesvio: "Linha 4 com horas reduzidas de transporte.",
     acaoRecomendada: "Inspecionar válvulas de manobra e descarte."
   },
   {
     chave: "htrPastFill",
-    nome: "HTR Past Fill (h)",
-    nomeCurto: "HTR Past Fill (h)",
+    nome: "HTR Past Fill",
+    nomeCurto: "HTR Past Fill",
     unidade: "h",
     minIdeal: 0,
     maxIdeal: 12,
@@ -2390,7 +2390,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamento
     rotuloFaixa: "≤ 12 h",
     equipamento: "Planta Past Fill",
     subsistema: "Enchimento Mina",
-    grupo: "HTR Linhas (h)",
+    grupo: "HTR Linhas",
     impactoDesvio: "Baixo envio de polpa para a planta de Past Fill impacta o ciclo de enchimento de realces na mina.",
     acaoRecomendada: "Alinhar disponibilidade de furo/tubulação de descida para o subsolo com a equipe de mina."
   }
@@ -2701,7 +2701,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessam
   },
   {
     chave: "nivelTanqueConc",
-    nome: "Nível Tanque 44TQ001 (%)",
+    nome: "Nível Tanque 44TQ001",
     nomeCurto: "Nível 44TQ001",
     unidade: "%",
     minIdeal: 30.0,
@@ -2716,7 +2716,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessam
   },
   {
     chave: "consumoFloculanteConc",
-    nome: "Consumo Floculante (mL/min)",
+    nome: "Consumo Floculante",
     nomeCurto: "Floculante",
     unidade: "mL/min",
     minIdeal: 15.0,
@@ -2731,7 +2731,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessam
   },
   {
     chave: "elevacaoRakeConcEp001",
-    nome: "Elevação Rake 44EP001 (Pol)",
+    nome: "Elevação Rake 44EP001",
     nomeCurto: "Rake 44EP001",
     unidade: "Pol",
     minIdeal: 0.0,
@@ -2748,7 +2748,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessam
   },
   {
     chave: "elevacaoRakeConcEp002",
-    nome: "Elevação Rake 44EP002 (Pol)",
+    nome: "Elevação Rake 44EP002",
     nomeCurto: "Rake 44EP002",
     unidade: "Pol",
     minIdeal: 0.0,
@@ -2765,7 +2765,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessam
   },
   {
     chave: "torqueConcEp001",
-    nome: "Torque 44EP001 (%)",
+    nome: "Torque 44EP001",
     nomeCurto: "Torque 44EP001",
     unidade: "%",
     minIdeal: 0.0,
@@ -2782,7 +2782,7 @@ export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessam
   },
   {
     chave: "torqueConcEp002",
-    nome: "Torque 44EP002 (%)",
+    nome: "Torque 44EP002",
     nomeCurto: "Torque 44EP002",
     unidade: "%",
     minIdeal: 0.0,
@@ -3040,7 +3040,7 @@ export const CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO: ParametroConfigFiltragemCo
   },
   {
     chave: "produtividadeFiltro",
-    nome: "Produtividade do Filtro Prensa (t/h)",
+    nome: "Produtividade do Filtro Prensa",
     nomeCurto: "Produtividade",
     unidade: "t/h",
     minIdeal: 28.0,
@@ -3056,7 +3056,7 @@ export const CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO: ParametroConfigFiltragemCo
   },
   {
     chave: "umidadeBolo",
-    nome: "Umidade do Bolo de Concentrado (%)",
+    nome: "Umidade do Bolo de Concentrado",
     nomeCurto: "Umidade Bolo",
     unidade: "%",
     minIdeal: 7.0,
@@ -3089,7 +3089,7 @@ export const CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO: ParametroConfigFiltragemCo
   },
   {
     chave: "pressaoCompactacao",
-    nome: "Pressão de Compactação / Membrana (kPa)",
+    nome: "Pressão de Compactação / Membrana",
     nomeCurto: "Pressão Compact.",
     unidade: "kPa",
     minIdeal: 210,
@@ -3315,8 +3315,8 @@ export interface RegistroDiarioIndicadoresUtilidadesETA {
 export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = [
   {
     chave: "pressaoAr",
-    nome: "Pressão de Ar Comprimido (kgf/cm²)",
-    nomeCurto: "Ar Comprimido (kgf/cm²)",
+    nome: "Pressão de Ar Comprimido",
+    nomeCurto: "Ar Comprimido",
     unidade: "kgf/cm²",
     tipoLimite: "faixa",
     minIdeal: 6.0,
@@ -3332,8 +3332,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "pressaoArInstrumento",
-    nome: "Pressão de ar de instrumento (kgf/cm²)",
-    nomeCurto: "Ar Instrumento (kgf/cm²)",
+    nome: "Pressão de ar de instrumento",
+    nomeCurto: "Ar Instrumento",
     unidade: "kgf/cm²",
     tipoLimite: "min",
     minIdeal: 5.5,
@@ -3349,8 +3349,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "pressaoAguaResfriamento",
-    nome: "Pressão de água resfriamento (kgf/cm²)",
-    nomeCurto: "Água Resfriamento (kgf/cm²)",
+    nome: "Pressão de água resfriamento",
+    nomeCurto: "Água Resfriamento",
     unidade: "kgf/cm²",
     tipoLimite: "faixa",
     minIdeal: 6.0,
@@ -3366,8 +3366,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "pressaoAguaSelagem",
-    nome: "Pressão de água selagem (kgf/cm²)",
-    nomeCurto: "Água Selagem (kgf/cm²)",
+    nome: "Pressão de água selagem",
+    nomeCurto: "Água Selagem",
     unidade: "kgf/cm²",
     tipoLimite: "faixa",
     minIdeal: 6.5,
@@ -3383,8 +3383,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "captacaoAguaBruta",
-    nome: "Captação Água Bruta / Nova (m³/h)",
-    nomeCurto: "Captação Nova (m³/h)",
+    nome: "Captação Água Bruta / Nova",
+    nomeCurto: "Captação Nova",
     unidade: "m³/h",
     tipoLimite: "max",
     minIdeal: 280,
@@ -3400,8 +3400,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "nivelEtaBruta",
-    nome: "Nível ETA Bruta (%)",
-    nomeCurto: "Nível ETA Bruta (%)",
+    nome: "Nível ETA Bruta",
+    nomeCurto: "Nível ETA Bruta",
     unidade: "%",
     tipoLimite: "faixa",
     minIdeal: 70,
@@ -3417,8 +3417,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "nivelCamaraA",
-    nome: "Nível da Câmara A (%)",
-    nomeCurto: "Nível Câmara A (%)",
+    nome: "Nível da Câmara A",
+    nomeCurto: "Nível Câmara A",
     unidade: "%",
     tipoLimite: "min",
     minIdeal: 70,
@@ -3434,8 +3434,8 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
   },
   {
     chave: "nivelEtaRecuperada",
-    nome: "Nível ETA Recuperada (%)",
-    nomeCurto: "Nível ETA Recuperada (%)",
+    nome: "Nível ETA Recuperada",
+    nomeCurto: "Nível ETA Recuperada",
     unidade: "%",
     tipoLimite: "faixa",
     minIdeal: 70,
