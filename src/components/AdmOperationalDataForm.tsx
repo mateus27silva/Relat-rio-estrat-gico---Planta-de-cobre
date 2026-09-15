@@ -1073,10 +1073,7 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
       alimentacaoFeedF80: "",
       produtoHigP80: "",
       densidadeProdutoHig: "",
-      produtoHig74: "",
-      densidadeAlimDit006: "",
       fluxoAlimFit403072: "",
-      fluxoAlimentacao: "",
       potenciaKw: "",
       torquePct: ""
     }));
@@ -3627,11 +3624,11 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                     <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-purple-900 text-purple-100">
                       PENEIRAMENTO DERRICK (un)
                     </th>
-                    <th colSpan={4} className="p-1.5 border-r border-slate-700 bg-slate-850 text-purple-200">
-                      GRANULOMETRIA & PRODUTO HIG
+                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-slate-850 text-purple-200">
+                      GRANULOMETRIA & PRODUTO HIG (%)
                     </th>
-                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-purple-900 text-purple-100">
-                      DENSIDADES & FLUXOS (m³/h / %)
+                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-purple-900 text-purple-100">
+                      DENSIDADE FEED & FLUXO (g/t / tph)
                     </th>
                     <th colSpan={2} className="p-1.5 bg-slate-850 text-amber-200">
                       POTÊNCIA & TORQUE HIG
@@ -5738,14 +5735,14 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                     <th rowSpan={2} className="p-2 border-r border-slate-700 min-w-[95px] bg-slate-850 text-slate-200 align-middle">
                       BOMBAS ÁGUA
                     </th>
-                    <th colSpan={1} className="p-1.5 border-r border-slate-700 bg-sky-900 text-sky-100">
-                      AR COMPRIMIDO
+                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-sky-900 text-sky-100">
+                      REDE DE AR INDUSTRIAL
                     </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
-                      BALANÇO HÍDRICO GLOBAL
+                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-cyan-900 text-cyan-100">
+                      SISTEMAS DE ÁGUA & PROCESSO
                     </th>
-                    <th colSpan={2} className="p-1.5 border-r border-slate-700 bg-teal-950 text-teal-100">
-                      QUALIDADE ETA & RESERVATÓRIOS
+                    <th colSpan={3} className="p-1.5 border-r border-slate-700 bg-teal-950 text-teal-100">
+                      ESTAÇÃO TRATAMENTO DE ÁGUA (ETA)
                     </th>
                   </tr>
 

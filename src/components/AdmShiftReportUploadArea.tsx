@@ -601,6 +601,65 @@ export const AdmShiftReportUploadArea: React.FC<AdmShiftReportUploadAreaProps> =
                   </div>
                 </div>
 
+                {/* Utilidades & ETA */}
+                {(relatorioVisualizando.dadosUmido.pressaoAr !== undefined ||
+                  relatorioVisualizando.dadosUmido.pressaoArInstrumento !== undefined ||
+                  relatorioVisualizando.dadosUmido.pressaoAguaResfriamento !== undefined ||
+                  relatorioVisualizando.dadosUmido.pressaoAguaSelagem !== undefined ||
+                  relatorioVisualizando.dadosUmido.nivelEtaBruta !== undefined ||
+                  relatorioVisualizando.dadosUmido.nivelEtaRecuperada !== undefined) && (
+                  <div className="space-y-1.5 pt-1">
+                    <h5 className="text-[11px] font-bold text-teal-800 flex items-center justify-between">
+                      <span>2. Utilidades & ETA (Rede de Ar & Sistemas Hídricos)</span>
+                      <span className="text-[10px] font-normal text-slate-500">Metas Operacionais Vigentes</span>
+                    </h5>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                      <div className="bg-sky-50/70 p-2 rounded border border-sky-200">
+                        <span className="text-slate-500 block text-[10px]">Ar Comprimido:</span>
+                        <div className="flex items-baseline justify-between mt-0.5">
+                          <strong className="text-sky-950 text-sm">{relatorioVisualizando.dadosUmido.pressaoAr ?? "-"} kgf/cm²</strong>
+                          <span className="text-[10px] text-sky-700 font-medium">6,0 - 14,0</span>
+                        </div>
+                      </div>
+                      <div className="bg-sky-50/70 p-2 rounded border border-sky-200">
+                        <span className="text-slate-500 block text-[10px]">Ar de Instrumento:</span>
+                        <div className="flex items-baseline justify-between mt-0.5">
+                          <strong className="text-sky-950 text-sm">{relatorioVisualizando.dadosUmido.pressaoArInstrumento ?? "-"} kgf/cm²</strong>
+                          <span className="text-[10px] text-sky-700 font-medium">Min 5,5</span>
+                        </div>
+                      </div>
+                      <div className="bg-cyan-50/70 p-2 rounded border border-cyan-200">
+                        <span className="text-slate-500 block text-[10px]">Água de Resfriamento:</span>
+                        <div className="flex items-baseline justify-between mt-0.5">
+                          <strong className="text-cyan-950 text-sm">{relatorioVisualizando.dadosUmido.pressaoAguaResfriamento ?? "-"} kgf/cm²</strong>
+                          <span className="text-[10px] text-cyan-700 font-medium">6,0 - 8,0</span>
+                        </div>
+                      </div>
+                      <div className="bg-cyan-50/70 p-2 rounded border border-cyan-200">
+                        <span className="text-slate-500 block text-[10px]">Água de Selagem:</span>
+                        <div className="flex items-baseline justify-between mt-0.5">
+                          <strong className="text-cyan-950 text-sm">{relatorioVisualizando.dadosUmido.pressaoAguaSelagem ?? "-"} kgf/cm²</strong>
+                          <span className="text-[10px] text-cyan-700 font-medium">6,5 - 10,0</span>
+                        </div>
+                      </div>
+                      <div className="bg-teal-50/70 p-2 rounded border border-teal-200">
+                        <span className="text-slate-500 block text-[10px]">Nível ETA Bruta:</span>
+                        <div className="flex items-baseline justify-between mt-0.5">
+                          <strong className="text-teal-950 text-sm">{relatorioVisualizando.dadosUmido.nivelEtaBruta ?? relatorioVisualizando.dadosUmido.etaAguaBruta ?? "-"}%</strong>
+                          <span className="text-[10px] text-teal-700 font-medium">70% - 100%</span>
+                        </div>
+                      </div>
+                      <div className="bg-teal-50/70 p-2 rounded border border-teal-200">
+                        <span className="text-slate-500 block text-[10px]">Nível ETA Recuperada:</span>
+                        <div className="flex items-baseline justify-between mt-0.5">
+                          <strong className="text-teal-950 text-sm">{relatorioVisualizando.dadosUmido.nivelEtaRecuperada ?? relatorioVisualizando.dadosUmido.etaAguaRecuperada ?? "-"}%</strong>
+                          <span className="text-[10px] text-teal-700 font-medium">70% - 100%</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Atividades e Pendências */}
                 <div className="space-y-2 pt-2">
                   <div className="bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 text-xs">

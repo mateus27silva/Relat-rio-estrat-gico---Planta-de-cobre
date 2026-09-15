@@ -45,22 +45,25 @@ export const SETORES: Setor[] = [
     icon: "Hammer",
     cor: "teal",
     campos: [
-      { id: "alimentacao", label: "Produtividade", type: "number", meta: 1000, un: "t/h" },
+      { id: "alimentacao", label: "Produtividade", type: "number", meta: 925, un: "t/h" },
       {
         id: "posicao_manto",
         label: "Posição do manto",
         type: "select",
+        un: "%",
         opcoes: [
-          "0%", "5%", "10%", "15%", "20%", "25%", "30%", "35%", "40%", "45%", 
-          "50%", "55%", "60%", "65%", "70%", "75%", "80%", "85%", "90%", "95%", "100%"
+          "5%", "10%", "15%", "20%", "25%", "30%", "35%", "40%", "45%", 
+          "50%", "55%", "60%", "65%", "70%", "75%", "80%", "85%", "90%", "95%", "100%", "0%"
         ],
       },
       {
         id: "afericao_britadores",
-        label: "Aferição dos britadores",
+        label: "Aferição do britador",
         type: "select",
-        opcoes: ["Realizado", "Pendente"],
+        un: '"',
+        opcoes: ["5.0\"", "5.2\"", "5.5\"", "5.8\"", "6.0\"", "6.2\"", "6.5\"", "Realizado", "Pendente"],
       },
+      { id: "amperagem_41tc001", label: "Amp. 41TC001", type: "number", meta: 45, un: "A" },
       { id: "paradas_manutencao", label: "Paradas de Manutenção", type: "number", un: "h" },
       { id: "paradas_outros", label: "Paradas de Outros (OUT)", type: "number", un: "h" },
       { id: "estoque_msb", label: "Estoque MSB", type: "number", un: "t" },
@@ -160,11 +163,12 @@ export const SETORES: Setor[] = [
     icon: "RotateCw",
     cor: "indigo",
     campos: [
-      { id: "produtividade", label: "Produtividade", type: "number", meta: 275, un: "t/h" },
-      { id: "densidade", label: "Densidade", type: "number", un: "g/t" },
-      { id: "torque", label: "Torque", type: "number", un: "%" },
-      { id: "granulometria_p80", label: "P80", type: "number", un: "microns" },
-      { id: "potencia_moinho", label: "Potência do moinho", type: "number", un: "kWh" },
+      { id: "produtividade", label: "Fluxo Alimentação FIT-403-072", type: "number", meta: 225, un: "tph" },
+      { id: "f80_210", label: "F80 210microns", type: "number", meta: 80, un: "%" },
+      { id: "granulometria_p80", label: "P80 75microns", type: "number", meta: 75, un: "%" },
+      { id: "densidade", label: "Densidade feed (g/t)", type: "number", meta: 1.50, un: "g/t" },
+      { id: "potencia_moinho", label: "Potência HIG", type: "number", meta: 1800, un: "kW" },
+      { id: "torque", label: "Torque HIG", type: "number", meta: 75, un: "%" },
       { id: "peneiras_operacao", label: "Número de peneiras em operação", type: "number", un: "" },
       { id: "decks_parados", label: "Número de decks parados", type: "number", un: "" },
       { id: "paradas_manutencao", label: "Paradas de Manutenção", type: "number", un: "h" },
@@ -282,10 +286,13 @@ export const SETORES: Setor[] = [
     icon: "Wrench",
     cor: "cyan",
     campos: [
-      { id: "pressao_ar", label: "Pressão Ar Comprimido", type: "number", meta: 7.0, un: "bar" },
-      { id: "eta_agua_recuperada", label: "ETA água recuperada", type: "number", meta: 75, un: "%" },
-      { id: "eta_agua_bruta", label: "ETA água bruta", type: "number", meta: 70, un: "%" },
+      { id: "pressao_ar", label: "Pressão de Ar Comprimido", type: "number", meta: 10.0, un: "kgf/cm²" },
+      { id: "pressao_ar_instrumento", label: "Pressão de ar de instrumento", type: "number", meta: 5.5, un: "kgf/cm²" },
+      { id: "pressao_agua_resfriamento", label: "Pressão de água resfriamento", type: "number", meta: 7.0, un: "kgf/cm²" },
+      { id: "pressao_agua_selagem", label: "Pressão de água selagem", type: "number", meta: 8.0, un: "kgf/cm²" },
+      { id: "eta_agua_bruta", label: "Nível ETA Bruta", type: "number", meta: 85, un: "%" },
       { id: "nivel_camara_a", label: "Nível da câmara A", type: "number", meta: 80, un: "%" },
+      { id: "eta_agua_recuperada", label: "Nível ETA Recuperada", type: "number", meta: 85, un: "%" },
       { id: "vazao_agua_nova", label: "Vazão Captação Água Nova", type: "number", un: "m³/h" },
       { id: "compressores", label: "Compressores em Operação", type: "select", opcoes: ["Comp 01", "Comp 02", "Comp 03", "Comp 01 e 02", "Comp 01 e 03", "Comp 02 e 03", "Todos em Operação"] },
       { id: "bombas_agua", label: "Bombas Água de Processo", type: "select", opcoes: ["Bomba 01", "Bomba 02", "Ambas em Operação"] },
@@ -351,9 +358,73 @@ export function st(val: string | number, meta: number | undefined, id: string, s
     return "alerta";
   }
 
-  // Produtividade Remoagem: até 275tph OK, acima disso Crítico
-  if (setorId === "remoagem" && (id === "produtividade" || id === "alimentacao")) {
-    return v <= 275 ? "ok" : "critico";
+  // Remoagem: Fluxo Alimentação FIT-403-072: Min 175 e Max 275 tph
+  if (setorId === "remoagem" && (id === "produtividade" || id === "alimentacao" || id === "fluxo_alimentacao" || id === "fluxoAlimFit403072")) {
+    if (v < 160 || v > 290) return "critico";
+    if (v < 175 || v > 275) return "alerta";
+    return "ok";
+  }
+
+  // Remoagem: F80 210microns: Min 70% e Max 90%
+  if (setorId === "remoagem" && (id === "f80_210" || id === "f80" || id === "alimentacaoFeedF80")) {
+    if (v < 65 || v > 95) return "critico";
+    if (v < 70 || v > 90) return "alerta";
+    return "ok";
+  }
+
+  // Remoagem: P80 75microns: Min 65% e Max 85%
+  if (setorId === "remoagem" && (id === "granulometria_p80" || id === "p80_75" || id === "produtoHigP80" || id === "p80")) {
+    if (v < 60 || v > 90) return "critico";
+    if (v < 65 || v > 85) return "alerta";
+    return "ok";
+  }
+
+  // Remoagem: Densidade feed (g/t): Min 1,44 e Max 1,55 g/t
+  if (setorId === "remoagem" && (id === "densidade" || id === "densidade_feed" || id === "densidadeProdutoHig")) {
+    if (v < 1.40 || v > 1.60) return "critico";
+    if (v < 1.44 || v > 1.55) return "alerta";
+    return "ok";
+  }
+
+  // Remoagem: Potência HIG: Min 1400 kW e Max 2250 kW
+  if (setorId === "remoagem" && (id === "potencia_moinho" || id === "potencia_hig" || id === "potenciaKw")) {
+    if (v < 1300 || v > 2350) return "critico";
+    if (v < 1400 || v > 2250) return "alerta";
+    return "ok";
+  }
+
+  // Remoagem: Torque HIG: Min 60% e Max 95%
+  if (setorId === "remoagem" && (id === "torque" || id === "torque_hig" || id === "torquePct")) {
+    if (v < 55 || v > 98) return "critico";
+    if (v < 60 || v > 95) return "alerta";
+    return "ok";
+  }
+
+  // Britagem Primária: Produtividade: Min 850 e Max 1000 tph
+  if (setorId === "britagem_primaria" && (id === "alimentacao" || id === "produtividade" || id === "produtividadeTph")) {
+    if (v < 800 || v > 1100) return "critico";
+    if (v < 850 || v > 1000) return "alerta";
+    return "ok";
+  }
+
+  // Britagem Primária: Posição do Manto: Min 5% e Max 100%
+  if (setorId === "britagem_primaria" && (id === "posicao_manto" || id === "posicaoManto")) {
+    if (v < 5 || v > 100) return "critico";
+    return "ok";
+  }
+
+  // Britagem Primária: Aferição: Min 5" e Max 6.5"
+  if (setorId === "britagem_primaria" && (id === "afericao" || id === "afericao_britador" || id === "afericao_britadores" || id === "afericaoBritador")) {
+    if (v < 4.5 || v > 7.0) return "critico";
+    if (v < 5.0 || v > 6.5) return "alerta";
+    return "ok";
+  }
+
+  // Britagem Primária: Amp. 41TC001: Min 37A e Max 54A
+  if (setorId === "britagem_primaria" && (id === "amperagem_41tc001" || id === "amperagem_motor_41tc001" || id === "amperagemMotor41TC001" || id === "amp_41tc001")) {
+    if (v < 30 || v > 60) return "critico";
+    if (v < 37 || v > 54) return "alerta";
+    return "ok";
   }
 
   // % retido em 1/2" (Rebritagem)
@@ -383,6 +454,48 @@ export function st(val: string | number, meta: number | undefined, id: string, s
   if (id === "nivel_camara_a" || id.startsWith("nivel_camara_a")) {
     if (v < 70) return "critico";
     if (v < 80) return "alerta";
+    return "ok";
+  }
+
+  // Pressão de Ar Comprimido (kgf/cm²) - Min 6 e Max 14 kgf/cm²
+  if (id === "pressao_ar" || id.startsWith("pressao_ar_comprimido")) {
+    if (v < 5.5 || v > 15.0) return "critico";
+    if (v < 6.0 || v > 14.0) return "alerta";
+    return "ok";
+  }
+
+  // Pressão de ar de instrumento (kgf/cm²) - Min 5,5 kgf/cm²
+  if (id === "pressao_ar_instrumento") {
+    if (v < 5.0) return "critico";
+    if (v < 5.5) return "alerta";
+    return "ok";
+  }
+
+  // Pressão de água resfriamento (kgf/cm²) - Min 6 e Max 8 kgf/cm²
+  if (id === "pressao_agua_resfriamento") {
+    if (v < 5.5 || v > 8.5) return "critico";
+    if (v < 6.0 || v > 8.0) return "alerta";
+    return "ok";
+  }
+
+  // Pressão de água selagem (kgf/cm²) - Min 6,5 e Max 10 kgf/cm²
+  if (id === "pressao_agua_selagem") {
+    if (v < 6.0 || v > 10.5) return "critico";
+    if (v < 6.5 || v > 10.0) return "alerta";
+    return "ok";
+  }
+
+  // Nível ETA Bruta (%) - Min 70% e Max 100%
+  if (id === "eta_agua_bruta" || id === "nivel_eta_bruta") {
+    if (v < 60 || v > 100) return "critico";
+    if (v < 70) return "alerta";
+    return "ok";
+  }
+
+  // Nível ETA Recuperada (%) - Min 70% e Max 100%
+  if (id === "eta_agua_recuperada" || id === "nivel_eta_recuperada") {
+    if (v < 60 || v > 100) return "critico";
+    if (v < 70) return "alerta";
     return "ok";
   }
 
@@ -506,7 +619,12 @@ export function gerarWpp({ data, turno, turma, supervisor, temaDds, dados, acoes
           else if (c.id === "nivel_camara_a" || c.id.startsWith("nivel_camara_a")) refStr = "crítico < 70%";
           else if (c.id.startsWith("solidos_45") || (s.id === "espessamento_rejeito" && c.id.startsWith("solidos_"))) refStr = "crítico > 66%";
           else if (c.id.startsWith("torque_ep") || (s.id === "espessamento_rejeito" && c.id.startsWith("torque")) || (s.id === "espessamento_conc" && c.id.startsWith("torque"))) refStr = "crítico > 20%";
-          else if (s.id === "remoagem" && (c.id === "produtividade" || c.id === "alimentacao")) refStr = "crítico > 275 t/h";
+          else if (s.id === "remoagem" && (c.id === "produtividade" || c.id === "alimentacao" || c.id === "fluxo_alimentacao")) refStr = "meta 175-275 tph";
+          else if (s.id === "remoagem" && c.id === "f80_210") refStr = "meta 70-90%";
+          else if (s.id === "remoagem" && (c.id === "granulometria_p80" || c.id === "p80_75")) refStr = "meta 65-85%";
+          else if (s.id === "remoagem" && (c.id === "densidade" || c.id === "densidade_feed")) refStr = "meta 1,44-1,55 g/t";
+          else if (s.id === "remoagem" && (c.id === "potencia_moinho" || c.id === "potencia_hig")) refStr = "meta 1400-2250 kW";
+          else if (s.id === "remoagem" && (c.id === "torque" || c.id === "torque_hig")) refStr = "meta 60-95%";
 
           const acao = d[`acao_${c.id}`];
           const acaoStr = acao && typeof acao === "string" && acao.trim() ? ` — *Tratativa:* ${acao.trim()}` : "";
@@ -610,7 +728,10 @@ export function gerarWpp({ data, turno, turma, supervisor, temaDds, dados, acoes
         return;
       }
       if (c.type === "select") {
-        L.push(`🔹 ${c.label}: *${d[c.id]}*`);
+        let metaSel = "";
+        if (s.id === "britagem_primaria" && (c.id === "posicao_manto" || c.id === "posicaoManto")) metaSel = " (meta 5-100%)";
+        else if (s.id === "britagem_primaria" && (c.id === "afericao" || c.id === "afericao_britador" || c.id === "afericao_britadores" || c.id === "afericaoBritador")) metaSel = " (meta 5-6.5\")";
+        L.push(`🔹 ${c.label}: *${d[c.id]}*${metaSel}`);
         if (d[`acao_${c.id}`] && String(d[`acao_${c.id}`]).trim()) {
           L.push(`   ↳ 🛠️ *Tratativa:* ${String(d[`acao_${c.id}`]).trim()}`);
         }
@@ -646,7 +767,14 @@ export function gerarWpp({ data, turno, turma, supervisor, temaDds, dados, acoes
       else if (c.id === "nivel_camara_a" || c.id.startsWith("nivel_camara_a")) metaS = " (meta 80-100%)";
       else if (c.id.startsWith("solidos_45") || (s.id === "espessamento_rejeito" && c.id.startsWith("solidos_"))) metaS = " (meta 63-66%)";
       else if (c.id.startsWith("torque_ep") || (s.id === "espessamento_rejeito" && c.id.startsWith("torque")) || (s.id === "espessamento_conc" && c.id.startsWith("torque"))) metaS = " (meta <12%)";
-      else if (s.id === "remoagem" && (c.id === "produtividade" || c.id === "alimentacao")) metaS = " (meta ≤ 275 t/h)";
+      else if (s.id === "britagem_primaria" && (c.id === "produtividade" || c.id === "alimentacao")) metaS = " (meta 850-1000 tph)";
+      else if (s.id === "britagem_primaria" && (c.id === "amperagem_41tc001" || c.id === "amperagem_motor_41tc001" || c.id === "amperagemMotor41TC001" || c.id === "amp_41tc001")) metaS = " (meta 37-54 A)";
+      else if (s.id === "remoagem" && (c.id === "produtividade" || c.id === "alimentacao" || c.id === "fluxo_alimentacao")) metaS = " (meta 175-275 tph)";
+      else if (s.id === "remoagem" && c.id === "f80_210") metaS = " (meta 70-90%)";
+      else if (s.id === "remoagem" && (c.id === "granulometria_p80" || c.id === "p80_75")) metaS = " (meta 65-85%)";
+      else if (s.id === "remoagem" && (c.id === "densidade" || c.id === "densidade_feed")) metaS = " (meta 1,44-1,55 g/t)";
+      else if (s.id === "remoagem" && (c.id === "potencia_moinho" || c.id === "potencia_hig")) metaS = " (meta 1400-2250 kW)";
+      else if (s.id === "remoagem" && (c.id === "torque" || c.id === "torque_hig")) metaS = " (meta 60-95%)";
       else if (c.id === "nivel_tanque") metaS = "";
 
       L.push(`${ST[s2].em} ${c.label}: *${d[c.id]}${c.un ? " " + c.un : ""}*${metaS}`);

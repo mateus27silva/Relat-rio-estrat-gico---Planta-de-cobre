@@ -598,15 +598,26 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
     },
     {
       label: "Taxa Britagem Primária",
-      valor: br.taxaBritagem ? `${br.taxaBritagem}` : "1.250",
+      valor: br.taxaBritagem ? `${br.taxaBritagem}` : "950",
       unidade: "t/h",
-      budget: `Budget: ${br.metaTaxaBritagem || 1300} t/h`,
-      delta: br.taxaBritagem && br.metaTaxaBritagem
-        ? calcAtingimento(br.taxaBritagem, br.metaTaxaBritagem).delta
-        : "-3,8%",
-      isPos: (br.taxaBritagem && br.metaTaxaBritagem ? Number(br.taxaBritagem) >= br.metaTaxaBritagem : false),
-      pctFill: br.taxaBritagem && br.metaTaxaBritagem ? Math.min(100, Math.round((Number(br.taxaBritagem) / br.metaTaxaBritagem) * 100)) : 96,
-      status: "warn" as const
+      budget: `Faixa: 850 - 1.000 t/h (Alvo: ${br.metaTaxaBritagem || 925} t/h)`,
+      delta: (() => {
+        const val = Number(br.taxaBritagem || 950);
+        if (val >= 850 && val <= 1000) return "Na faixa ideal";
+        if (val < 850) return `▼ -${850 - val} t/h`;
+        return `▲ +${val - 1000} t/h`;
+      })(),
+      isPos: (() => {
+        const val = Number(br.taxaBritagem || 950);
+        return val >= 850 && val <= 1000;
+      })(),
+      pctFill: br.taxaBritagem ? Math.min(100, Math.round((Number(br.taxaBritagem) / 1000) * 100)) : 95,
+      status: (() => {
+        const val = Number(br.taxaBritagem || 950);
+        if (val >= 850 && val <= 1000) return "good" as const;
+        if (val >= 800 && val <= 1050) return "warn" as const;
+        return "alert" as const;
+      })()
     },
     {
       label: "Produção Rebritagem",

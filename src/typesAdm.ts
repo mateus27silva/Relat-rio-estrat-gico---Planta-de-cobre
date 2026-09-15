@@ -273,10 +273,10 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
     subsistema: "Desempenho Britagem",
     unidade: "tph",
     minIdeal: 850,
-    maxIdeal: 1400,
-    alvo: 1000,
+    maxIdeal: 1000,
+    alvo: 925,
     decimais: 0,
-    impactoDesvio: "Produtividade do Britador Primário fora da faixa esperada (850 a 1.400 tph) compromete a taxa de alimentação global da planta.",
+    impactoDesvio: "Produtividade do Britador Primário fora da faixa esperada (850 a 1.000 tph) compromete a taxa de alimentação global da planta.",
     acaoRecomendada: "Ajustar cadência de basculamento dos caminhões de mina, regular alimentador de sapatas e monitorar fragmentação do ROM."
   },
   {
@@ -286,11 +286,11 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
     nomeCurto: "Pos. Manto",
     subsistema: "Câmara de Britagem",
     unidade: "%",
-    minIdeal: 15,
+    minIdeal: 5,
     maxIdeal: 100,
     alvo: 50,
     decimais: 0,
-    impactoDesvio: "Manto fora da faixa (15% a 100%) indica desgaste severo do revestimento ou desajuste mecânico do conjunto excêntrico.",
+    impactoDesvio: "Manto fora da faixa (5% a 100%) indica desgaste severo do revestimento ou desajuste mecânico do conjunto excêntrico.",
     acaoRecomendada: "Calibrar posição do manto hidraulicamente e inspecionar perfil de desgaste da câmara de britagem."
   },
   {
@@ -300,11 +300,11 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
     nomeCurto: "Aferição",
     subsistema: "GAP Hidráulico",
     unidade: '"',
-    minIdeal: 5.5,
+    minIdeal: 5.0,
     maxIdeal: 6.5,
-    alvo: 6.0,
+    alvo: 5.8,
     decimais: 1,
-    impactoDesvio: "Aferição fora de 5,5\" a 6,5\" descalibra a distribuição granulométrica da alimentação para a rebritagem.",
+    impactoDesvio: "Aferição fora de 5,0\" a 6,5\" descalibra a distribuição granulométrica da alimentação para a rebritagem.",
     acaoRecomendada: "Realizar aferição com chumbo e recalibrar posição do manto hidraulicamente."
   },
   {
@@ -412,12 +412,12 @@ export const CONFIG_PARAMETROS_BRITAGEM: ParametroConfigBritagem[] = [
     nomeCurto: "Amp. 41TC001",
     subsistema: "Transportador 41TC001",
     unidade: "A",
-    minIdeal: 0,
-    maxIdeal: 37,
-    alvo: 28,
+    minIdeal: 37,
+    maxIdeal: 54,
+    alvo: 45,
     decimais: 0,
-    impactoDesvio: "Amperagem do TC001 acima de 37 A indica sobrecarga de correia, atrito de guias ou material acumulado no chute.",
-    acaoRecomendada: "Inspecionar alinhamento da correia, rotação livre de roletes e desobstruir transferência."
+    impactoDesvio: "Amperagem do 41TC001 fora da faixa ideal de 37 a 54 A indica sobrecarga de correia, atrito de guias ou operação em vazio.",
+    acaoRecomendada: "Inspecionar alinhamento da correia, rotação livre de roletes, nível de enchimento e desobstruir transferência."
   },
   {
     chave: "amperagemMotor41BR001",
@@ -1401,32 +1401,28 @@ export interface RegistroDiarioIndicadoresRemoagem {
   // 1. Derrick isoladas/by pass
   derrickIsoladas: number | string | "";
 
-  // 2. Alimentação Feed F80 (µm)
+  // 2. F80 210microns (%) - Meta: 70 a 90%
   alimentacaoFeedF80: number | "";
 
-  // 3. Produto HIG p80 micron (µm)
+  // 3. P80 75microns (%) - Meta: 65 a 85%
   produtoHigP80: number | "";
 
-  // 4. Densidade Produto Hig (g/cm³)
+  // 4. Densidade feed (g/t) - Meta: 1,44 a 1,55 g/t
   densidadeProdutoHig: number | "";
 
-  // 5. Produto HIG > 74 micron (%)
-  produtoHig74: number | "";
-
-  // 6. Densidade Alimentação % Sólidos (m) DIT-006 (%)
-  densidadeAlimDit006: number | "";
-
-  // 7. Fluxo de alimentação FIT-403-072 (m3/h)
+  // 5. Fluxo Alimentação FIT-403-072 (tph) - Meta: 175 a 275 tph
   fluxoAlimFit403072: number | "";
 
-  // 8. Fluxo de alimentação (m3/h)
-  fluxoAlimentacao: number | "";
-
-  // 9. Potência kW
+  // 6. Potência HIG (kW) - Meta: 1400 a 2250 kW
   potenciaKw: number | "";
 
-  // 10. Torque %
+  // 7. Torque HIG (%) - Meta: 60 a 95%
   torquePct: number | "";
+
+  // Itens legados mantidos como opcionais para retrocompatibilidade
+  produtoHig74?: number | "";
+  densidadeAlimDit006?: number | "";
+  fluxoAlimentacao?: number | "";
 
   observacao?: string;
 }
@@ -1462,111 +1458,75 @@ export const CONFIG_PARAMETROS_REMOAGEM: ParametroConfigRemoagem[] = [
   },
   {
     chave: "alimentacaoFeedF80",
-    nome: "Alimentação Feed F80",
-    nomeCurto: "Alimentação Feed F80",
-    unidade: "µm",
-    minIdeal: 60,
-    maxIdeal: 120,
-    alvo: 85,
+    nome: "F80 210microns",
+    nomeCurto: "F80 210microns",
+    unidade: "%",
+    minIdeal: 70,
+    maxIdeal: 90,
+    alvo: 80,
     decimais: 1,
-    impactoDesvio: "F80 acima de 120µm reduz a liberação mineral e satura o meio moedor cerâmico do HIG.",
+    impactoDesvio: "F80 210microns fora da faixa de 70% a 90% desestabiliza a eficiência de quebra e satura o meio moedor cerâmico do HIG.",
     acaoRecomendada: "Ajustar classificação primária e pressão dos hidrociclones de remoagem."
   },
   {
     chave: "produtoHigP80",
-    nome: "Produto HIG P80",
-    nomeCurto: "Produto HIG p80 micron",
-    unidade: "µm",
-    minIdeal: 25,
-    maxIdeal: 50,
-    alvo: 38,
+    nome: "P80 75microns",
+    nomeCurto: "P80 75microns",
+    unidade: "%",
+    minIdeal: 65,
+    maxIdeal: 85,
+    alvo: 75,
     decimais: 1,
-    impactoDesvio: "P80 acima da meta (>50µm) prejudica a seletividade e recuperação na flotação cleaner de cobre.",
+    impactoDesvio: "P80 75microns fora da faixa de 65% a 85% compromete a seletividade e recuperação na flotação cleaner de cobre.",
     acaoRecomendada: "Ajustar velocidade do eixo/potência específica do HIG e taxa de alimentação."
   },
   {
     chave: "densidadeProdutoHig",
-    nome: "Densidade Produto HIG",
-    nomeCurto: "Densidade Produto Hig",
-    unidade: "g/cm³",
-    minIdeal: 1.15,
-    maxIdeal: 1.45,
-    alvo: 1.28,
+    nome: "Densidade feed (g/t)",
+    nomeCurto: "Densidade feed (g/t)",
+    unidade: "g/t",
+    minIdeal: 1.44,
+    maxIdeal: 1.55,
+    alvo: 1.50,
     decimais: 2,
-    impactoDesvio: "Densidade fora de controle altera viscosidade, cinética de quebra e tempo de residência.",
-    acaoRecomendada: "Controlar dosagem de água de processo na entrada e saída do circuito de remoagem."
-  },
-  {
-    chave: "produtoHig74",
-    nome: "Produto HIG > 74µm",
-    nomeCurto: "Produto HIG > 74 micron",
-    unidade: "%",
-    minIdeal: 0.5,
-    maxIdeal: 6.0,
-    alvo: 2.2,
-    decimais: 1,
-    impactoDesvio: "Fração retida >74µm elevada no produto do HIG causa perdas por não liberação no concentrado final.",
-    acaoRecomendada: "Verificar carga de bolas cerâmicas no HIG e desgaste dos rotores/estatores."
-  },
-  {
-    chave: "densidadeAlimDit006",
-    nome: "Densidade Alimentação DIT-006",
-    nomeCurto: "Densidade Alimentação % Sólidos (m) DIT-006",
-    unidade: "%",
-    minIdeal: 30,
-    maxIdeal: 50,
-    alvo: 42,
-    decimais: 1,
-    impactoDesvio: "% Sólidos fora da faixa no DIT-006 desestabiliza a eficiência de classificação e alimentação.",
-    acaoRecomendada: "Modular água de diluição na caixa de bomba do DIT-006."
+    impactoDesvio: "Densidade de alimentação fora da faixa de 1,44 a 1,55 g/t altera viscosidade, cinética de quebra e tempo de residência no HIG.",
+    acaoRecomendada: "Controlar dosagem de água de processo na caixa de alimentação do circuito de remoagem."
   },
   {
     chave: "fluxoAlimFit403072",
     nome: "Fluxo Alimentação FIT-403-072",
-    nomeCurto: "Fluxo de alimentação FIT-403-072 (m3/h)",
-    unidade: "m³/h",
-    minIdeal: 100,
-    maxIdeal: 280,
-    alvo: 180,
+    nomeCurto: "Fluxo FIT-403-072",
+    unidade: "tph",
+    minIdeal: 175,
+    maxIdeal: 275,
+    alvo: 225,
     decimais: 1,
-    impactoDesvio: "Oscilação no transmissor FIT-403-072 gera variações bruscas de carga hidráulica.",
-    acaoRecomendada: "Calibrar transmissor de vazão e verificar estabilidade da bomba de polpa."
-  },
-  {
-    chave: "fluxoAlimentacao",
-    nome: "Fluxo de Alimentação",
-    nomeCurto: "Fluxo de alimentação (m3/h)",
-    unidade: "m³/h",
-    minIdeal: 100,
-    maxIdeal: 290,
-    alvo: 185,
-    decimais: 1,
-    impactoDesvio: "Vazão excessiva reduz o tempo de contato mineral-esfera moedora no HIG.",
-    acaoRecomendada: "Ajustar setpoint de vazão e controlar nível da caixa de alimentação."
+    impactoDesvio: "Fluxo no FIT-403-072 fora da faixa de 175 a 275 tph gera variações bruscas de carga hidráulica e sobrecarga/subutilização no HIG.",
+    acaoRecomendada: "Ajustar vazão de alimentação da bomba de polpa e calibrar o transmissor FIT-403-072."
   },
   {
     chave: "potenciaKw",
     nome: "Potência HIG",
-    nomeCurto: "Potência kW",
+    nomeCurto: "Potência HIG",
     unidade: "kW",
-    minIdeal: 350,
-    maxIdeal: 850,
-    alvo: 580,
+    minIdeal: 1400,
+    maxIdeal: 2250,
+    alvo: 1825,
     decimais: 0,
-    impactoDesvio: "Potência anormal reflete falta de carga moedora (baixa) ou empacotamento/bloqueio (alta).",
-    acaoRecomendada: "Efetuar recarga de microesferas cerâmicas ou verificar bloqueios no vaso do HIG."
+    impactoDesvio: "Potência do moinho HIG fora da faixa de 1400 a 2250 kW reflete desbalanceamento da carga moedora cerâmica ou empacotamento no vaso.",
+    acaoRecomendada: "Verificar alimentação de sólidos, dosagem de microesferas cerâmicas e desobstrução dos discos do HIG."
   },
   {
     chave: "torquePct",
     nome: "Torque HIG",
-    nomeCurto: "Torque %",
+    nomeCurto: "Torque HIG",
     unidade: "%",
-    minIdeal: 45,
-    maxIdeal: 88,
-    alvo: 68,
+    minIdeal: 60,
+    maxIdeal: 95,
+    alvo: 78,
     decimais: 1,
-    impactoDesvio: "Torque elevado (>88%) indica risco iminente de desarme elétrico por sobretorque.",
-    acaoRecomendada: "Reduzir alimentação instantânea e injetar água de lavagem para desobstrução."
+    impactoDesvio: "Torque do HIG fora de 60% a 95% indica risco iminente de desarme elétrico por sobretorque (>95%) ou perda de arraste de polpa (<60%).",
+    acaoRecomendada: "Reduzir alimentação instantânea e modular água de lavagem para desobstrução e alívio do torque."
   }
 ];
 
@@ -1589,99 +1549,78 @@ export const DADOS_DIARIOS_REMOAGEM_PADRAO: RegistroDiarioIndicadoresRemoagem[] 
     dia: "seg",
     diaLabel: "Segunda-feira",
     derrickIsoladas: 0,
-    alimentacaoFeedF80: 84.5,
-    produtoHigP80: 37.8,
-    densidadeProdutoHig: 1.28,
-    produtoHig74: 2.1,
-    densidadeAlimDit006: 41.5,
-    fluxoAlimFit403072: 182.0,
-    fluxoAlimentacao: 185.5,
-    potenciaKw: 585,
-    torquePct: 67.4
+    alimentacaoFeedF80: 81.5,
+    produtoHigP80: 74.2,
+    densidadeProdutoHig: 1.50,
+    fluxoAlimFit403072: 225.0,
+    potenciaKw: 1820,
+    torquePct: 78.5
   },
   {
     dia: "ter",
     diaLabel: "Terça-feira",
     derrickIsoladas: 0,
-    alimentacaoFeedF80: 86.0,
-    produtoHigP80: 38.2,
-    densidadeProdutoHig: 1.29,
-    produtoHig74: 2.3,
-    densidadeAlimDit006: 42.0,
-    fluxoAlimFit403072: 184.5,
-    fluxoAlimentacao: 188.0,
-    potenciaKw: 590,
-    torquePct: 68.2
+    alimentacaoFeedF80: 82.0,
+    produtoHigP80: 75.8,
+    densidadeProdutoHig: 1.49,
+    fluxoAlimFit403072: 232.0,
+    potenciaKw: 1860,
+    torquePct: 81.2
   },
   {
     dia: "qua",
     diaLabel: "Quarta-feira",
     derrickIsoladas: 1,
-    alimentacaoFeedF80: 83.2,
-    produtoHigP80: 36.9,
-    densidadeProdutoHig: 1.27,
-    produtoHig74: 1.9,
-    densidadeAlimDit006: 41.0,
-    fluxoAlimFit403072: 180.0,
-    fluxoAlimentacao: 183.0,
-    potenciaKw: 578,
-    torquePct: 66.5
+    alimentacaoFeedF80: 79.5,
+    produtoHigP80: 73.0,
+    densidadeProdutoHig: 1.52,
+    fluxoAlimFit403072: 218.0,
+    potenciaKw: 1790,
+    torquePct: 75.0
   },
   {
     dia: "qui",
     diaLabel: "Quinta-feira",
     derrickIsoladas: 0,
-    alimentacaoFeedF80: 85.8,
-    produtoHigP80: 38.5,
-    densidadeProdutoHig: 1.30,
-    produtoHig74: 2.4,
-    densidadeAlimDit006: 42.5,
-    fluxoAlimFit403072: 186.0,
-    fluxoAlimentacao: 189.5,
-    potenciaKw: 595,
-    torquePct: 69.0
+    alimentacaoFeedF80: 83.5,
+    produtoHigP80: 76.5,
+    densidadeProdutoHig: 1.51,
+    fluxoAlimFit403072: 240.0,
+    potenciaKw: 1910,
+    torquePct: 83.5
   },
   {
     dia: "sex",
     diaLabel: "Sexta-feira",
     derrickIsoladas: 0,
-    alimentacaoFeedF80: 84.0,
-    produtoHigP80: 37.4,
-    densidadeProdutoHig: 1.28,
-    produtoHig74: 2.0,
-    densidadeAlimDit006: 41.8,
-    fluxoAlimFit403072: 183.0,
-    fluxoAlimentacao: 186.0,
-    potenciaKw: 582,
-    torquePct: 67.0
+    alimentacaoFeedF80: 80.8,
+    produtoHigP80: 74.5,
+    densidadeProdutoHig: 1.50,
+    fluxoAlimFit403072: 228.0,
+    potenciaKw: 1835,
+    torquePct: 77.8
   },
   {
     dia: "sab",
     diaLabel: "Sábado",
     derrickIsoladas: 0,
-    alimentacaoFeedF80: 83.5,
-    produtoHigP80: 37.1,
-    densidadeProdutoHig: 1.27,
-    produtoHig74: 2.0,
-    densidadeAlimDit006: 41.2,
-    fluxoAlimFit403072: 181.5,
-    fluxoAlimentacao: 184.0,
-    potenciaKw: 580,
-    torquePct: 66.8
+    alimentacaoFeedF80: 78.2,
+    produtoHigP80: 73.5,
+    densidadeProdutoHig: 1.48,
+    fluxoAlimFit403072: 220.0,
+    potenciaKw: 1805,
+    torquePct: 76.0
   },
   {
     dia: "dom",
     diaLabel: "Domingo",
     derrickIsoladas: 0,
-    alimentacaoFeedF80: 84.5,
-    produtoHigP80: 37.8,
-    densidadeProdutoHig: 1.28,
-    produtoHig74: 2.1,
-    densidadeAlimDit006: 41.5,
-    fluxoAlimFit403072: 182.0,
-    fluxoAlimentacao: 185.0,
-    potenciaKw: 585,
-    torquePct: 67.5
+    alimentacaoFeedF80: 81.0,
+    produtoHigP80: 75.0,
+    densidadeProdutoHig: 1.50,
+    fluxoAlimFit403072: 226.0,
+    potenciaKw: 1840,
+    torquePct: 79.0
   }
 ];
 
@@ -3357,12 +3296,17 @@ export interface RegistroDiarioIndicadoresUtilidadesETA {
   compressoresOp?: string;
   bombasAguaOp?: string;
   pressaoAr?: number | "";
+  pressaoArInstrumento?: number | "";
+  pressaoAguaResfriamento?: number | "";
+  pressaoAguaSelagem?: number | "";
   captacaoAguaBruta?: number | "";
+  nivelEtaBruta?: number | "";
   volumeTratadoEta?: number | "";
+  nivelCamaraA?: number | "";
+  nivelEtaRecuperada?: number | "";
+  etaAguaRecuperada?: number | "";
   taxaRecirculacaoReuso?: number | "";
   turbidezAguaTratada?: number | "";
-  nivelCamaraA?: number | "";
-  etaAguaRecuperada?: number | "";
   disponibilidadeUtilidades?: number | "";
   paradasManutencaoUtilidades?: number | "";
   observacao?: string;
@@ -3371,24 +3315,76 @@ export interface RegistroDiarioIndicadoresUtilidadesETA {
 export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = [
   {
     chave: "pressaoAr",
-    nome: "Pressão de Ar Comprimido (bar)",
-    nomeCurto: "Pressão Ar (bar)",
-    unidade: "bar",
-    minIdeal: 6.5,
-    maxIdeal: 7.8,
-    alvo: 7.0,
+    nome: "Pressão de Ar Comprimido (kgf/cm²)",
+    nomeCurto: "Ar Comprimido (kgf/cm²)",
+    unidade: "kgf/cm²",
+    tipoLimite: "faixa",
+    minIdeal: 6.0,
+    maxIdeal: 14.0,
+    alvo: 8.0,
     decimais: 1,
     equipamento: "Compressores 47-CO",
     subsistema: "Rede Ar Industrial",
-    grupo: "Utilidades & Ar",
-    rotuloFaixa: "6,5 - 7,8 bar",
-    impactoDesvio: "Queda de pressão de ar pneumático paralisa válvulas automáticas da flotação e afeta a prensagem dos filtros.",
-    acaoRecomendada: "Partir compressor reserva 47-CO-003 e verificar estanqueidade nos purgadores da rede."
+    grupo: "Rede de Ar Industrial",
+    rotuloFaixa: "6,0 - 14,0 kgf/cm²",
+    impactoDesvio: "Pressão de ar comprimido fora da faixa de 6,0 a 14,0 kgf/cm² compromete válvulas automáticas da flotação e prensagem dos filtros.",
+    acaoRecomendada: "Partir compressor reserva 47-CO e verificar purgadores na linha principal."
+  },
+  {
+    chave: "pressaoArInstrumento",
+    nome: "Pressão de ar de instrumento (kgf/cm²)",
+    nomeCurto: "Ar Instrumento (kgf/cm²)",
+    unidade: "kgf/cm²",
+    tipoLimite: "min",
+    minIdeal: 5.5,
+    maxIdeal: 7.5,
+    alvo: 6.0,
+    decimais: 1,
+    equipamento: "Secador & Vasos 47-AI",
+    subsistema: "Rede de Instrumentação Pneumática",
+    grupo: "Rede de Ar Industrial",
+    rotuloFaixa: "≥ 5,5 kgf/cm²",
+    impactoDesvio: "Pressão < 5,5 kgf/cm² descalibra posicionadores eletropneumáticos de dosagem e válvulas de controle.",
+    acaoRecomendada: "Limpar filtros coalescentes do secador e acionar booster pneumático reserva."
+  },
+  {
+    chave: "pressaoAguaResfriamento",
+    nome: "Pressão de água resfriamento (kgf/cm²)",
+    nomeCurto: "Água Resfriamento (kgf/cm²)",
+    unidade: "kgf/cm²",
+    tipoLimite: "faixa",
+    minIdeal: 6.0,
+    maxIdeal: 8.0,
+    alvo: 7.0,
+    decimais: 1,
+    equipamento: "Bombas 47-AR",
+    subsistema: "Resfriamento de Mancais",
+    grupo: "Sistemas de Água de Processo",
+    rotuloFaixa: "6,0 - 8,0 kgf/cm²",
+    impactoDesvio: "Pressão fora da faixa de 6,0 a 8,0 kgf/cm² causa superaquecimento de mancais dos moinhos MI003/004/005.",
+    acaoRecomendada: "Ajustar alinhamento das válvulas de recirculação e alternar bomba de resfriamento."
+  },
+  {
+    chave: "pressaoAguaSelagem",
+    nome: "Pressão de água selagem (kgf/cm²)",
+    nomeCurto: "Água Selagem (kgf/cm²)",
+    unidade: "kgf/cm²",
+    tipoLimite: "faixa",
+    minIdeal: 6.5,
+    maxIdeal: 10.0,
+    alvo: 8.0,
+    decimais: 1,
+    equipamento: "Bombas 47-AS",
+    subsistema: "Selagem de Bombas de Polpa",
+    grupo: "Sistemas de Água de Processo",
+    rotuloFaixa: "6,5 - 10,0 kgf/cm²",
+    impactoDesvio: "Pressão < 6,5 kgf/cm² ocasiona penetração de polpa abrasiva nas gaxetas das bombas de polpa, danificando os eixos.",
+    acaoRecomendada: "Inspecionar filtros da linha de selagem e comutar para bomba de selagem auxiliar."
   },
   {
     chave: "captacaoAguaBruta",
     nome: "Captação Água Bruta / Nova (m³/h)",
-    nomeCurto: "Captação (m³/h)",
+    nomeCurto: "Captação Nova (m³/h)",
     unidade: "m³/h",
     tipoLimite: "max",
     minIdeal: 280,
@@ -3397,26 +3393,27 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
     decimais: 0,
     equipamento: "Captação Nova 47-CP",
     subsistema: "Recursos Hídricos",
-    grupo: "Balanço Hídrico",
+    grupo: "Sistemas de Água de Processo",
     rotuloFaixa: "≤ 380 m³/h",
     impactoDesvio: "Captação acima de 380 m³/h excede limites de outorga ambiental e sinaliza baixa recuperação nos espessadores.",
     acaoRecomendada: "Aumentar reaproveitamento de água clarificada dos espessadores e inspecionar boias da bacia."
   },
   {
-    chave: "volumeTratadoEta",
-    nome: "Volume Tratado ETA (m³/dia)",
-    nomeCurto: "Volume ETA (m³/dia)",
-    unidade: "m³/dia",
-    minIdeal: 7500,
-    maxIdeal: 9500,
-    alvo: 8640,
+    chave: "nivelEtaBruta",
+    nome: "Nível ETA Bruta (%)",
+    nomeCurto: "Nível ETA Bruta (%)",
+    unidade: "%",
+    tipoLimite: "faixa",
+    minIdeal: 70,
+    maxIdeal: 100,
+    alvo: 85,
     decimais: 0,
-    equipamento: "ETA 47-ET-001",
-    subsistema: "Tratamento de Água",
-    grupo: "Balanço Hídrico",
-    rotuloFaixa: "7.500 - 9.500 m³/dia",
-    impactoDesvio: "Variações no volume tratado desestabilizam o nível dos reservatórios centrais de água de processo.",
-    acaoRecomendada: "Regular vazão de alimentação dos filtros de areia e decantadores da ETA."
+    equipamento: "Tanque ETA Bruta 47-ET-001",
+    subsistema: "Tratamento de Água Bruta",
+    grupo: "Estação de Tratamento de Água (ETA)",
+    rotuloFaixa: "70% - 100%",
+    impactoDesvio: "Nível fora de 70% a 100% compromete a vazão de água bruta para tratamento e gera risco de desabastecimento.",
+    acaoRecomendada: "Regular fluxo de captação e manobrar válvulas de entrada da ETA."
   },
   {
     chave: "nivelCamaraA",
@@ -3426,31 +3423,31 @@ export const CONFIG_PARAMETROS_UTILIDADES_ETA: ParametroConfigUtilidadesETA[] = 
     tipoLimite: "min",
     minIdeal: 70,
     maxIdeal: 100,
-    alvo: 80,
+    alvo: 85,
     decimais: 0,
     equipamento: "Câmara A 47-TQ",
     subsistema: "Reservatórios Centrais",
-    grupo: "Armazenamento Hídrico",
+    grupo: "Estação de Tratamento de Água (ETA)",
     rotuloFaixa: "≥ 70% (Meta 80-100%)",
     impactoDesvio: "Nível crítico (< 70%) gera risco de cavitação em bombas de alimentação e perda de pressão de selagem.",
     acaoRecomendada: "Partir bombas de transferência do poço de acumulação e restringir consumos não essenciais."
   },
   {
-    chave: "etaAguaRecuperada",
-    nome: "ETA Água Recuperada (%)",
-    nomeCurto: "Água Recuperada (%)",
+    chave: "nivelEtaRecuperada",
+    nome: "Nível ETA Recuperada (%)",
+    nomeCurto: "Nível ETA Recuperada (%)",
     unidade: "%",
-    tipoLimite: "min",
+    tipoLimite: "faixa",
     minIdeal: 70,
-    maxIdeal: 85,
-    alvo: 75,
+    maxIdeal: 100,
+    alvo: 85,
     decimais: 0,
-    equipamento: "ETA 47-ET-001",
+    equipamento: "Tanque ETA Recuperada 47-ET-002",
     subsistema: "Recuperação Hídrica",
-    grupo: "Tratamento ETA",
-    rotuloFaixa: "≥ 70% (Meta 75%)",
-    impactoDesvio: "Baixa recuperação de água na ETA sobrecarrega o efluente e eleva custos de descarte.",
-    acaoRecomendada: "Otimizar tempo de retenção hidráulica e dosagem de polímero auxiliar de decantação."
+    grupo: "Estação de Tratamento de Água (ETA)",
+    rotuloFaixa: "70% - 100%",
+    impactoDesvio: "Nível fora de 70% a 100% compromete a recirculação sustentável de água clarificada.",
+    acaoRecomendada: "Otimizar clarificação dos espessadores e dosagem de polímeros auxiliares."
   }
 ];
 
@@ -3461,12 +3458,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Todos em Operação",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 7.0,
-    captacaoAguaBruta: 380,
-    volumeTratadoEta: 8640,
+    pressaoArInstrumento: 6.0,
+    pressaoAguaResfriamento: 7.2,
+    pressaoAguaSelagem: 8.2,
+    captacaoAguaBruta: 350,
+    nivelEtaBruta: 85,
+    volumeTratadoEta: 85,
     taxaRecirculacaoReuso: 86.5,
     turbidezAguaTratada: 1.8,
     nivelCamaraA: 84,
-    etaAguaRecuperada: 75,
+    nivelEtaRecuperada: 82,
+    etaAguaRecuperada: 82,
     disponibilidadeUtilidades: 98.5,
     paradasManutencaoUtilidades: 0.5
   },
@@ -3476,12 +3478,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Todos em Operação",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 7.1,
-    captacaoAguaBruta: 375,
-    volumeTratadoEta: 8520,
+    pressaoArInstrumento: 6.1,
+    pressaoAguaResfriamento: 7.1,
+    pressaoAguaSelagem: 8.4,
+    captacaoAguaBruta: 345,
+    nivelEtaBruta: 88,
+    volumeTratadoEta: 88,
     taxaRecirculacaoReuso: 87.0,
     turbidezAguaTratada: 1.7,
     nivelCamaraA: 82,
-    etaAguaRecuperada: 76,
+    nivelEtaRecuperada: 84,
+    etaAguaRecuperada: 84,
     disponibilidadeUtilidades: 100.0,
     paradasManutencaoUtilidades: 0.0
   },
@@ -3491,12 +3498,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Comp 01 e 02",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 6.9,
+    pressaoArInstrumento: 5.9,
+    pressaoAguaResfriamento: 7.0,
+    pressaoAguaSelagem: 8.1,
     captacaoAguaBruta: 360,
-    volumeTratadoEta: 8700,
+    nivelEtaBruta: 84,
+    volumeTratadoEta: 84,
     taxaRecirculacaoReuso: 86.0,
     turbidezAguaTratada: 1.9,
     nivelCamaraA: 85,
-    etaAguaRecuperada: 74,
+    nivelEtaRecuperada: 80,
+    etaAguaRecuperada: 80,
     disponibilidadeUtilidades: 96.0,
     paradasManutencaoUtilidades: 1.0
   },
@@ -3506,12 +3518,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Todos em Operação",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 7.2,
-    captacaoAguaBruta: 370,
-    volumeTratadoEta: 8640,
+    pressaoArInstrumento: 6.2,
+    pressaoAguaResfriamento: 7.3,
+    pressaoAguaSelagem: 8.5,
+    captacaoAguaBruta: 340,
+    nivelEtaBruta: 89,
+    volumeTratadoEta: 89,
     taxaRecirculacaoReuso: 88.0,
     turbidezAguaTratada: 1.6,
     nivelCamaraA: 80,
-    etaAguaRecuperada: 77,
+    nivelEtaRecuperada: 85,
+    etaAguaRecuperada: 85,
     disponibilidadeUtilidades: 100.0,
     paradasManutencaoUtilidades: 0.0
   },
@@ -3521,12 +3538,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Todos em Operação",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 7.0,
-    captacaoAguaBruta: 380,
-    volumeTratadoEta: 8800,
+    pressaoArInstrumento: 6.0,
+    pressaoAguaResfriamento: 7.2,
+    pressaoAguaSelagem: 8.3,
+    captacaoAguaBruta: 350,
+    nivelEtaBruta: 86,
+    volumeTratadoEta: 86,
     taxaRecirculacaoReuso: 86.5,
     turbidezAguaTratada: 1.8,
     nivelCamaraA: 84,
-    etaAguaRecuperada: 75,
+    nivelEtaRecuperada: 83,
+    etaAguaRecuperada: 83,
     disponibilidadeUtilidades: 98.0,
     paradasManutencaoUtilidades: 0.5
   },
@@ -3536,12 +3558,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Todos em Operação",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 6.8,
-    captacaoAguaBruta: 365,
-    volumeTratadoEta: 8600,
+    pressaoArInstrumento: 5.8,
+    pressaoAguaResfriamento: 6.9,
+    pressaoAguaSelagem: 8.0,
+    captacaoAguaBruta: 355,
+    nivelEtaBruta: 83,
+    volumeTratadoEta: 83,
     taxaRecirculacaoReuso: 87.2,
     turbidezAguaTratada: 1.7,
     nivelCamaraA: 83,
-    etaAguaRecuperada: 76,
+    nivelEtaRecuperada: 81,
+    etaAguaRecuperada: 81,
     disponibilidadeUtilidades: 100.0,
     paradasManutencaoUtilidades: 0.0
   },
@@ -3551,12 +3578,17 @@ export const DADOS_DIARIOS_UTILIDADES_ETA_PADRAO: RegistroDiarioIndicadoresUtili
     compressoresOp: "Todos em Operação",
     bombasAguaOp: "Ambas em Operação",
     pressaoAr: 7.0,
-    captacaoAguaBruta: 350,
-    volumeTratadoEta: 8640,
+    pressaoArInstrumento: 6.0,
+    pressaoAguaResfriamento: 7.1,
+    pressaoAguaSelagem: 8.2,
+    captacaoAguaBruta: 345,
+    nivelEtaBruta: 87,
+    volumeTratadoEta: 87,
     taxaRecirculacaoReuso: 86.8,
     turbidezAguaTratada: 1.8,
     nivelCamaraA: 85,
-    etaAguaRecuperada: 75,
+    nivelEtaRecuperada: 83,
+    etaAguaRecuperada: 83,
     disponibilidadeUtilidades: 99.0,
     paradasManutencaoUtilidades: 0.0
   }
@@ -3931,9 +3963,9 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
   {
     dia: "seg",
     diaLabel: "Segunda-feira",
-    produtividadeTph: 1040,
+    produtividadeTph: 960,
     posicaoManto: 48,
-    afericaoBritador: 130,
+    afericaoBritador: 5.8,
     vazaoOleoBuchaInterna: 48.0,
     vazaoOleoBuchaExterna: 52.0,
     pressaoOleoLubrificante: 3.8,
@@ -3941,7 +3973,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 42.0,
     pressaoArAc2: 41.5,
     pressaoAguaResfriamento: 2.6,
-    amperagemMotor41TC001: 142,
+    amperagemMotor41TC001: 44,
     amperagemMotor41BR001: 175,
     temperaturaOleoRetorno: 45.2,
     temperaturaOleoBuchaExterna: 48.0,
@@ -3953,7 +3985,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     diaLabel: "Terça-feira",
     produtividadeTph: 820,
     posicaoManto: 45,
-    afericaoBritador: 132,
+    afericaoBritador: 6.0,
     vazaoOleoBuchaInterna: 46.0,
     vazaoOleoBuchaExterna: 50.0,
     pressaoOleoLubrificante: 3.6,
@@ -3961,7 +3993,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 41.0,
     pressaoArAc2: 40.5,
     pressaoAguaResfriamento: 2.5,
-    amperagemMotor41TC001: 138,
+    amperagemMotor41TC001: 42,
     amperagemMotor41BR001: 168,
     temperaturaOleoRetorno: 44.8,
     temperaturaOleoBuchaExterna: 47.5,
@@ -3971,9 +4003,9 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
   {
     dia: "qua",
     diaLabel: "Quarta-feira",
-    produtividadeTph: 1120,
+    produtividadeTph: 990,
     posicaoManto: 50,
-    afericaoBritador: 128,
+    afericaoBritador: 5.6,
     vazaoOleoBuchaInterna: 49.5,
     vazaoOleoBuchaExterna: 54.0,
     pressaoOleoLubrificante: 3.9,
@@ -3981,7 +4013,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 43.0,
     pressaoArAc2: 42.0,
     pressaoAguaResfriamento: 2.7,
-    amperagemMotor41TC001: 148,
+    amperagemMotor41TC001: 48,
     amperagemMotor41BR001: 182,
     temperaturaOleoRetorno: 46.5,
     temperaturaOleoBuchaExterna: 49.2,
@@ -3991,9 +4023,9 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
   {
     dia: "qui",
     diaLabel: "Quinta-feira",
-    produtividadeTph: 980,
+    produtividadeTph: 920,
     posicaoManto: 52,
-    afericaoBritador: 126,
+    afericaoBritador: 5.5,
     vazaoOleoBuchaInterna: 47.0,
     vazaoOleoBuchaExterna: 51.5,
     pressaoOleoLubrificante: 3.7,
@@ -4001,7 +4033,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 42.0,
     pressaoArAc2: 41.0,
     pressaoAguaResfriamento: 2.4,
-    amperagemMotor41TC001: 140,
+    amperagemMotor41TC001: 41,
     amperagemMotor41BR001: 172,
     temperaturaOleoRetorno: 45.0,
     temperaturaOleoBuchaExterna: 48.5,
@@ -4011,9 +4043,9 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
   {
     dia: "sex",
     diaLabel: "Sexta-feira",
-    produtividadeTph: 1080,
+    produtividadeTph: 970,
     posicaoManto: 50,
-    afericaoBritador: 128,
+    afericaoBritador: 5.9,
     vazaoOleoBuchaInterna: 50.0,
     vazaoOleoBuchaExterna: 55.0,
     pressaoOleoLubrificante: 4.0,
@@ -4021,7 +4053,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 43.0,
     pressaoArAc2: 42.0,
     pressaoAguaResfriamento: 2.8,
-    amperagemMotor41TC001: 146,
+    amperagemMotor41TC001: 46,
     amperagemMotor41BR001: 180,
     temperaturaOleoRetorno: 46.8,
     temperaturaOleoBuchaExterna: 50.1,
@@ -4031,9 +4063,9 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
   {
     dia: "sab",
     diaLabel: "Sábado",
-    produtividadeTph: 1010,
+    produtividadeTph: 950,
     posicaoManto: 48,
-    afericaoBritador: 130,
+    afericaoBritador: 5.8,
     vazaoOleoBuchaInterna: 48.0,
     vazaoOleoBuchaExterna: 53.0,
     pressaoOleoLubrificante: 3.8,
@@ -4041,7 +4073,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 42.0,
     pressaoArAc2: 41.0,
     pressaoAguaResfriamento: 2.6,
-    amperagemMotor41TC001: 143,
+    amperagemMotor41TC001: 45,
     amperagemMotor41BR001: 176,
     temperaturaOleoRetorno: 45.5,
     temperaturaOleoBuchaExterna: 48.8,
@@ -4051,9 +4083,9 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
   {
     dia: "dom",
     diaLabel: "Domingo",
-    produtividadeTph: 995,
+    produtividadeTph: 940,
     posicaoManto: 47,
-    afericaoBritador: 131,
+    afericaoBritador: 5.7,
     vazaoOleoBuchaInterna: 48.0,
     vazaoOleoBuchaExterna: 52.5,
     pressaoOleoLubrificante: 3.8,
@@ -4061,7 +4093,7 @@ export const DADOS_DIARIOS_BRITAGEM_PADRAO: RegistroDiarioIndicadoresBritagem[] 
     pressaoArAc1: 42.0,
     pressaoArAc2: 41.5,
     pressaoAguaResfriamento: 2.6,
-    amperagemMotor41TC001: 141,
+    amperagemMotor41TC001: 43,
     amperagemMotor41BR001: 174,
     temperaturaOleoRetorno: 45.1,
     temperaturaOleoBuchaExterna: 48.2,
@@ -6033,7 +6065,13 @@ export function obterLeituraAtualUtilidadesETA(
     for (let i = hist.length - 1; i >= 0; i--) {
       const row = hist[i];
       if (row) {
-        const valRaw = (row as any)[param.chave];
+        let valRaw = (row as any)[param.chave];
+        if ((valRaw === undefined || valRaw === "") && param.chave === "nivelEtaBruta") {
+          valRaw = (row as any)["volumeTratadoEta"];
+        }
+        if ((valRaw === undefined || valRaw === "") && param.chave === "nivelEtaRecuperada") {
+          valRaw = (row as any)["etaAguaRecuperada"];
+        }
         const parsed = parseNumeroBritagem(valRaw);
         if (parsed !== null) {
           let str = `${param.decimais > 0 ? parsed.toFixed(param.decimais).replace(".", ",") : parsed} ${param.unidade}`;
@@ -6049,9 +6087,9 @@ export function obterLeituraAtualUtilidadesETA(
     const parsed = parseNumeroBritagem(dadosCE.captacaoAguaBrutaM3h);
     if (parsed !== null) return { numVal: parsed, leituraFormatada: `${parsed} m³/h`, origem: "direto" };
   }
-  if (param.chave === "volumeTratadoEta" && dadosCE?.aguaTratadaM3Dia !== undefined && dadosCE?.aguaTratadaM3Dia !== "") {
+  if ((param.chave === "nivelEtaBruta" || (param.chave as any) === "volumeTratadoEta") && dadosCE?.aguaTratadaM3Dia !== undefined && dadosCE?.aguaTratadaM3Dia !== "") {
     const parsed = parseNumeroBritagem(dadosCE.aguaTratadaM3Dia);
-    if (parsed !== null) return { numVal: parsed, leituraFormatada: `${parsed} m³/dia`, origem: "direto" };
+    if (parsed !== null) return { numVal: parsed, leituraFormatada: `${parsed}%`, origem: "direto" };
   }
   if (param.chave === "taxaRecirculacaoReuso" && dadosCE?.taxaRecirculacaoReuso !== undefined && dadosCE?.taxaRecirculacaoReuso !== "") {
     const parsed = parseNumeroBritagem(dadosCE.taxaRecirculacaoReuso);
@@ -6105,7 +6143,7 @@ export const DADOS_PADRAO_BRITAGEM_REBRITAGEM: DadosSetorBritagemRebritagem = {
 
   // Indicadores Operacionais da Britagem (41BR001 / 41TC001)
   posicaoManto: "48%",
-  afericaoBritador: "128 mm (5.0'')",
+  afericaoBritador: '5.8"',
   vazaoOleoBuchaInterna: 48.0,
   vazaoOleoBuchaExterna: 53.0,
   pressaoOleoLubrificante: 3.85,
@@ -6113,7 +6151,7 @@ export const DADOS_PADRAO_BRITAGEM_REBRITAGEM: DadosSetorBritagemRebritagem = {
   pressaoArAc1: 42.0,
   pressaoArAc2: 41.5,
   pressaoAguaResfriamento: 2.65,
-  amperagemMotor41TC001: 144,
+  amperagemMotor41TC001: 45,
   amperagemMotor41BR001: 178,
   temperaturaOleoRetorno: 46.2,
   temperaturaOleoBuchaExterna: 49.5,
@@ -6122,7 +6160,7 @@ export const DADOS_PADRAO_BRITAGEM_REBRITAGEM: DadosSetorBritagemRebritagem = {
   historicoDiarioBritagem: DADOS_DIARIOS_BRITAGEM_PADRAO,
   anotacoesDesvios: {
     "produtividadeTph_ter": {
-      impactoPerda: "Taxa horária média pontualmente em 820 tph (-180 tph vs meta) por matacos de desmonte na mina subterrânea",
+      impactoPerda: "Taxa horária média pontualmente em 820 tph (-30 tph vs faixa mínima de 850 tph) por matacos de desmonte na mina subterrânea",
       acaoRecomendada: "Acionamento do rompedor hidráulico fixo e balanceamento de blend com alimentação direta via pulmão Surubim"
     },
     "temperaturaOleoBuchaInterna_sex": {
@@ -6769,9 +6807,10 @@ export function gerarWppAdm(payload: RelatorioAdmPayload): string {
     L.push(`• Prod. Britagem Dia: *${br.producaoDiaTotal ? br.producaoDiaTotal.toLocaleString("pt-BR") : "-"} t* (Meta: ${br.metaProducaoDia.toLocaleString("pt-BR")} t)`);
     L.push(`• Prod. Britagem Semana: *${br.producaoSemanaAcum ? br.producaoSemanaAcum.toLocaleString("pt-BR") : "-"} t* (Meta: ${br.metaProducaoSemana.toLocaleString("pt-BR")} t)`);
     L.push(`• Prod. Britagem Mês: *${br.producaoMesAcum ? br.producaoMesAcum.toLocaleString("pt-BR") : "-"} t* (Meta: ${br.metaProducaoMes.toLocaleString("pt-BR")} t)`);
-    L.push(`• Taxa Britador Primário: *${br.taxaBritagem || "-"} t/h* (Meta: ${br.metaTaxaBritagem} t/h)`);
+    L.push(`• Taxa Britador Primário: *${br.taxaBritagem || "-"} t/h* (Meta: 850 - 1.000 t/h)`);
     L.push(`• Disp / Util Britagem: *${br.disponibilidadeBritagem || "-"}%* / *${br.utilizacaoBritagem || "-"}%*`);
-    L.push(`• Posição Manto / Aferição: *${br.posicaoManto || "-"}* | *${br.afericaoBritador || "-"}*`);
+    L.push(`• Posição Manto: *${br.posicaoManto || "-"}* (Meta: 5-100%) | Aferição: *${br.afericaoBritador || "-"}* (Meta: 5-6.5")`);
+    L.push(`• Amp. 41TC001: *${br.amperagemMotor41TC001 || "-"} A* (Meta: 37-54 A)`);
     L.push(`• Estoque Total ROM: *${br.estoqueTotalRom ? br.estoqueTotalRom.toLocaleString("pt-BR") : "-"} t* (MSB: ${br.estoqueMsb || "-"}t, Surubim: ${br.estoqueSurubim || "-"}t)`);
     L.push(`• Pilha Intermediária: *${br.pilhaIntermediaria ? br.pilhaIntermediaria.toLocaleString("pt-BR") : "-"} t* | Rebritagem Total: *${br.producaoTotalRebritagem ? br.producaoTotalRebritagem.toLocaleString("pt-BR") : "-"} t*`);
     L.push(``);

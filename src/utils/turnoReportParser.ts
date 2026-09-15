@@ -126,8 +126,13 @@ export interface RelatorioTurnoAnexo {
 
     // Utilidades / ETA
     pressaoAr?: number;
-    etaAguaRecuperada?: number;
+    pressaoArInstrumento?: number;
+    pressaoAguaResfriamento?: number;
+    pressaoAguaSelagem?: number;
+    nivelEtaBruta?: number;
     etaAguaBruta?: number;
+    nivelEtaRecuperada?: number;
+    etaAguaRecuperada?: number;
     nivelCamaraA?: number;
 
     // Itens Críticos Úmido
@@ -322,6 +327,15 @@ export const RELATORIOS_ANEXOS_SEMANA_EXEMPLO: RelatorioTurnoAnexo[] = [
       torqueRejEp001: 9.0,
       torqueRejEp002: 8.0,
       consumoFloculanteRej: 2800,
+      pressaoAr: 7.1,
+      pressaoArInstrumento: 6.2,
+      pressaoAguaResfriamento: 7.2,
+      pressaoAguaSelagem: 8.5,
+      nivelEtaBruta: 85,
+      etaAguaBruta: 85,
+      nivelEtaRecuperada: 82,
+      etaAguaRecuperada: 82,
+      nivelCamaraA: 84,
       atividadesRealizadas: [
         "Ajuste da flotação mantendo recuperação em 88.5% e pH em 9.5."
       ],
@@ -523,6 +537,15 @@ export const RELATORIOS_ANEXOS_SEMANA_EXEMPLO: RelatorioTurnoAnexo[] = [
       solidosRej45ep002: 65,
       torqueRejEp001: 8.0,
       torqueRejEp002: 10.0,
+      pressaoAr: 7.0,
+      pressaoArInstrumento: 6.0,
+      pressaoAguaResfriamento: 7.1,
+      pressaoAguaSelagem: 8.3,
+      nivelEtaBruta: 88,
+      etaAguaBruta: 88,
+      nivelEtaRecuperada: 84,
+      etaAguaRecuperada: 84,
+      nivelCamaraA: 82,
       atividadesRealizadas: [
         "45HC012 colocado flange na válvula danificada e eliminado vazamento.",
         "Substituídas correias de acionamento da 43BB087."
@@ -634,10 +657,15 @@ export const RELATORIOS_ANEXOS_SEMANA_EXEMPLO: RelatorioTurnoAnexo[] = [
       pressaoCompactacao: 230,
       disponibilidadeFiltro: 100,
       utilizacaoFiltro: 91.7,
-      pressaoAr: 8.0,
-      etaAguaRecuperada: 80,
-      etaAguaBruta: 40,
-      nivelCamaraA: 70,
+      pressaoAr: 7.2,
+      pressaoArInstrumento: 6.1,
+      pressaoAguaResfriamento: 7.0,
+      pressaoAguaSelagem: 8.2,
+      nivelEtaBruta: 86,
+      etaAguaBruta: 86,
+      nivelEtaRecuperada: 83,
+      etaAguaRecuperada: 83,
+      nivelCamaraA: 85,
       atividadesRealizadas: [
         "Substituída a gaxeta da 43BB077 e eliminado furo no distribuidor 07.",
         "Limpeza da baia de concentrado e troca de gaxeta da 43BB078 durante janela operacional."

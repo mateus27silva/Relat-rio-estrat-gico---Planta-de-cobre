@@ -354,7 +354,16 @@ export function gerarRelatorioPDF(payload: PDFDataPayload) {
         else if (campo.id === "nivel_camara_a" || campo.id.startsWith("nivel_camara_a")) metaStr = "80 - 100% (Atenção 70-80 / Crítico < 70)";
         else if (campo.id.startsWith("solidos_45") || (setor.id === "espessamento_rejeito" && campo.id.startsWith("solidos_"))) metaStr = "63 - 66% (Crítico > 66%)";
         else if (campo.id.startsWith("torque_ep") || (setor.id === "espessamento_rejeito" && campo.id.startsWith("torque")) || (setor.id === "espessamento_conc" && campo.id.startsWith("torque"))) metaStr = "< 12% (Atenção 12-20 / Crítico > 20)";
-        else if (setor.id === "remoagem" && campo.id === "produtividade") metaStr = "≤ 275 t/h (Crítico > 275)";
+        else if (setor.id === "britagem_primaria" && (campo.id === "alimentacao" || campo.id === "produtividade")) metaStr = "850 - 1000 tph";
+        else if (setor.id === "britagem_primaria" && (campo.id === "posicao_manto" || campo.id === "posicaoManto")) metaStr = "5 - 100%";
+        else if (setor.id === "britagem_primaria" && (campo.id === "afericao" || campo.id === "afericao_britador" || campo.id === "afericao_britadores" || campo.id === "afericaoBritador")) metaStr = "5,0\" - 6,5\"";
+        else if (setor.id === "britagem_primaria" && (campo.id === "amperagem_41tc001" || campo.id === "amperagemMotor41TC001" || campo.id === "amp_41tc001")) metaStr = "37 - 54 A";
+        else if (setor.id === "remoagem" && (campo.id === "produtividade" || campo.id === "fluxo_alimentacao")) metaStr = "175 - 275 tph";
+        else if (setor.id === "remoagem" && campo.id === "f80_210") metaStr = "70 - 90%";
+        else if (setor.id === "remoagem" && (campo.id === "granulometria_p80" || campo.id === "p80_75")) metaStr = "65 - 85%";
+        else if (setor.id === "remoagem" && (campo.id === "densidade" || campo.id === "densidade_feed")) metaStr = "1,44 - 1,55 g/t";
+        else if (setor.id === "remoagem" && (campo.id === "potencia_moinho" || campo.id === "potencia_hig")) metaStr = "1400 - 2250 kW";
+        else if (setor.id === "remoagem" && (campo.id === "torque" || campo.id === "torque_hig")) metaStr = "60 - 95%";
         else if (campo.id === "afericao_britadores") metaStr = "Realizado";
         else if (campo.id === "nivel_tanque" || campo.id === "ciclos") metaStr = "-";
 
@@ -387,8 +396,26 @@ export function gerarRelatorioPDF(payload: PDFDataPayload) {
             status = sType === "ok" ? "OK (63-66%)" : sType === "alerta" ? "Atenção (<63%)" : "Crítico (>66%)";
           } else if (campo.id.startsWith("torque_ep") || (setor.id === "espessamento_rejeito" && campo.id.startsWith("torque")) || (setor.id === "espessamento_conc" && campo.id.startsWith("torque"))) {
             status = sType === "ok" ? "OK (<12%)" : sType === "alerta" ? "Atenção (12-20%)" : "Crítico (>20%)";
-          } else if (setor.id === "remoagem" && campo.id === "produtividade") {
-            status = sType === "ok" ? "OK (≤275 t/h)" : "Crítico (>275 t/h)";
+          } else if (setor.id === "britagem_primaria" && (campo.id === "alimentacao" || campo.id === "produtividade")) {
+            status = sType === "ok" ? "OK (850-1000 tph)" : "Fora da Meta (850-1000 tph)";
+          } else if (setor.id === "britagem_primaria" && (campo.id === "posicao_manto" || campo.id === "posicaoManto")) {
+            status = sType === "ok" ? "OK (5-100%)" : "Fora da Meta (5-100%)";
+          } else if (setor.id === "britagem_primaria" && (campo.id === "afericao" || campo.id === "afericao_britador" || campo.id === "afericao_britadores" || campo.id === "afericaoBritador")) {
+            status = sType === "ok" ? "OK (5,0\"-6,5\")" : "Fora da Meta (5,0\"-6,5\")";
+          } else if (setor.id === "britagem_primaria" && (campo.id === "amperagem_41tc001" || campo.id === "amperagemMotor41TC001" || campo.id === "amp_41tc001")) {
+            status = sType === "ok" ? "OK (37-54 A)" : "Fora da Meta (37-54 A)";
+          } else if (setor.id === "remoagem" && (campo.id === "produtividade" || campo.id === "fluxo_alimentacao")) {
+            status = sType === "ok" ? "OK (175-275 tph)" : "Fora da Meta (175-275 tph)";
+          } else if (setor.id === "remoagem" && campo.id === "f80_210") {
+            status = sType === "ok" ? "OK (70-90%)" : "Fora da Meta (70-90%)";
+          } else if (setor.id === "remoagem" && (campo.id === "granulometria_p80" || campo.id === "p80_75")) {
+            status = sType === "ok" ? "OK (65-85%)" : "Fora da Meta (65-85%)";
+          } else if (setor.id === "remoagem" && (campo.id === "densidade" || campo.id === "densidade_feed")) {
+            status = sType === "ok" ? "OK (1,44-1,55 g/t)" : "Fora da Meta (1,44-1,55 g/t)";
+          } else if (setor.id === "remoagem" && (campo.id === "potencia_moinho" || campo.id === "potencia_hig")) {
+            status = sType === "ok" ? "OK (1400-2250 kW)" : "Fora da Meta (1400-2250 kW)";
+          } else if (setor.id === "remoagem" && (campo.id === "torque" || campo.id === "torque_hig")) {
+            status = sType === "ok" ? "OK (60-95%)" : "Fora da Meta (60-95%)";
           } else if (sType === "ok") {
             status = "Atingida";
           } else if (sType === "alerta") {
@@ -403,7 +430,18 @@ export function gerarRelatorioPDF(payload: PDFDataPayload) {
             acaoText = "Pendente de tratativa";
           }
         } else if (val !== undefined && val !== "") {
-          if (val === "Pendente") {
+          const numParsed = parseFloat(String(val).replace("%", "").replace('"', '').replace(',', '.'));
+          if (!isNaN(numParsed) && setor.id === "britagem_primaria") {
+            const sType = st(numParsed, campo.meta, campo.id, setor.id);
+            if (campo.id === "posicao_manto" || campo.id === "posicaoManto") {
+              status = sType === "ok" ? "OK (5-100%)" : "Fora da Meta (5-100%)";
+            } else if (campo.id === "afericao" || campo.id === "afericao_britador" || campo.id === "afericao_britadores" || campo.id === "afericaoBritador") {
+              status = sType === "ok" ? "OK (5,0\"-6,5\")" : "Fora da Meta (5,0\"-6,5\")";
+            }
+            if ((sType === "alerta" || sType === "critico") && acaoText === "-") {
+              acaoText = "Pendente de tratativa";
+            }
+          } else if (val === "Pendente") {
             status = "Pendente";
             if (acaoText === "-") {
               acaoText = "Pendente de tratativa";
