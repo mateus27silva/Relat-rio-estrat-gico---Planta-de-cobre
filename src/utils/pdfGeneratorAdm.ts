@@ -69,6 +69,7 @@ import {
   obterDiasAlocadosNumeros,
   normalizarAlocacaoTurnos,
   formatarResumoAlocacao,
+  formatDateTimeToDisplay,
   DIAS_CHAVES_GANTT,
   DiretrizSupervisorTurno
 } from "../typesAdm";
@@ -2101,7 +2102,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         `${codAcao}\n${d.setor}`,
         d.acaoEstrategica || "-",
         `${d.responsavelTurma}\n${d.supervisorNome || "-"}`,
-        d.prazoLimite || "Turno Vigente",
+        formatDateTimeToDisplay(d.prazoDateTime || d.prazoLimite),
         prioLabel,
         d.metaEsperada || "-",
         statusLabel
@@ -2114,8 +2115,8 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         [
           { content: "Código / Setor", styles: { halign: "left" } },
           { content: "Ação Estratégica / Procedimento de Turno", styles: { halign: "left" } },
-          { content: "Turma / Supervisor", styles: { halign: "left" } },
-          { content: "Prazo Limite", styles: { halign: "center" } },
+          { content: "Turma Responsável", styles: { halign: "left" } },
+          { content: "Prazo Limite & Horários de Conclusão", styles: { halign: "center" } },
           { content: "Prioridade", styles: { halign: "center" } },
           { content: "Critério de Aceite / Meta", styles: { halign: "left" } },
           { content: "Status", styles: { halign: "center" } },
@@ -2198,12 +2199,22 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
     );
 
     const fullWidth = pageWidth - margin * 2; // 190 mm
-    const colSetorW = 22; // mm
-    const colAtividadeW = 55; // mm
-    const colRecursosW = 18; // mm
-    const colTurnoW = 5.6; // mm (14 turnos x 5.6 = 78.4 mm)
-    const colGanttW = 78.4; // mm (7 dias x 11.2 mm)
-    const colProgressoW = fullWidth - colSetorW - colAtividadeW - colRecursosW - colGanttW; // 16.6 mm
+    const colSetorW = 18; // mm
+    const colAtividadeW = 42; // mm
+    const colTurmaW = 16; // mm
+    const colPrazoW = 20; // mm
+    const colRecursosW = 13; // mm
+    const colTurnoW = 4.8; // mm (14 turnos x 4.8 = 67.2 mm)
+    const colGanttW = 67.2; // mm (7 dias x 9.6 mm)
+    const colProgressoW = fullWidth - colSetorW - colAtividadeW - colTurmaW - colPrazoW - colRecursosW - colGanttW; // 13.8 mm
+
+    // Posições horizontais X das colunas principais
+    const ativX = margin + colSetorW;
+    const turmaX = ativX + colAtividadeW;
+    const prazoX = turmaX + colTurmaW;
+    const recX = prazoX + colPrazoW;
+    const ganttX = recX + colRecursosW;
+    const progX = ganttX + colGanttW;
 
     // Agrupamento por Setor
     const setoresUnicos: string[] = Array.from(
@@ -2225,33 +2236,44 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
       doc.setFillColor(7, 22, 27);
       doc.rect(margin, yPos, colSetorW, totalHeaderH, "F");
       doc.setFont("helvetica", "bold");
-      doc.setFontSize(5.2);
+      doc.setFontSize(5.0);
       doc.setTextColor(255, 255, 255);
       doc.text("LOCAL / SETOR", margin + colSetorW / 2, yPos + 4.5, { align: "center" });
 
       // Coluna 2: ATIVIDADE OPERACIONAL / DIRETRIZ (fundo #0A2028)
       doc.setFillColor(10, 32, 40);
-      doc.rect(margin + colSetorW, yPos, colAtividadeW, totalHeaderH, "F");
-      doc.text("ATIVIDADE OPERACIONAL / DIRETRIZ", margin + colSetorW + colAtividadeW / 2, yPos + 4.5, { align: "center" });
+      doc.rect(ativX, yPos, colAtividadeW, totalHeaderH, "F");
+      doc.text("ATIVIDADE OPERACIONAL / DIRETRIZ", ativX + colAtividadeW / 2, yPos + 4.5, { align: "center" });
 
-      // Coluna 3: RECURSOS (fundo #0A2028)
+      // Coluna 3: TURMA RESPONSÁVEL (fundo #082229)
+      doc.setFillColor(8, 34, 41);
+      doc.rect(turmaX, yPos, colTurmaW, totalHeaderH, "F");
+      doc.setTextColor(167, 243, 208); // mint
+      doc.text("TURMA RESP.", turmaX + colTurmaW / 2, yPos + 4.5, { align: "center" });
+
+      // Coluna 4: PRAZO LIMITE & HORÁRIOS (fundo #082229)
+      doc.setFillColor(8, 34, 41);
+      doc.rect(prazoX, yPos, colPrazoW, totalHeaderH, "F");
+      doc.setTextColor(254, 243, 199); // amber-100
+      doc.text("PRAZO & HORÁRIOS", prazoX + colPrazoW / 2, yPos + 4.5, { align: "center" });
+
+      // Coluna 5: RECURSOS (fundo #0A2028)
       doc.setFillColor(10, 32, 40);
-      doc.rect(margin + colSetorW + colAtividadeW, yPos, colRecursosW, totalHeaderH, "F");
-      doc.text("RECURSOS", margin + colSetorW + colAtividadeW + colRecursosW / 2, yPos + 4.5, { align: "center" });
+      doc.rect(recX, yPos, colRecursosW, totalHeaderH, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.text("RECURSOS", recX + colRecursosW / 2, yPos + 4.5, { align: "center" });
 
-      // Coluna 4: CRONOGRAMA SEMANAL (DIAS E HORÁRIOS) (fundo #004D40)
-      const ganttX = margin + colSetorW + colAtividadeW + colRecursosW;
+      // Coluna 6: CRONOGRAMA SEMANAL (DIAS E HORÁRIOS) (fundo #004D40)
       doc.setFillColor(0, 77, 64);
       doc.rect(ganttX, yPos, colGanttW, hRow1, "F");
-      doc.setFontSize(5.5);
+      doc.setFontSize(5.3);
       doc.setTextColor(167, 243, 208); // mint
       doc.text("CRONOGRAMA SEMANAL (DIAS E HORÁRIOS)", ganttX + colGanttW / 2, yPos + 3.0, { align: "center" });
 
-      // Coluna 5: PROGRESSO (fundo #07161B)
-      const progX = ganttX + colGanttW;
+      // Coluna 7: PROGRESSO (fundo #07161B)
       doc.setFillColor(7, 22, 27);
       doc.rect(progX, yPos, colProgressoW, totalHeaderH, "F");
-      doc.setFontSize(5.2);
+      doc.setFontSize(5.0);
       doc.setTextColor(255, 255, 255);
       doc.text("PROGRESSO", progX + colProgressoW / 2, yPos + 4.5, { align: "center" });
 
@@ -2268,7 +2290,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
 
       diasLabels.forEach((d, idx) => {
         const diaX = ganttX + idx * (colTurnoW * 2);
-        const diaW = colTurnoW * 2; // 11.2 mm
+        const diaW = colTurnoW * 2; // 9.6 mm
         if (d.fds) {
           doc.setFillColor(141, 75, 18); // #8D4B12
           doc.rect(diaX, yPos + hRow1, diaW, hRow2, "F");
@@ -2279,14 +2301,14 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
           doc.setTextColor(255, 255, 255);
         }
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(4.8);
+        doc.setFontSize(4.6);
         doc.text(d.label, diaX + diaW / 2, yPos + hRow1 + 2.5, { align: "center" });
       });
 
       // --- LINHA 3: SUB-HORÁRIOS (07h:19h e 19h:07h) ---
       // Fundo das colunas laterais na linha 3
       doc.setFillColor(226, 232, 240);
-      doc.rect(margin, yPos + hRow1 + hRow2, colSetorW + colAtividadeW + colRecursosW, hRow3, "F");
+      doc.rect(margin, yPos + hRow1 + hRow2, colSetorW + colAtividadeW + colTurmaW + colPrazoW + colRecursosW, hRow3, "F");
       doc.rect(progX, yPos + hRow1 + hRow2, colProgressoW, hRow3, "F");
 
       for (let i = 0; i < 14; i++) {
@@ -2305,7 +2327,7 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         }
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(3.8);
+        doc.setFontSize(3.6);
         doc.text(isDiurno ? "07:19" : "19:07", tX + colTurnoW / 2, yPos + hRow1 + hRow2 + 2.2, { align: "center" });
 
         // Divisórias verticais
@@ -2317,8 +2339,10 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
       // Linhas divisórias verticais principais do cabeçalho
       doc.setDrawColor(51, 65, 85);
       doc.setLineWidth(0.2);
-      doc.line(margin + colSetorW, yPos, margin + colSetorW, yPos + totalHeaderH);
-      doc.line(margin + colSetorW + colAtividadeW, yPos, margin + colSetorW + colAtividadeW, yPos + totalHeaderH);
+      doc.line(ativX, yPos, ativX, yPos + totalHeaderH);
+      doc.line(turmaX, yPos, turmaX, yPos + totalHeaderH);
+      doc.line(prazoX, yPos, prazoX, yPos + totalHeaderH);
+      doc.line(recX, yPos, recX, yPos + totalHeaderH);
       doc.line(ganttX, yPos, ganttX, yPos + totalHeaderH);
       doc.line(progX, yPos, progX, yPos + totalHeaderH);
 
@@ -2439,8 +2463,6 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         });
 
         // --- COLUNA 2: ATIVIDADE OPERACIONAL / DIRETRIZ ---
-        const ativX = margin + colSetorW;
-        
         // Badge de Prioridade (P1 / P2 / P3)
         let prioBg: [number, number, number] = [219, 234, 254];
         let prioColor: [number, number, number] = [30, 64, 175];
@@ -2456,45 +2478,92 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
         }
 
         doc.setFillColor(...prioBg);
-        doc.roundedRect(ativX + 1.5, tableY + 1.2, 14.5, 2.2, 0.4, 0.4, "F");
+        doc.roundedRect(ativX + 1.2, tableY + 1.0, 14.0, 2.2, 0.4, 0.4, "F");
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(4.2);
+        doc.setFontSize(4.0);
         doc.setTextColor(...prioColor);
-        doc.text(prioLabel, ativX + 8.75, tableY + 2.75, { align: "center" });
+        doc.text(prioLabel, ativX + 8.2, tableY + 2.55, { align: "center" });
 
-        // Prazo Limite
+        // Código / Setor tag
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(4.2);
+        doc.setFontSize(3.8);
         doc.setTextColor(100, 116, 139); // slate-500
-        const prazoStr = `Prazo: ${d.prazoLimite || "Turno Atual"}`;
-        doc.text(prazoStr, ativX + 17.5, tableY + 2.75);
+        doc.text(`Cód: ACT-${String(idx + 1).padStart(2, "0")}`, ativX + 16.5, tableY + 2.55);
 
         // Texto da Ação
         doc.setFont("helvetica", isConcluido ? "normal" : "bold");
-        doc.setFontSize(4.8);
+        doc.setFontSize(4.6);
         doc.setTextColor(isConcluido ? 148 : 15, isConcluido ? 163 : 23, isConcluido ? 184 : 42);
         acaoLines.forEach((aLine: string, aIdx: number) => {
-          doc.text(aLine, ativX + 1.5, tableY + 5.0 + aIdx * 2.2);
+          doc.text(aLine, ativX + 1.2, tableY + 4.8 + aIdx * 2.1);
         });
 
-        // --- COLUNA 3: RECURSOS ---
-        const recX = ativX + colAtividadeW;
+        // --- COLUNA 3: TURMA RESPONSÁVEL ---
+        doc.setFillColor(248, 250, 252);
+        doc.rect(turmaX, tableY, colTurmaW, rowHeight, "F");
+
+        doc.setFillColor(240, 253, 250); // teal-50
+        doc.setDrawColor(153, 246, 228); // teal-200
+        doc.setLineWidth(0.12);
+        doc.roundedRect(turmaX + 1.0, tableY + 1.2, colTurmaW - 2.0, 3.0, 0.4, 0.4, "FD");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(4.0);
+        doc.setTextColor(19, 78, 74); // teal-900
+        const turmaNome = d.responsavelTurma || "Todas";
+        doc.text(turmaNome, turmaX + colTurmaW / 2, tableY + 3.3, { align: "center" });
+
+        if (d.supervisorNome) {
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(3.5);
+          doc.setTextColor(100, 116, 139);
+          const supLines = doc.splitTextToSize(d.supervisorNome, colTurmaW - 2);
+          supLines.slice(0, 2).forEach((sLine: string, sIdx: number) => {
+            doc.text(sLine, turmaX + colTurmaW / 2, tableY + 5.6 + sIdx * 1.8, { align: "center" });
+          });
+        }
+
+        // --- COLUNA 4: PRAZO LIMITE & HORÁRIOS DE CONCLUSÃO ---
+        doc.setFillColor(248, 250, 252);
+        doc.rect(prazoX, tableY, colPrazoW, rowHeight, "F");
+
+        doc.setFillColor(254, 243, 199); // amber-100
+        doc.setDrawColor(251, 191, 36); // amber-400
+        doc.setLineWidth(0.12);
+        doc.roundedRect(prazoX + 1.0, tableY + 1.2, colPrazoW - 2.0, 3.0, 0.4, 0.4, "FD");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(3.9);
+        doc.setTextColor(120, 53, 15); // amber-900
+        const prazoTxt = formatDateTimeToDisplay(d.prazoDateTime || d.prazoLimite);
+        doc.text(prazoTxt, prazoX + colPrazoW / 2, tableY + 3.3, { align: "center" });
+
+        // Resumo de Alocação de Turnos
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(3.4);
+        doc.setTextColor(100, 116, 139);
+        const resAloc = d.alocacaoTurnos ? formatarResumoAlocacao(d.alocacaoTurnos) : "Janela Programada";
+        const prazoLines = doc.splitTextToSize(resAloc, colPrazoW - 2);
+        prazoLines.slice(0, 2).forEach((pLine: string, pIdx: number) => {
+          doc.text(pLine, prazoX + colPrazoW / 2, tableY + 5.6 + pIdx * 1.8, { align: "center" });
+        });
+
+        // --- COLUNA 5: RECURSOS ---
         doc.setFillColor(248, 250, 252);
         doc.rect(recX, tableY, colRecursosW, rowHeight, "F");
 
-        const recursoStr = d.recursosPessoais || "ADM / OPERAÇÃO";
+        const recursoStr = d.recursosPessoais || "OPERAÇÃO";
         doc.setFillColor(241, 245, 249);
         doc.setDrawColor(203, 213, 225);
         doc.setLineWidth(0.12);
-        doc.roundedRect(recX + 1.2, tableY + (rowHeight - 3.2) / 2, colRecursosW - 2.4, 3.2, 0.4, 0.4, "FD");
+        doc.roundedRect(recX + 1.0, tableY + (rowHeight - 3.0) / 2, colRecursosW - 2.0, 3.0, 0.4, 0.4, "FD");
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(4.2);
+        doc.setFontSize(4.0);
         doc.setTextColor(30, 41, 59);
         doc.text(recursoStr, recX + colRecursosW / 2, tableY + rowHeight / 2 + 1.0, { align: "center" });
 
-        // --- COLUNAS 4 A 17: 14 TURNOS COM MARCAÇÃO "X" VERDE FLORESTA ---
-        const ganttX = recX + colRecursosW;
+        // --- COLUNAS 6 A 19: 14 TURNOS COM MARCAÇÃO "X" VERDE FLORESTA ---
         const aloc = normalizarAlocacaoTurnos(d.alocacaoTurnos, d.diaInicioNum, d.diaFimNum, d.diasAlocados);
         const diaKeys = ["seg", "ter", "qua", "qui", "sex", "sab", "dom"] as const;
 
@@ -2511,9 +2580,9 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
             doc.setFillColor(30, 126, 52); // #1E7E34 Verde Floresta
             doc.rect(diurnoX + 0.15, tableY + 0.15, colTurnoW - 0.3, rowHeight - 0.3, "F");
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(5.5);
+            doc.setFontSize(5.2);
             doc.setTextColor(255, 255, 255);
-            doc.text("X", diurnoX + colTurnoW / 2, tableY + rowHeight / 2 + 1.6, { align: "center" });
+            doc.text("X", diurnoX + colTurnoW / 2, tableY + rowHeight / 2 + 1.5, { align: "center" });
           }
 
           // Turno Noturno
@@ -2521,9 +2590,9 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
             doc.setFillColor(30, 126, 52); // #1E7E34 Verde Floresta
             doc.rect(noturnoX + 0.15, tableY + 0.15, colTurnoW - 0.3, rowHeight - 0.3, "F");
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(5.5);
+            doc.setFontSize(5.2);
             doc.setTextColor(255, 255, 255);
-            doc.text("X", noturnoX + colTurnoW / 2, tableY + rowHeight / 2 + 1.6, { align: "center" });
+            doc.text("X", noturnoX + colTurnoW / 2, tableY + rowHeight / 2 + 1.5, { align: "center" });
           }
 
           // Linhas verticais dos turnos
@@ -2533,18 +2602,17 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
           doc.line(noturnoX, tableY, noturnoX, tableY + rowHeight);
         });
 
-        // --- COLUNA 18: PROGRESSO ---
-        const progX = ganttX + colGanttW;
+        // --- COLUNA 20: PROGRESSO ---
         doc.setFillColor(248, 250, 252);
         doc.rect(progX, tableY, colProgressoW, rowHeight, "F");
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(4.8);
+        doc.setFontSize(4.6);
         doc.setTextColor(15, 23, 42);
         doc.text(`${progresso}%`, progX + colProgressoW / 2, tableY + rowHeight / 2 - 0.6, { align: "center" });
 
         // Mini Barra de Progresso
-        const barW = 12;
+        const barW = 10;
         const barH = 1.3;
         const barX = progX + (colProgressoW - barW) / 2;
         const barY = tableY + rowHeight / 2 + 0.8;
@@ -2571,6 +2639,8 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
 
         // Linhas verticais delimitadoras das colunas principais
         doc.line(ativX, tableY, ativX, tableY + rowHeight);
+        doc.line(turmaX, tableY, turmaX, tableY + rowHeight);
+        doc.line(prazoX, tableY, prazoX, tableY + rowHeight);
         doc.line(recX, tableY, recX, tableY + rowHeight);
         doc.line(ganttX, tableY, ganttX, tableY + rowHeight);
         doc.line(progX, tableY, progX, tableY + rowHeight);

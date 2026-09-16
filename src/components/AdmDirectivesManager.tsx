@@ -31,7 +31,9 @@ import {
   DIAS_CHAVES_GANTT,
   normalizarAlocacaoTurnos,
   obterDiasAlocadosNumeros,
-  formatarResumoAlocacao
+  formatarResumoAlocacao,
+  formatDateTimeToDisplay,
+  parsePrazoToDateTimeLocal
 } from "../typesAdm";
 import { AdmGanttChartView } from "./AdmGanttChartView";
 
@@ -104,39 +106,6 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
     });
   };
 
-  // Helper para formatar datetime-local para texto amigável de turno
-  const formatDateTimeToPrazo = (dtStr: string): string => {
-    if (!dtStr) return "";
-    const d = new Date(dtStr);
-    if (isNaN(d.getTime())) return dtStr;
-
-    const now = new Date();
-    const isToday =
-      d.getFullYear() === now.getFullYear() &&
-      d.getMonth() === now.getMonth() &&
-      d.getDate() === now.getDate();
-
-    const tomorrow = new Date(now);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const isTomorrow =
-      d.getFullYear() === tomorrow.getFullYear() &&
-      d.getMonth() === tomorrow.getMonth() &&
-      d.getDate() === tomorrow.getDate();
-
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    const dia = String(d.getDate()).padStart(2, "0");
-    const mes = String(d.getMonth() + 1).padStart(2, "0");
-
-    if (isToday) {
-      return `Hoje até ${hh}:${mm}`;
-    }
-    if (isTomorrow) {
-      return `Amanhã até ${hh}:${mm}`;
-    }
-    return `${dia}/${mes} às ${hh}:${mm}`;
-  };
-
   const getDayOfWeek1to7 = (d: Date): number => {
     const day = d.getDay(); // 0 = Domingo, 1 = Segunda, ...
     return day === 0 ? 7 : day;
@@ -145,7 +114,7 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
   const handleDateTimeChange = (val: string) => {
     setFormDateTime(val);
     if (val) {
-      const formatted = formatDateTimeToPrazo(val);
+      const formatted = formatDateTimeToDisplay(val);
       setFormPrazo(formatted);
       const d = new Date(val);
       if (!isNaN(d.getTime())) {
@@ -212,8 +181,9 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, "0");
     const dd = String(now.getDate()).padStart(2, "0");
-    setFormDateTime(`${yyyy}-${mm}-${dd}T18:00`);
-    setFormPrazo("Hoje até 18:00");
+    const dtPadrao = `${yyyy}-${mm}-${dd}T18:00`;
+    setFormDateTime(dtPadrao);
+    setFormPrazo(formatDateTimeToDisplay(dtPadrao));
     setFormPrioridade("alta");
     setFormMeta("");
     setFormObs("");
@@ -239,8 +209,9 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
     setFormAcao(d.acaoEstrategica);
     setFormTurma(d.responsavelTurma);
     setFormSupervisor(d.supervisorNome || "");
-    setFormPrazo(d.prazoLimite);
-    setFormDateTime("");
+    const dtLocal = parsePrazoToDateTimeLocal(d.prazoLimite, d.prazoDateTime);
+    setFormDateTime(dtLocal);
+    setFormPrazo(formatDateTimeToDisplay(dtLocal));
     setFormPrioridade(d.prioridade);
     setFormMeta(d.metaEsperada);
     setFormObs(d.observacoes || "");
@@ -254,7 +225,8 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
 
   const handleSaveDiretriz = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formAcao.trim() || !formPrazo.trim()) return;
+    const finalPrazo = formDateTime ? formatDateTimeToDisplay(formDateTime) : (formPrazo || "Turno Vigente");
+    if (!formAcao.trim() || !finalPrazo.trim()) return;
 
     const diasAlocadosCalc = obterDiasAlocadosNumeros(formAlocacaoTurnos);
     const diaIniCalc = diasAlocadosCalc.length > 0 ? Math.min(...diasAlocadosCalc) : formDiaInicio;
@@ -270,7 +242,8 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
                 acaoEstrategica: formAcao.trim(),
                 responsavelTurma: formTurma,
                 supervisorNome: formSupervisor.trim(),
-                prazoLimite: formPrazo.trim(),
+                prazoLimite: finalPrazo,
+                prazoDateTime: formDateTime,
                 prioridade: formPrioridade,
                 metaEsperada: formMeta.trim(),
                 observacoes: formObs.trim(),
@@ -292,7 +265,8 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
         acaoEstrategica: formAcao.trim(),
         responsavelTurma: formTurma,
         supervisorNome: formSupervisor.trim(),
-        prazoLimite: formPrazo.trim(),
+        prazoLimite: finalPrazo,
+        prazoDateTime: formDateTime,
         prioridade: formPrioridade,
         metaEsperada: formMeta.trim(),
         status: Number(formProgresso) >= 100 ? "concluido" : Number(formProgresso) > 0 ? "em_andamento" : "pendente",
@@ -941,46 +915,33 @@ export const AdmDirectivesManager: React.FC<AdmDirectivesManagerProps> = ({ circ
               </div>
 
               {/* Prazo Limite com Calendário & Horário */}
-              <div className="bg-slate-50/90 p-3 rounded-xl border border-slate-200 space-y-2.5">
+              <div className="bg-slate-50/90 p-3 rounded-xl border border-slate-200 space-y-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                  <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <label htmlFor="prazo-datetime-input" className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-[#007369]" />
                     <span>Prazo Limite & Horário de Conclusão</span>
                     <span className="text-rose-500">*</span>
                   </label>
-                  <span className="text-[10px] text-slate-500 font-medium">
-                    Preenchimento automático via calendário com horário
-                  </span>
+                  {formDateTime && (
+                    <span className="text-[11px] font-bold text-[#007369] bg-teal-50 border border-teal-200 px-2.5 py-0.5 rounded-md inline-flex items-center gap-1 self-start sm:self-auto">
+                      <Clock className="w-3 h-3 text-[#007369]" />
+                      <span>{formatDateTimeToDisplay(formDateTime)}</span>
+                    </span>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {/* Seletor de Data & Hora Nativo (Calendário com Horário) */}
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      📅 Selecionar no Calendário com Horário:
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formDateTime}
-                      onChange={e => handleDateTimeChange(e.target.value)}
-                      className="w-full bg-white border border-teal-300 rounded-lg px-2.5 py-1.5 text-xs font-bold text-[#007369] focus:ring-1 focus:ring-[#007369] cursor-pointer shadow-2xs"
-                    />
-                  </div>
-
-                  {/* Texto Formatado / Customizado */}
-                  <div>
-                    <label className="block text-[11px] font-semibold text-slate-600 mb-1">
-                      🏷️ Descrição do Prazo (Texto):
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: Hoje até 15:30 / Sexta 18h"
-                      value={formPrazo}
-                      onChange={e => setFormPrazo(e.target.value)}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-900 focus:ring-1 focus:ring-[#007369]"
-                    />
-                  </div>
+                <div>
+                  <label htmlFor="prazo-datetime-input" className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    📅 Selecionar no Calendário com Horário:
+                  </label>
+                  <input
+                    id="prazo-datetime-input"
+                    type="datetime-local"
+                    required
+                    value={formDateTime}
+                    onChange={e => handleDateTimeChange(e.target.value)}
+                    className="w-full bg-white border border-teal-300 rounded-lg px-3 py-2 text-xs font-bold text-[#007369] focus:ring-2 focus:ring-[#007369] cursor-pointer shadow-2xs"
+                  />
                 </div>
               </div>
 

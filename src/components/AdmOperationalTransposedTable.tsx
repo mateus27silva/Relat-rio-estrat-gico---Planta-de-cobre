@@ -18,6 +18,21 @@ import {
 } from "lucide-react";
 import { parseNumeroBritagem } from "../typesAdm";
 
+/**
+ * Remove unidades duplicadas que possam vir embutidas no nome ou nome curto
+ */
+function cleanNameWithoutUnit(text: string, unidade?: string): string {
+  if (!text) return "";
+  let clean = text;
+  if (unidade) {
+    const escaped = unidade.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    clean = clean.replace(new RegExp(`\\s*\\(${escaped}\\)`, "gi"), "");
+  }
+  // Remove unidades clássicas caso venham duplicadas em parênteses
+  clean = clean.replace(/\s*\((kgf\/cm²|m³\/h|%|tph|g\/t|g\/L|t|kPa|ºC|Pol|"|mL\/min|A|l\/m|h|µm|bar|rpm)\)/gi, "");
+  return clean.trim();
+}
+
 export interface GenericParametroConfig {
   chave: string;
   nome: string;
@@ -288,18 +303,18 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
               <span>{titulo}</span>
             </h4>
             {subtitulo && (
-              <p className="text-[11px] text-slate-300 mt-0.5">{subtitulo}</p>
+              <p className="text-xs text-slate-300 mt-0.5">{subtitulo}</p>
             )}
           </div>
-          <span className="text-[10px] text-slate-400 font-medium">
+          <span className="text-[11px] text-slate-400 font-medium">
             Formato Transposto: Parâmetros em linhas × 7 dias em colunas
           </span>
         </div>
       )}
 
-      <table className="w-full text-center border-collapse text-[11px]">
+      <table className="w-full text-center border-collapse text-xs">
         <thead>
-          <tr className="bg-slate-900 text-white font-bold text-[10px] border-b border-slate-700">
+          <tr className="bg-slate-900 text-white font-bold text-[11px] border-b border-slate-700">
             <th className="p-2 border-r border-slate-700 w-9 text-center bg-slate-900 sticky left-0 z-20">
               #
             </th>
@@ -318,8 +333,8 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
                 title={dia.labelCompleto}
               >
                 <div className="flex flex-col items-center">
-                  <span className="font-extrabold text-[11px]">{dia.labelCurto}</span>
-                  <span className="text-[8px] font-normal text-slate-400">Dia {dIdx + 1}</span>
+                  <span className="font-extrabold text-xs">{dia.labelCurto}</span>
+                  <span className="text-[9.5px] font-normal text-slate-400">Dia {dIdx + 1}</span>
                 </div>
               </th>
             ))}
@@ -363,13 +378,22 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
                   .replace(".", ",")
               : "—";
 
+            // Limpeza de unidades duplicadas para renderização precisa
+            const rawShort = param.nomeCurto || param.nome;
+            const titleClean = cleanNameWithoutUnit(rawShort, param.unidade);
+            const fullClean = cleanNameWithoutUnit(param.nome, param.unidade);
+            const showSubtitle = fullClean && fullClean.toLowerCase() !== titleClean.toLowerCase();
+            const subtitleText = showSubtitle
+              ? (param.unidade ? `${fullClean} (${param.unidade})` : fullClean)
+              : (param.unidade ? `Unidade: ${param.unidade}` : "");
+
             return (
               <React.Fragment key={param.chave}>
                 {showGroupHeader && (
                   <tr className="border-y border-slate-300">
                     <td
                       colSpan={13}
-                      className={`px-3 py-1.5 text-left font-bold text-[10.5px] uppercase tracking-wider ${theme.groupBg}`}
+                      className={`px-3 py-1.5 text-left font-bold text-[11.5px] uppercase tracking-wider ${theme.groupBg}`}
                     >
                       <div className="flex items-center gap-2">
                         <span className={`w-2 h-2 rounded-full ${theme.groupDot}`}></span>
@@ -381,7 +405,7 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
 
                 <tr className="border-b border-slate-200 hover:bg-slate-50/80 transition group">
                   {/* # Index */}
-                  <td className="p-1.5 border-r border-slate-200 text-slate-400 font-mono text-[10px] text-center bg-slate-50/60 sticky left-0 z-10">
+                  <td className="p-1.5 border-r border-slate-200 text-slate-400 font-mono text-[11px] text-center bg-slate-50/60 sticky left-0 z-10">
                     {paramIdx + 1}
                   </td>
 
@@ -390,28 +414,30 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
                     <div className="flex flex-col justify-center">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {param.equipamento && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                             {param.equipamento}
                           </span>
                         )}
-                        <span className="font-bold text-slate-900 text-xs leading-tight">
-                          {param.nomeCurto || param.nome}
+                        <span className="font-bold text-slate-900 text-[13px] leading-tight">
+                          {titleClean || rawShort}
                         </span>
                       </div>
-                      <span className="text-[9.5px] text-slate-500 font-medium mt-0.5">
-                        {param.nome !== (param.nomeCurto || param.nome) ? param.nome : ""} ({param.unidade})
-                      </span>
+                      {subtitleText && (
+                        <span className="text-[11px] text-slate-500 font-medium mt-0.5">
+                          {subtitleText}
+                        </span>
+                      )}
                     </div>
                   </td>
 
                   {/* Faixa Ideal */}
-                  <td className="p-1.5 border-r border-slate-200 bg-slate-50/40 text-center font-mono text-[10px] text-slate-700">
+                  <td className="p-1.5 border-r border-slate-200 bg-slate-50/40 text-center font-mono text-[11px] text-slate-700">
                     <div className="flex flex-col items-center">
                       <span className="font-semibold text-slate-800">
                         {param.rotuloFaixa || `${param.minIdeal} a ${param.maxIdeal} ${param.unidade}`}
                       </span>
                       {param.alvo !== undefined && (
-                        <span className="text-[8.5px] text-slate-500">
+                        <span className="text-[9.5px] text-slate-500">
                           Alvo: {param.alvo} {param.unidade}
                         </span>
                       )}
@@ -454,7 +480,7 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
                             onPaste={e => handlePasteCelula(e, paramIdx, diaIdx)}
                             onKeyDown={e => handleKeyDownCelula(e, paramIdx, diaIdx)}
                             placeholder="—"
-                            className={`w-full text-center rounded px-1 py-1 text-xs font-semibold focus:bg-white focus:ring-1 ${
+                            className={`w-full text-center rounded px-1 py-1 text-[13px] font-semibold focus:bg-white focus:ring-1 ${
                               theme.ringFocus
                             } transition ${
                               isFora
@@ -463,7 +489,7 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
                             }`}
                           />
                           {isFora && (
-                            <span className="absolute right-0.5 top-0 text-[8px] text-rose-600 font-black">
+                            <span className="absolute right-0.5 top-0 text-[9.5px] text-rose-600 font-black">
                               !
                             </span>
                           )}
@@ -473,22 +499,22 @@ export const AdmOperationalTransposedTable: React.FC<AdmOperationalTransposedTab
                   })}
 
                   {/* Média Semanal */}
-                  <td className="p-1.5 border-r border-slate-200 bg-slate-50/70 text-center font-bold font-mono text-xs text-slate-800">
+                  <td className="p-1.5 border-r border-slate-200 bg-slate-50/70 text-center font-bold font-mono text-[13px] text-slate-800">
                     {mediaCalculada}
                   </td>
 
                   {/* Status CEP */}
                   <td className="p-1.5 border-r border-slate-200 text-center">
                     {desviosCount > 0 ? (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-rose-100 text-rose-800 border border-rose-200 whitespace-nowrap">
                         Desvio ({desviosCount}x)
                       </span>
                     ) : valoresValidos.length > 0 ? (
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-teal-100 text-teal-800 border border-teal-200 whitespace-nowrap">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10.5px] font-bold bg-teal-100 text-teal-800 border border-teal-200 whitespace-nowrap">
                         Controlado
                       </span>
                     ) : (
-                      <span className="text-slate-400 font-mono text-[10px]">—</span>
+                      <span className="text-slate-400 font-mono text-[11px]">—</span>
                     )}
                   </td>
 

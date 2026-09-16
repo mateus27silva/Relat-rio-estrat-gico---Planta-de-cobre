@@ -39,6 +39,7 @@ import {
   RelatorioAdmPayload,
   gerarWppAdm,
   fmtData,
+  formatDateTimeToDisplay,
   SECOES_VISIVEIS_PADRAO,
   SecoesVisiveisRelatorio,
   detectarDesviosBritagem,
@@ -2649,8 +2650,8 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                     <tr className="bg-[#0A2028] text-white font-bold text-[10px]">
                       <th className="p-2 border-r border-slate-800">Código / Setor</th>
                       <th className="p-2 border-r border-slate-800">Ação Estratégica / Procedimento de Turno</th>
-                      <th className="p-2 border-r border-slate-800">Turma / Supervisor</th>
-                      <th className="p-2 text-center border-r border-slate-800">Prazo Limite</th>
+                      <th className="p-2 border-r border-slate-800">Turma Responsável</th>
+                      <th className="p-2 text-center border-r border-slate-800">Prazo Limite & Horários de Conclusão</th>
                       <th className="p-2 text-center border-r border-slate-800">Prioridade</th>
                       <th className="p-2 border-r border-slate-800">Critério de Aceite / Meta</th>
                       <th className="p-2 text-center">Status</th>
@@ -2685,7 +2686,7 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                               {dir.supervisorNome && <span className="text-[10px] text-slate-500 block">{dir.supervisorNome}</span>}
                             </td>
                             <td className="p-2 text-center border-r border-slate-300 font-bold text-slate-900 whitespace-nowrap">
-                              {dir.prazoLimite || "Turno Vigente"}
+                              {formatDateTimeToDisplay(dir.prazoDateTime || dir.prazoLimite)}
                             </td>
                             <td className="p-2 text-center border-r border-slate-300 whitespace-nowrap">
                               <span

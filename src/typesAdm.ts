@@ -32,7 +32,8 @@ export interface DiretrizSupervisorTurno {
   acaoEstrategica: string;
   responsavelTurma: string; // "Turma A", "Turma B", "Turma C", "Turma D", "Todas as Turmas", "Supervisão Diurna", "Supervisão Noturna"
   supervisorNome?: string;
-  prazoLimite: string; // Ex: "Hoje até 15:30", "Turno Noturno", "Até Fim do FDS"
+  prazoLimite: string; // Ex: "16/09/2026 às 15:30", "18/09/2026 às 18:00"
+  prazoDateTime?: string; // Formato datetime-local (YYYY-MM-DDTHH:mm) determinado pelo supervisor
   prioridade: PrioridadeDiretriz;
   metaEsperada: string; // Ex: "Manter taxa > 610 t/h e granulometria 105µm > 62%"
   status: StatusDiretriz;
@@ -138,6 +139,81 @@ export function formatarResumoAlocacao(alocacao?: AlocacaoSemanalTurnos): string
     return "Segunda a Sexta (Diurno 07h:19h)";
   }
   return ativos.join(", ");
+}
+
+/**
+ * Converte data/hora (formato ISO ou datetime-local YYYY-MM-DDTHH:mm) para exibição elegante no padrão brasileiro (DD/MM/AAAA às HH:mm).
+ */
+export function formatDateTimeToDisplay(dtStr?: string): string {
+  if (!dtStr) return "Turno Vigente";
+
+  // Se já tiver no formato YYYY-MM-DDTHH:mm ou ISO
+  if (dtStr.includes("T")) {
+    const [datePart, timePart] = dtStr.split("T");
+    const dParts = datePart.split("-");
+    if (dParts.length === 3) {
+      const [ano, mes, dia] = dParts;
+      const horaMin = timePart ? timePart.slice(0, 5) : "18:00";
+      return `${dia}/${mes}/${ano} às ${horaMin}`;
+    }
+  }
+
+  // Se já for DD/MM/AAAA às HH:mm ou similar
+  if (/^\d{2}\/\d{2}\/\d{4}/.test(dtStr)) {
+    return dtStr;
+  }
+
+  // Tenta converter se for timestamp ou string de data padrão
+  const d = new Date(dtStr);
+  if (!isNaN(d.getTime())) {
+    const dia = String(d.getDate()).padStart(2, "0");
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const ano = d.getFullYear();
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${dia}/${mes}/${ano} às ${hh}:${mm}`;
+  }
+
+  return dtStr;
+}
+
+/**
+ * Converte prazo string ou prazoDateTime para o formato compatível com input type="datetime-local" (YYYY-MM-DDTHH:mm).
+ */
+export function parsePrazoToDateTimeLocal(prazoStr?: string, prazoDateTime?: string): string {
+  if (prazoDateTime && prazoDateTime.includes("T")) {
+    return prazoDateTime.slice(0, 16);
+  }
+
+  if (!prazoStr) {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}T18:00`;
+  }
+
+  if (prazoStr.includes("T")) {
+    return prazoStr.slice(0, 16);
+  }
+
+  // Se prazoStr tiver formato DD/MM/AAAA ... HH:mm
+  const ddmmyyyyMatch = prazoStr.match(/(\d{2})\/(\d{2})\/(\d{4})\D+(\d{2}):(\d{2})/);
+  if (ddmmyyyyMatch) {
+    const [, d, m, y, hh, mm] = ddmmyyyyMatch;
+    return `${y}-${m}-${d}T${hh}:${mm}`;
+  }
+
+  // Se prazoStr tiver horário explícito (ex: "Hoje até 15:30", "Sexta-feira 18:00")
+  const timeMatch = prazoStr.match(/(\d{2}):(\d{2})/);
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  const hh = timeMatch ? timeMatch[1] : "18";
+  const min = timeMatch ? timeMatch[2] : "00";
+
+  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 }
 
 export interface KpiOperacionalAdm {
@@ -932,7 +1008,7 @@ export const CONFIG_PARAMETROS_REBRITAGEM: ParametroConfigRebritagem[] = [
     chave: "produtividadeTph",
     grupo: "PRODUTIVIDADE (tph)",
     equipamento: "Rebritagem",
-    nome: "Produtividade (tph)",
+    nome: "Produtividade",
     nomeCurto: "Produtividade",
     subsistema: "Circuito Rebritagem",
     unidade: "tph",
@@ -2172,7 +2248,7 @@ export interface ParametroConfigEspessamentoRejeito {
 export const CONFIG_PARAMETROS_ESPESSAMENTO_REJEITO: ParametroConfigEspessamentoRejeito[] = [
   {
     chave: "densidadeUnderflowRej",
-    nome: "Densidade Underflow Rejeito (g/L)",
+    nome: "Densidade Underflow Rejeito",
     nomeCurto: "Dens. Underflow",
     unidade: "g/L",
     minIdeal: 1400,
@@ -2656,7 +2732,7 @@ export interface ParametroConfigEspessamentoConcentrado {
 export const CONFIG_PARAMETROS_ESPESSAMENTO_CONCENTRADO: ParametroConfigEspessamentoConcentrado[] = [
   {
     chave: "densidadeUnderflowConc",
-    nome: "Densidade Underflow Conc (g/L)",
+    nome: "Densidade Underflow Conc",
     nomeCurto: "Dens. Underflow",
     unidade: "g/L",
     minIdeal: 1750,
@@ -3024,8 +3100,8 @@ export interface RegistroDiarioIndicadoresFiltragemConcentrado {
 export const CONFIG_PARAMETROS_FILTRAGEM_CONCENTRADO: ParametroConfigFiltragemConcentrado[] = [
   {
     chave: "producaoFiltragem",
-    nome: "Produção Concentrado Filtrado (t)",
-    nomeCurto: "Produção (t)",
+    nome: "Produção Concentrado Filtrado",
+    nomeCurto: "Produção",
     unidade: "t",
     minIdeal: 280.0,
     maxIdeal: 400.0,
@@ -6376,7 +6452,8 @@ export const DIRETRIZES_PADRAO_SECO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Realizar aferição do britador primário e limpeza preventiva do chute durante a janela operacional programada.",
     responsavelTurma: "Turma A",
     supervisorNome: "Sup. Roberto Lima",
-    prazoLimite: "Hoje até 15:30",
+    prazoLimite: "16/09/2026 às 15:30",
+    prazoDateTime: "2026-09-16T15:30",
     prioridade: "alta",
     metaEsperada: "Manto calibrado em 35% e taxa horária restabelecida > 1.000 t/h sem restrições de fluxo.",
     status: "em_andamento",
@@ -6392,7 +6469,8 @@ export const DIRETRIZES_PADRAO_SECO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Equalizar alimentação do circuito terciário e monitorar telas da peneira PE002 contra entupimento por umidade.",
     responsavelTurma: "Turma B",
     supervisorNome: "Sup. Carlos Eduardo",
-    prazoLimite: "Turno Diurno e Noturno",
+    prazoLimite: "17/09/2026 às 19:00",
+    prazoDateTime: "2026-09-17T19:00",
     prioridade: "alta",
     metaEsperada: "Produção de rebritagem > 12.000 t/dia com retido 1/2'' < 12.0%.",
     status: "em_andamento",
@@ -6408,7 +6486,8 @@ export const DIRETRIZES_PADRAO_SECO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Executar blend de alimentação de ROM com proporção 60% MSB / 40% Surubim para garantir densidade e fluidez.",
     responsavelTurma: "Turma C",
     supervisorNome: "Sup. Mariana Souza",
-    prazoLimite: "Hoje até 20:00",
+    prazoLimite: "16/09/2026 às 20:00",
+    prazoDateTime: "2026-09-16T20:00",
     prioridade: "critica",
     metaEsperada: "Estoque de ROM mantido acima de 25.000 t e Pilha Intermediária em 10.000 t.",
     status: "pendente",
@@ -6424,7 +6503,8 @@ export const DIRETRIZES_PADRAO_SECO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Executar protocolo de abastecimento máximo dos silos 1 e 2 (mínimo 85% de nível) e pulmão intermediário na sexta-feira.",
     responsavelTurma: "Todas as Turmas",
     supervisorNome: "Supervisores do Circuito Seco",
-    prazoLimite: "Sexta-feira 18:00",
+    prazoLimite: "18/09/2026 às 18:00",
+    prazoDateTime: "2026-09-18T18:00",
     prioridade: "critica",
     metaEsperada: "Autonomia de finos > 30 horas para garantir operação contínua da moagem no FDS.",
     status: "pendente",
@@ -6440,7 +6520,8 @@ export const DIRETRIZES_PADRAO_SECO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Executar rota de termografia preventiva nos mancais dos britadores cônicos BR003 a BR006 e teste de alívio Hydroset.",
     responsavelTurma: "Turma D / Preditiva",
     supervisorNome: "Sup. Fernando Alves",
-    prazoLimite: "Sexta-feira 14:00",
+    prazoLimite: "18/09/2026 às 14:00",
+    prazoDateTime: "2026-09-18T14:00",
     prioridade: "alta",
     metaEsperada: "100% dos mancais abaixo de 60°C e calibração de pressão em 3.5 MPa confirmada.",
     status: "em_andamento",
@@ -6460,7 +6541,8 @@ export const DIRETRIZES_PADRAO_UMIDO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Manter taxa horária combinada de 605 t/h nos moinhos MI003, MI004 e MI005, com controle de densidade nos ciclones.",
     responsavelTurma: "Todas as Turmas",
     supervisorNome: "Supervisores de Turno",
-    prazoLimite: "Turno Diurno e Noturno",
+    prazoLimite: "16/09/2026 às 19:00",
+    prazoDateTime: "2026-09-16T19:00",
     prioridade: "critica",
     metaEsperada: "Garantir P80 < 105µm acima de 62% e produção diária consolidada > 7.200 t.",
     status: "em_andamento",
@@ -6476,7 +6558,8 @@ export const DIRETRIZES_PADRAO_UMIDO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Ajustar dosagem de CMC para 190 g/t e controlar pH da linha Rougher em 9.6 fixo.",
     responsavelTurma: "Turma B",
     supervisorNome: "Sup. Carlos Eduardo",
-    prazoLimite: "Hoje até 21:00",
+    prazoLimite: "16/09/2026 às 21:00",
+    prazoDateTime: "2026-09-16T21:00",
     prioridade: "alta",
     metaEsperada: "Recuperação metalúrgica sustentada acima de 89.0% e teor de rejeito < 0.095% Cu.",
     status: "em_andamento",
@@ -6492,7 +6575,8 @@ export const DIRETRIZES_PADRAO_UMIDO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Garantir 26 ciclos completos no filtro prensa com lavagem dupla programada a cada 6 ciclos.",
     responsavelTurma: "Turma C",
     supervisorNome: "Sup. Mariana Souza",
-    prazoLimite: "Madrugada até 05:00",
+    prazoLimite: "17/09/2026 às 05:00",
+    prazoDateTime: "2026-09-17T05:00",
     prioridade: "alta",
     metaEsperada: "Umidade média da torta rigorosamente abaixo de 9.3% para liberação de transporte.",
     status: "pendente",
@@ -6508,7 +6592,8 @@ export const DIRETRIZES_PADRAO_UMIDO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Monitorar torque do espessador 45EP001 e assegurar recirculação de água clarificada > 85% para a moagem.",
     responsavelTurma: "Turma D",
     supervisorNome: "Sup. Fernando Alves",
-    prazoLimite: "Amanhã até 07:00",
+    prazoLimite: "17/09/2026 às 07:00",
+    prazoDateTime: "2026-09-17T07:00",
     prioridade: "critica",
     metaEsperada: "Densidade de underflow em 1.420 g/L e turbidez da ETA < 2.0 NTU.",
     status: "pendente",
@@ -6524,7 +6609,8 @@ export const DIRETRIZES_PADRAO_UMIDO: DiretrizSupervisorTurno[] = [
     acaoEstrategica: "Realizar aferição das bombas dosadoras de coletor xantato e espumante na flotação e teste gravimétrico de vazão.",
     responsavelTurma: "Turma A / Metalurgia",
     supervisorNome: "Sup. Roberto Lima",
-    prazoLimite: "Hoje até 17:00",
+    prazoLimite: "16/09/2026 às 17:00",
+    prazoDateTime: "2026-09-16T17:00",
     prioridade: "alta",
     metaEsperada: "Erro de dosagem inferior a 2% e garantia de recuperação metalúrgica global acima de 89.2%.",
     status: "concluido",
@@ -6674,9 +6760,9 @@ export const RELATORIO_ADM_SECO_INICIAL: RelatorioAdmPayload = {
   diretrizesTurno: DIRETRIZES_PADRAO_SECO,
   observacoesGerais: "O foco da supervisão do Circuito Seco é garantir a alimentação estável e contínua dos silos e pátios, mantendo alta taxa horária e granulometria adequada para a moagem.",
   prioridadesImediatas: [
-    "Aferição do britador primário (Hoje até 15:30) — Turma A",
+    "Aferição do britador primário (16/09 às 15:30) — Turma A",
     "Manter taxa da rebritagem acima de 1.000 t/h — Turma B",
-    "Blindagem dos silos para o Final de Semana (Sexta 18h) — Todas as Turmas"
+    "Blindagem dos silos para o Final de Semana (18/09 às 18:00) — Todas as Turmas"
   ]
 };
 

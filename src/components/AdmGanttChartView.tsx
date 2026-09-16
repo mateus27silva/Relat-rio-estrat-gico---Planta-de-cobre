@@ -7,14 +7,17 @@ import React from "react";
 import {
   Layers,
   ChevronRight,
-  Table
+  Table,
+  Users,
+  Clock
 } from "lucide-react";
 import {
   DiretrizSupervisorTurno,
   CircuitoTipo,
   DIAS_CHAVES_GANTT,
   normalizarAlocacaoTurnos,
-  formatarResumoAlocacao
+  formatarResumoAlocacao,
+  formatDateTimeToDisplay
 } from "../typesAdm";
 
 interface AdmGanttChartViewProps {
@@ -75,38 +78,48 @@ export const AdmGanttChartView: React.FC<AdmGanttChartViewProps> = ({
       {/* MATRIZ DE TURNOS SEMANAL (07h:19h / 19h:07h COM MARCAÇÃO "X" VERDE) */}
       <div className="bg-white rounded-xl border border-slate-300 overflow-hidden shadow-xs w-full">
           <div className="w-full overflow-x-auto">
-            <table className="w-full table-fixed text-left border-collapse text-xs">
+            <table className="w-full min-w-[1320px] table-fixed text-left border-collapse text-xs">
               <colgroup>
                 {/* 1. Local / Setor */}
-                <col style={{ width: "12%" }} />
+                <col style={{ width: "9%" }} />
                 {/* 2. Atividade / Diretriz */}
-                <col style={{ width: "26%" }} />
-                {/* 3. Recursos Pessoais */}
+                <col style={{ width: "21%" }} />
+                {/* 3. Turma Responsável */}
                 <col style={{ width: "8.5%" }} />
-                {/* 4 a 17. 14 Turnos (7 dias x 2 turnos = 14 * 3.25% = 45.5%) */}
+                {/* 4. Prazo Limite & Horários de Conclusão */}
+                <col style={{ width: "11.5%" }} />
+                {/* 5. Recursos Pessoais */}
+                <col style={{ width: "6%" }} />
+                {/* 6 a 19. 14 Turnos (7 dias x 2 turnos = 14 * 2.7% = 37.8%) */}
                 {Array.from({ length: 14 }).map((_, i) => (
-                  <col key={i} style={{ width: "3.25%" }} />
+                  <col key={i} style={{ width: "2.7%" }} />
                 ))}
-                {/* 18. Progresso */}
-                <col style={{ width: "8%" }} />
+                {/* 20. Progresso */}
+                <col style={{ width: "6.2%" }} />
               </colgroup>
 
               <thead>
                 {/* Linha 1 do Cabeçalho: Categorias Principais e Dias */}
                 <tr className="bg-[#0A2028] text-white font-extrabold uppercase divide-x divide-slate-700 border-b border-slate-700">
-                  <th rowSpan={2} className="py-2 px-1 text-center bg-[#07161B] text-[10px] sm:text-[11px] tracking-tight">
+                  <th rowSpan={2} className="py-2.5 px-1.5 text-center bg-[#07161B] text-[10px] sm:text-[11px] tracking-tight">
                     LOCAL / SETOR
                   </th>
-                  <th rowSpan={2} className="py-2 px-2 text-center text-[10px] sm:text-[11px] tracking-tight">
+                  <th rowSpan={2} className="py-2.5 px-2 text-center text-[10px] sm:text-[11px] tracking-tight">
                     ATIVIDADE OPERACIONAL / DIRETRIZ
                   </th>
-                  <th rowSpan={2} className="py-2 px-1 text-center text-[10px] sm:text-[11px] tracking-tight">
+                  <th rowSpan={2} className="py-2.5 px-1.5 text-center bg-[#082229] text-teal-300 text-[10px] sm:text-[11px] tracking-tight">
+                    TURMA RESPONSÁVEL
+                  </th>
+                  <th rowSpan={2} className="py-2.5 px-2 text-center bg-[#082229] text-amber-300 text-[10px] sm:text-[11px] tracking-tight">
+                    PRAZO LIMITE & HORÁRIOS DE CONCLUSÃO
+                  </th>
+                  <th rowSpan={2} className="py-2.5 px-1 text-center text-[10px] sm:text-[11px] tracking-tight">
                     RECURSOS
                   </th>
                   <th colSpan={14} className="py-1.5 px-1 text-center bg-[#004D40] text-[#A7F3D0] text-[11px] tracking-wider">
                     CRONOGRAMA SEMANAL (DIAS E HORÁRIOS)
                   </th>
-                  <th rowSpan={2} className="py-2 px-1 text-center bg-[#07161B] text-[10px] sm:text-[11px] tracking-tight">
+                  <th rowSpan={2} className="py-2.5 px-1 text-center bg-[#07161B] text-[10px] sm:text-[11px] tracking-tight">
                     PROGRESSO
                   </th>
                 </tr>
@@ -138,6 +151,8 @@ export const AdmGanttChartView: React.FC<AdmGanttChartViewProps> = ({
                   <th className="py-1 px-1 bg-slate-200" />
                   <th className="py-1 px-1 bg-slate-200" />
                   <th className="py-1 px-1 bg-slate-200" />
+                  <th className="py-1 px-1 bg-slate-200" />
+                  <th className="py-1 px-1 bg-slate-200" />
                   {DIAS_CHAVES_GANTT.map(dia => {
                     const isFds = dia.num === 6 || dia.num === 7;
                     return (
@@ -163,7 +178,7 @@ export const AdmGanttChartView: React.FC<AdmGanttChartViewProps> = ({
                     <React.Fragment key={grupo}>
                       {/* Sub-cabeçalho do Grupo */}
                       <tr className="bg-slate-800 text-white font-bold text-[11px]">
-                        <td colSpan={18} className="py-1.5 px-3 bg-slate-800 text-teal-300">
+                        <td colSpan={20} className="py-1.5 px-3 bg-slate-800 text-teal-300">
                           <div className="flex items-center gap-2">
                             <ChevronRight className="w-3.5 h-3.5 text-teal-400" />
                             <span className="uppercase tracking-wide">{grupo}</span>
@@ -189,17 +204,17 @@ export const AdmGanttChartView: React.FC<AdmGanttChartViewProps> = ({
 
                         return (
                           <tr key={dir.id || idx} className="hover:bg-teal-50/30 transition duration-150 divide-x divide-slate-200">
-                            {/* Local / Setor */}
-                            <td className="py-2 px-1.5 font-bold text-slate-800 text-center uppercase text-[10px] sm:text-[11px] bg-slate-50/50 break-words leading-tight">
+                            {/* 1. Local / Setor */}
+                            <td className="py-2.5 px-2 font-bold text-slate-800 text-center uppercase text-[10px] sm:text-[11px] bg-slate-50/50 break-words leading-tight">
                               {dir.setor}
                             </td>
 
-                            {/* Atividade Operacional */}
-                            <td className="py-2 px-2 text-slate-900 break-words">
-                              <div className="space-y-1">
+                            {/* 2. Atividade Operacional */}
+                            <td className="py-2.5 px-2.5 text-slate-900 break-words">
+                              <div className="space-y-1.5">
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   <span
-                                    className={`text-[8.5px] sm:text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                                    className={`text-[8.5px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded ${
                                       isCritica
                                         ? "bg-rose-100 text-rose-800"
                                         : isAlta
@@ -209,24 +224,69 @@ export const AdmGanttChartView: React.FC<AdmGanttChartViewProps> = ({
                                   >
                                     {isCritica ? "P1 - CRÍTICA" : isAlta ? "P2 - ALTA" : "P3 - MÉDIA"}
                                   </span>
-                                  <span className="text-[9.5px] sm:text-[10px] text-slate-500 font-semibold truncate max-w-full">
-                                    Prazo: {dir.prazoLimite}
-                                  </span>
+                                  {dir.status && (
+                                    <span
+                                      className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                                        isConcluido
+                                          ? "bg-teal-100 text-teal-800"
+                                          : dir.status === "em_andamento"
+                                          ? "bg-blue-100 text-blue-800"
+                                          : "bg-slate-100 text-slate-600"
+                                      }`}
+                                    >
+                                      {isConcluido ? "Concluído" : dir.status === "em_andamento" ? "Em Execução" : "Pendente"}
+                                    </span>
+                                  )}
                                 </div>
                                 <p className={`text-[11px] sm:text-xs font-semibold leading-snug break-words ${isConcluido ? "line-through text-slate-400" : "text-slate-900"}`}>
                                   {dir.acaoEstrategica}
                                 </p>
+                                {dir.metaEsperada && (
+                                  <p className="text-[10px] text-slate-500 font-medium leading-tight">
+                                    <span className="font-semibold text-slate-600">Meta:</span> {dir.metaEsperada}
+                                  </p>
+                                )}
                               </div>
                             </td>
 
-                            {/* Recursos Pessoais */}
-                            <td className="py-2 px-1 text-center text-[9px] sm:text-[10px] font-bold text-slate-700 bg-slate-50/30 break-words">
+                            {/* 3. Turma Responsável */}
+                            <td className="py-2.5 px-2 text-center bg-slate-50/40 break-words">
+                              <div className="flex flex-col items-center justify-center gap-1">
+                                <span className="bg-teal-50 text-teal-900 border border-teal-200 px-2 py-0.5 rounded text-[10.5px] font-extrabold inline-flex items-center gap-1 shadow-2xs leading-tight">
+                                  <Users className="w-3 h-3 text-teal-600 shrink-0" />
+                                  <span>{dir.responsavelTurma || "Todas as Turmas"}</span>
+                                </span>
+                                {dir.supervisorNome && (
+                                  <span className="text-[9.5px] text-slate-600 font-medium leading-tight text-center">
+                                    {dir.supervisorNome}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* 4. Prazo Limite & Horários de Conclusão */}
+                            <td className="py-2.5 px-2 text-center bg-slate-50/20 break-words">
+                              <div className="flex flex-col items-center justify-center gap-1">
+                                <span className="bg-amber-50/90 text-amber-950 border border-amber-300/80 px-2 py-0.5 rounded text-[10.5px] font-bold inline-flex items-center gap-1 shadow-2xs leading-tight">
+                                  <Clock className="w-3 h-3 text-amber-700 shrink-0" />
+                                  <span>{formatDateTimeToDisplay(dir.prazoDateTime || dir.prazoLimite)}</span>
+                                </span>
+                                <span className="text-[9px] text-slate-500 font-medium leading-tight">
+                                  {dir.alocacaoTurnos && formatarResumoAlocacao(dir.alocacaoTurnos) !== "Sem turnos alocados"
+                                    ? formatarResumoAlocacao(dir.alocacaoTurnos)
+                                    : "Janela Programada"}
+                                </span>
+                              </div>
+                            </td>
+
+                            {/* 5. Recursos Pessoais */}
+                            <td className="py-2.5 px-1 text-center text-[9px] sm:text-[10px] font-bold text-slate-700 bg-slate-50/30 break-words">
                               <span className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded border border-slate-200 inline-block text-[9.5px] leading-tight">
                                 {dir.recursosPessoais || "ADM / OPERAÇÃO"}
                               </span>
                             </td>
 
-                            {/* Células dos 7 Dias da Semana (07h:19h e 19h:07h com X em Verde Floresta) */}
+                            {/* 6 a 19. Células dos 7 Dias da Semana (07h:19h e 19h:07h com X em Verde Floresta) */}
                             {DIAS_CHAVES_GANTT.map(dia => {
                               const diaObj = aloc[dia.key] || { diurno: false, noturno: false };
                               const isDiurno = Boolean(diaObj.diurno);
@@ -261,8 +321,8 @@ export const AdmGanttChartView: React.FC<AdmGanttChartViewProps> = ({
                               );
                             })}
 
-                            {/* Progresso / Status */}
-                            <td className="py-2 px-1.5 text-center bg-slate-50/50">
+                            {/* 20. Progresso / Status */}
+                            <td className="py-2.5 px-1.5 text-center bg-slate-50/50">
                               <div className="space-y-1">
                                 <span className="text-[10px] sm:text-[11px] font-bold text-slate-800">{progresso}%</span>
                                 <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
