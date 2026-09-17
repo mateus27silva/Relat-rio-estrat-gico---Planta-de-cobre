@@ -2347,16 +2347,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 <div className="flex items-center flex-wrap gap-2">
                   <button
                     type="button"
-                    onClick={() => abrirModalColarColuna("posicaoManto")}
-                    className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                    title="Abrir assistente para colar dados de coluna do Excel"
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                    <span>Colar Coluna do Excel</span>
-                  </button>
-
-                  <button
-                    type="button"
                     onClick={handleLimparTabela}
                     className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                     title="Limpar todos os campos da tabela diária"
@@ -2664,16 +2654,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => abrirModalColarColunaRebritagem("tempOleoLub_BR001")}
-                    className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                    title="Abrir assistente para colar dados de coluna do Excel"
-                  >
-                    <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                    <span>Colar Coluna do Excel</span>
-                  </button>
-
                   <button
                     type="button"
                     onClick={handleLimparTabelaRebritagem}
@@ -3012,16 +2992,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => abrirModalColarColunaMoagem("taxa_MI003")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={handleLimparTabelaMoagem}
                   className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Limpar tabela de moagem"
@@ -3321,16 +3291,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => abrirModalColarColunaRemoagem("derrickIsoladas")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={handleLimparTabelaRemoagem}
                   className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Limpar tabela de remoagem"
@@ -3626,16 +3586,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => abrirModalColarColunaFlotacao("solidosRougher")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleLimparTabelaFlotacao}
@@ -3941,16 +3891,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
               {/* Botões de Ação Rápida */}
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => abrirModalColarColunaEspessamentoRejeito("densidadeUnderflow")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleLimparTabelaEspessamentoRejeito}
@@ -4263,16 +4203,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
               {/* Botões de Ação Rápida */}
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => abrirModalColarColunaEspessamentoConcentrado("densidadeUnderflow")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleLimparTabelaEspessamentoConcentrado}
@@ -4620,16 +4550,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
                 <button
                   type="button"
-                  onClick={() => abrirModalColarColunaFiltragem("producaoTurno1")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
-                <button
-                  type="button"
                   onClick={handleLimparTabelaFiltragemConcentrado}
                   className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
                   title="Limpar tabela de filtragem de concentrado"
@@ -4954,16 +4874,6 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => abrirModalColarColunaUtilidades("pressaoRedeBar")}
-                  className="px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
-                  title="Abrir assistente para colar dados de coluna do Excel"
-                >
-                  <FileSpreadsheet className="w-3.5 h-3.5 text-teal-700" />
-                  <span>Colar Coluna do Excel</span>
-                </button>
-
                 <button
                   type="button"
                   onClick={handleLimparTabelaUtilidadesETA}
