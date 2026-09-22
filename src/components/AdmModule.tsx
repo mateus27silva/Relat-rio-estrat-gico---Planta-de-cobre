@@ -234,8 +234,14 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
       if (r.ok) {
         setPiAuthHeader(header);
         setPiPass("");
-      } else {
+      } else if (r.status === 401) {
+        // Só o PI Web API confirmando credencial recusada é 401 de fato.
         setPiErro("Usuário ou senha do PI inválidos.");
+      } else {
+        // Qualquer outro status (backend fora do ar, proxy instável, 5xx) não
+        // significa senha errada — mostrar isso como tal só confundiria o
+        // supervisor, que reveria a senha à toa achando que está errada.
+        setPiErro(`Não foi possível confirmar o login no PI agora (erro ${r.status}). Aguarde alguns segundos e tente novamente.`);
       }
     } catch {
       setPiErro("Não foi possível conectar ao PI. Verifique a rede.");
