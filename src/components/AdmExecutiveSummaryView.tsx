@@ -100,6 +100,42 @@ import {
 import { gerarRelatorioAdmPDF } from "../utils/pdfGeneratorAdm";
 import { AdmGanttChartView } from "./AdmGanttChartView";
 
+// Badges de prioridade (P1/P2/P3) para os itens dos horizontes estratégicos,
+// gravados pelo AdmStrategicHorizons no formato "[prioridade][Setor] Texto".
+const PRIORIDADE_BADGE_RESUMO: Record<string, { sigla: string; className: string }> = {
+  critica: { sigla: "P1", className: "bg-rose-600 text-white" },
+  alta: { sigla: "P2", className: "bg-amber-500 text-white" },
+  media: { sigla: "P3", className: "bg-blue-600 text-white" }
+};
+
+/**
+ * Extrai prioridade + setor + texto de um item dos horizontes estratégicos.
+ * Aceita o formato atual "[prioridade][Setor] Texto" e o legado "[Setor] Texto"
+ * (itens salvos antes da classificação por prioridade existir, sem prioridade).
+ */
+function parseItemHorizonteResumo(item: string): { prioridade: string | null; setor: string | null; texto: string } {
+  if (!item) return { prioridade: null, setor: null, texto: "" };
+  const matchNovo = item.match(/^\[(critica|alta|media)\]\[(.*?)\]\s*([\s\S]*)$/);
+  if (matchNovo) {
+    return { prioridade: matchNovo[1], setor: matchNovo[2], texto: matchNovo[3] };
+  }
+  // Item salvo antes da classificação por prioridade existir: assume Média (P3)
+  // até o supervisor reclassificar no editor de Horizontes Estratégicos.
+  const matchLegado = item.match(/^\[(.*?)\]\s*([\s\S]*)$/);
+  if (matchLegado) {
+    return { prioridade: "media", setor: matchLegado[1], texto: matchLegado[2] };
+  }
+  return { prioridade: null, setor: null, texto: item };
+}
+
+/** Mesma extração acima, mas devolve texto simples (usado em listas coladas com "; "). */
+function formatarItemHorizonteTexto(item: string): string {
+  const { prioridade, setor, texto } = parseItemHorizonteResumo(item);
+  const sigla = prioridade ? PRIORIDADE_BADGE_RESUMO[prioridade]?.sigla : null;
+  const prefixo = [sigla, setor].filter(Boolean).map(p => `[${p}]`).join("");
+  return prefixo ? `${prefixo} ${texto}` : texto;
+}
+
 interface LinhaMonitoramentoOperacional {
   nome: string;
   equipamento?: string;
@@ -2390,22 +2426,22 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                       <span className="font-semibold">• Procedimentos & Diretrizes Prioritárias:</span>
                       <ul className="list-none pl-1 text-[11px] mt-1 space-y-1 text-slate-800">
                         {(payload.estrategiaSemana.diretrizesPrioritarias || []).map((dir, i) => {
-                          const match = dir.match(/^\[(.*?)\]\s*(.*)$/);
-                          if (match) {
-                            return (
-                              <li key={i} className="flex items-start gap-1.5">
-                                <span className="font-bold text-blue-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                <span className="bg-blue-100/90 text-blue-900 border border-blue-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
-                                  {match[1]}
-                                </span>
-                                <span className="text-slate-800 font-medium">{match[2]}</span>
-                              </li>
-                            );
-                          }
+                          const { prioridade, setor, texto } = parseItemHorizonteResumo(dir);
+                          const badge = prioridade ? PRIORIDADE_BADGE_RESUMO[prioridade] : null;
                           return (
                             <li key={i} className="flex items-start gap-1.5">
                               <span className="font-bold text-blue-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                              <span className="text-slate-800 font-medium">{dir}</span>
+                              {badge && (
+                                <span className={`${badge.className} font-bold px-1.5 py-0.2 rounded text-[10px] shrink-0 mt-0.5`}>
+                                  {badge.sigla}
+                                </span>
+                              )}
+                              {setor && (
+                                <span className="bg-blue-100/90 text-blue-900 border border-blue-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
+                                  {setor}
+                                </span>
+                              )}
+                              <span className="text-slate-800 font-medium">{texto}</span>
                             </li>
                           );
                         })}
@@ -2415,7 +2451,7 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                       <p className="text-[11px] text-blue-900 font-semibold">
                         • Intervenções de Manutenção / Gestão de Ativos:{" "}
                         {Array.isArray(payload.estrategiaSemana.recursosManutencao)
-                          ? payload.estrategiaSemana.recursosManutencao.filter(Boolean).join("; ")
+                          ? payload.estrategiaSemana.recursosManutencao.filter(Boolean).map(formatarItemHorizonteTexto).join("; ")
                           : payload.estrategiaSemana.recursosManutencao}
                       </p>
                     )}
@@ -2457,22 +2493,22 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                         <span className="font-semibold">• Procedimentos & Diretrizes Prioritárias:</span>
                         <ul className="list-none pl-1 text-[11px] mt-1 space-y-1 text-slate-800">
                           {payload.estrategiaFds.diretrizesPrioritarias.map((dir, i) => {
-                            const match = dir.match(/^\[(.*?)\]\s*(.*)$/);
-                            if (match) {
-                              return (
-                                <li key={i} className="flex items-start gap-1.5">
-                                  <span className="font-bold text-amber-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                  <span className="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
-                                    {match[1]}
-                                  </span>
-                                  <span className="text-slate-800 font-medium">{match[2]}</span>
-                                </li>
-                              );
-                            }
+                            const { prioridade, setor, texto } = parseItemHorizonteResumo(dir);
+                            const badge = prioridade ? PRIORIDADE_BADGE_RESUMO[prioridade] : null;
                             return (
                               <li key={i} className="flex items-start gap-1.5">
                                 <span className="font-bold text-amber-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                <span className="text-slate-800 font-medium">{dir}</span>
+                                {badge && (
+                                  <span className={`${badge.className} font-bold px-1.5 py-0.2 rounded text-[10px] shrink-0 mt-0.5`}>
+                                    {badge.sigla}
+                                  </span>
+                                )}
+                                {setor && (
+                                  <span className="bg-amber-100 text-amber-900 border border-amber-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
+                                    {setor}
+                                  </span>
+                                )}
+                                <span className="text-slate-800 font-medium">{texto}</span>
                               </li>
                             );
                           })}
@@ -2522,22 +2558,22 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                         <span className="font-semibold">• Procedimentos & Diretrizes Prioritárias:</span>
                         <ul className="list-none pl-1 text-[11px] mt-1 space-y-1 text-slate-800">
                           {payload.estrategiaParada.diretrizesPrioritarias.map((dir, i) => {
-                            const match = dir.match(/^\[(.*?)\]\s*(.*)$/);
-                            if (match) {
-                              return (
-                                <li key={i} className="flex items-start gap-1.5">
-                                  <span className="font-bold text-rose-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                  <span className="bg-rose-100 text-rose-900 border border-rose-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
-                                    {match[1]}
-                                  </span>
-                                  <span className="text-slate-800 font-medium">{match[2]}</span>
-                                </li>
-                              );
-                            }
+                            const { prioridade, setor, texto } = parseItemHorizonteResumo(dir);
+                            const badge = prioridade ? PRIORIDADE_BADGE_RESUMO[prioridade] : null;
                             return (
                               <li key={i} className="flex items-start gap-1.5">
                                 <span className="font-bold text-rose-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                <span className="text-slate-800 font-medium">{dir}</span>
+                                {badge && (
+                                  <span className={`${badge.className} font-bold px-1.5 py-0.2 rounded text-[10px] shrink-0 mt-0.5`}>
+                                    {badge.sigla}
+                                  </span>
+                                )}
+                                {setor && (
+                                  <span className="bg-rose-100 text-rose-900 border border-rose-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
+                                    {setor}
+                                  </span>
+                                )}
+                                <span className="text-slate-800 font-medium">{texto}</span>
                               </li>
                             );
                           })}
@@ -2548,13 +2584,13 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                       <p className="text-slate-700 leading-snug">
                         • Intervenções de Manutenção / Gestão de Ativos:{" "}
                         {Array.isArray(payload.estrategiaParada.recursosManutencao)
-                          ? payload.estrategiaParada.recursosManutencao.filter(Boolean).join("; ")
+                          ? payload.estrategiaParada.recursosManutencao.filter(Boolean).map(formatarItemHorizonteTexto).join("; ")
                           : payload.estrategiaParada.recursosManutencao}
                       </p>
                     )}
                     {payload.estrategiaParada.alertasOperacionais && payload.estrategiaParada.alertasOperacionais.length > 0 && (
                       <p className="text-slate-700 leading-snug">
-                        • Pontos Críticos & Gerenciamento de Risco: {payload.estrategiaParada.alertasOperacionais.join("; ")}
+                        • Pontos Críticos & Gerenciamento de Risco: {payload.estrategiaParada.alertasOperacionais.map(formatarItemHorizonteTexto).join("; ")}
                       </p>
                     )}
                     {(payload.estrategiaParada.planoAlinhamentoParada || payload.estrategiaParada.planoBlindagemFds) && (
@@ -2600,22 +2636,22 @@ export const AdmExecutiveSummaryView: React.FC<AdmExecutiveSummaryViewProps> = (
                         <span className="font-semibold">• Procedimentos & Diretrizes Prioritárias:</span>
                         <ul className="list-none pl-1 text-[11px] mt-1 space-y-1 text-slate-800">
                           {payload.estrategiaMes.diretrizesPrioritarias.map((dir, i) => {
-                            const match = dir.match(/^\[(.*?)\]\s*(.*)$/);
-                            if (match) {
-                              return (
-                                <li key={i} className="flex items-start gap-1.5">
-                                  <span className="font-bold text-purple-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                  <span className="bg-purple-100 text-purple-900 border border-purple-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
-                                    {match[1]}
-                                  </span>
-                                  <span className="text-slate-800 font-medium">{match[2]}</span>
-                                </li>
-                              );
-                            }
+                            const { prioridade, setor, texto } = parseItemHorizonteResumo(dir);
+                            const badge = prioridade ? PRIORIDADE_BADGE_RESUMO[prioridade] : null;
                             return (
                               <li key={i} className="flex items-start gap-1.5">
                                 <span className="font-bold text-purple-800 text-[10px] shrink-0 mt-0.5">[{i + 1}]</span>
-                                <span className="text-slate-800 font-medium">{dir}</span>
+                                {badge && (
+                                  <span className={`${badge.className} font-bold px-1.5 py-0.2 rounded text-[10px] shrink-0 mt-0.5`}>
+                                    {badge.sigla}
+                                  </span>
+                                )}
+                                {setor && (
+                                  <span className="bg-purple-100 text-purple-900 border border-purple-300 font-bold px-1.5 py-0.2 rounded text-[10px] uppercase shrink-0 mt-0.5">
+                                    {setor}
+                                  </span>
+                                )}
+                                <span className="text-slate-800 font-medium">{texto}</span>
                               </li>
                             );
                           })}

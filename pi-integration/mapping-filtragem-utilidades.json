@@ -1,0 +1,134 @@
+{
+  "geradoEm": "2026-09-17T18:20:00Z",
+  "resumo": {
+    "totalParametros": 13,
+    "mapeados": 3,
+    "naoMapeados": 10
+  },
+  "notasGerais": [
+    "Area AF FILTRAGEM (\\\\SWVM126\\EROBR\\USINA\\FILTRAGEM) so contem elementos 44BB001..018 (bombas), sem elemento para o filtro-prensa. O filtro-prensa real foi localizado apenas como PONTO BRUTO no Data Archive (DataServer SWVM124), subsistema PIL-BENF-0009, equipamento 44FL004 - ou seja, prefixo real e 44 (FILTRAGEM), nao 43 (MOAGEM) como sugere o rotulo do relatorio '43-FP-001 / 002'. So existe UM filtro-prensa modelado (44FL004), nao dois.",
+    "Area AF MOAGEM foi verificada e NAO contem nenhum elemento com codigo FP/filtro-prensa (apenas AL, BB, MI, SI, TC, TQ - moinhos, bombas, silos, telas, tanques).",
+    "Area AF ETA (\\\\SWVM126\\EROBR\\USINA\\ETA) so contem elementos 47BB001..010 (bombas), todos com atributos-modelo (CORRENTE, Descricao, Tag, Setpoint, etc.) SEM ponto PI real associado - a API retorna explicitamente o erro 'PI Point not found' para cada atributo consultado (ex.: '\\\\SWVM124\\47BB001.CORRENTE.<guid>'). Sao elementos de template AF ainda nao vinculados a instrumentacao real.",
+    "Area AF REAGENTES tambem foi verificada (46BB0xx) - mesmo padrao de bombas, sem relacao com compressores/ETA.",
+    "Busca exaustiva no Data Archive (todas as 1178 tags PIL-BENF, subsistemas 0001-0010, mais as ~1313 tags totais do servidor incluindo PIL-LABS, KPIs MA_/OP_, TAGNA e tags de infraestrutura) NAO encontrou nenhuma tag para compressores de ar, secador de ar de instrumento, bombas de agua de resfriamento/selagem, captacao de agua bruta, tanques de ETA ou camara de agua - ou seja, os equipamentos genericos do setor Utilidades & ETA do relatorio ('Compressores 47-CO', 'Secador & Vasos 47-AI', 'Bombas 47-AR', 'Bombas 47-AS', 'Captacao Nova 47-CP', 'Tanque ETA Bruta 47-ET-001', 'Camara A 47-TQ', 'Tanque ETA Recuperada 47-ET-002') NAO possuem contrapartida real nem em AF nem em ponto bruto no PI atualmente.",
+    "So existe um DataServer no ambiente (SWVM124), confirmado via GET /dataservers - nao ha um servidor PI separado para utilidades/ETA.",
+    "Os 3 pontos mapeados na Filtragem retornaram Span=318.0 / Zero=0.0 identicos para os tres atributos (WT101, PT103, contador de ciclos) - isso indica um range padrao de template aplicado uniformemente pela configuracao do ponto, NAO uma faixa de engenharia calibrada especificamente por variavel. Por isso NAO foi usado como validacao de unidade; a validacao de unidade foi feita apenas por ordem de grandeza do valor amostrado."
+  ],
+  "filtragemConcentrado": [
+    {
+      "chave": "producaoFiltragem",
+      "equipamento": "43-FP-001 / 002",
+      "nomeRelatorio": "Produção Concentrado Filtrado",
+      "unidadeRelatorio": "t",
+      "piKind": "raw-point",
+      "piPath": "PIL-BENF-0009-FLPR004-SPSG-WIT001.CALC-TOT",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAXwYAAAU1dWTTEyNFxQSUwtQkVORi0wMDA5LUZMUFIwMDQtU1BTRy1XSVQwMDEuQ0FMQy1UT1Q",
+      "unidadePi": "não especificada no ponto PI (EngineeringUnits em branco); descritor 'PESO LIQUIDO TORTA (WT101_SCALED) 44FL004' sugere massa (kg ou t)",
+      "valorAmostra": 7183.0,
+      "timestampAmostra": "2026-09-17T18:19:02.591Z",
+      "confianca": "baixa",
+      "observacao": "Ponto e um totalizador (CALC-TOT); pode ser cumulativo desde ultimo reset (turno/dia/ciclo), nao um valor instantaneo de producao. Ordem de grandeza (7183) e incompativel com a faixa esperada do relatorio (280-400 t) se a unidade for tonelada - pode estar em kg (≈7,18 t) ou representar acumulo parcial de um periodo diferente do turno. Recomenda-se validar escala/unidade com a equipe de automacao antes de usar como fonte definitiva; nao confirmar como 't' sem essa validacao."
+    },
+    {
+      "chave": "ciclosFiltro",
+      "equipamento": "43-FP-001 / 002",
+      "nomeRelatorio": "Ciclos Realizados (Turno)",
+      "unidadeRelatorio": "ciclos",
+      "piKind": "raw-point",
+      "piPath": "PIL-BENF-0009-FLPR004-SPSG-SIT001.CALC-TOT",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAYAYAAAU1dWTTEyNFxQSUwtQkVORi0wMDA5LUZMUFIwMDQtU1BTRy1TSVQwMDEuQ0FMQy1UT1Q",
+      "unidadePi": "ciclos (contagem, sem unidade de engenharia definida no ponto)",
+      "valorAmostra": 2043,
+      "timestampAmostra": "2026-09-17T18:18:29.342Z",
+      "confianca": "media",
+      "observacao": "Descritor 'CONTADOR CUMULATIVO DE CICLOS (FILTRATION_CNT_00) 44FL004' indica contador cumulativo (provavelmente desde o último reset/comissionamento, não por turno). Para usar como 'Ciclos Realizados (Turno)' seria necessário calcular o delta entre o valor no início e no fim do turno, não usar o valor absoluto diretamente."
+    },
+    {
+      "chave": "pressaoCompactacao",
+      "equipamento": "43-FP-001 / 002",
+      "nomeRelatorio": "Pressão de Compactação / Membrana",
+      "unidadeRelatorio": "kPa",
+      "piKind": "raw-point",
+      "piPath": "PIL-BENF-0009-FLPR004-SMED-PIT002.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAXAYAAAU1dWTTEyNFxQSUwtQkVORi0wMDA5LUZMUFIwMDQtU01FRC1QSVQwMDIuUFY",
+      "unidadePi": "não especificada no ponto PI (EngineeringUnits em branco); descritor 'PRESSAO PRENSAGEM MEMBRANA (PT103_SCALED) 44FL004' - valor amostrado (3.0) é consistente em ordem de grandeza com bar ou kgf/cm² (≈300 kPa se bar), próximo da faixa do relatório (210-260 kPa)",
+      "valorAmostra": 3.0,
+      "timestampAmostra": "2026-09-17T18:19:09.224Z",
+      "confianca": "media",
+      "observacao": "Melhor correspondência nominal encontrada (nome do sensor bate exatamente com o parâmetro do relatório). Confiança limitada a 'média' porque a unidade de engenharia não está configurada no ponto PI e o valor amostrado convertido para kPa (≈300) fica levemente acima da faixa ideal informada (210-260 kPa) - pode ser oscilação normal do ciclo ou diferença de escala."
+    }
+  ],
+  "utilidadesEta": [],
+  "naoMapeados": [
+    {
+      "chave": "produtividadeFiltro",
+      "setor": "Filtragem de Concentrado",
+      "equipamento": "43-FP-001 / 002",
+      "nomeRelatorio": "Produtividade do Filtro Prensa",
+      "motivo": "Não existe tag de produtividade (t/h) no equipamento real 44FL004; exigiria cálculo derivado (peso/tempo), não há sensor direto."
+    },
+    {
+      "chave": "umidadeBolo",
+      "setor": "Filtragem de Concentrado",
+      "equipamento": "43-FP-001 / 002",
+      "nomeRelatorio": "Umidade do Bolo de Concentrado",
+      "motivo": "Não há analisador de umidade online no 44FL004; umidade do bolo é tipicamente medida em laboratório, sem tag PI correspondente."
+    },
+    {
+      "chave": "pressaoAr",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Compressores 47-CO",
+      "nomeRelatorio": "Pressão de Ar Comprimido",
+      "motivo": "Nenhum elemento AF ou ponto bruto no PI corresponde a compressores de ar. Área ETA em AF só contém bombas-template (47BB001-010) sem ponto real vinculado; busca exaustiva no Data Archive (1178 tags PIL-BENF + demais ~135 tags do servidor) não retornou nenhuma tag de compressor."
+    },
+    {
+      "chave": "pressaoArInstrumento",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Secador & Vasos 47-AI",
+      "nomeRelatorio": "Pressão de ar de instrumento",
+      "motivo": "Nenhum elemento AF ou ponto bruto no PI corresponde a secador/vasos de ar de instrumento. Mesma conclusão da busca exaustiva acima."
+    },
+    {
+      "chave": "pressaoAguaResfriamento",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Bombas 47-AR",
+      "nomeRelatorio": "Pressão de água resfriamento",
+      "motivo": "Elementos 47BB001-010 em AF (bombas da área ETA) são apenas templates sem ponto PI real (erro 'PI Point not found' ao consultar qualquer atributo); nenhum ponto bruto com nome/descrição relacionada a água de resfriamento foi encontrado."
+    },
+    {
+      "chave": "pressaoAguaSelagem",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Bombas 47-AS",
+      "nomeRelatorio": "Pressão de água selagem",
+      "motivo": "Mesma limitação: bombas da área ETA em AF sem ponto PI real vinculado; nenhuma tag bruta de selagem de bombas encontrada na busca no Data Archive."
+    },
+    {
+      "chave": "captacaoAguaBruta",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Captação Nova 47-CP",
+      "nomeRelatorio": "Captação Água Bruta / Nova",
+      "motivo": "Não existe elemento AF nem ponto bruto para captação de água bruta/nova; a área ETA em AF não tem elemento filho com esse código."
+    },
+    {
+      "chave": "nivelEtaBruta",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Tanque ETA Bruta 47-ET-001",
+      "nomeRelatorio": "Nível ETA Bruta",
+      "motivo": "Não existe elemento AF nem ponto bruto para tanque de água bruta da ETA; buscas por 'ETA', 'BRUTA', 'AGUA' e variações de '47ET' não retornaram nenhuma tag real (apenas falsos positivos em KPIs cujo nome contém a substring 'eta', ex.: OP_..._META)."
+    },
+    {
+      "chave": "nivelCamaraA",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Câmara A 47-TQ",
+      "nomeRelatorio": "Nível da Câmara A",
+      "motivo": "Não existe elemento AF nem ponto bruto para a Câmara A / reservatório central; buscas por 'CAMARA' e '47TQ' não retornaram nenhuma tag."
+    },
+    {
+      "chave": "nivelEtaRecuperada",
+      "setor": "Utilidades & ETA",
+      "equipamento": "Tanque ETA Recuperada 47-ET-002",
+      "nomeRelatorio": "Nível ETA Recuperada",
+      "motivo": "Não existe elemento AF nem ponto bruto para tanque de água recuperada da ETA; mesma busca exaustiva sem resultado."
+    }
+  ]
+}

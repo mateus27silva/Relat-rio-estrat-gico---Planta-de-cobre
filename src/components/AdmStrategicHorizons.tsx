@@ -20,7 +20,7 @@ import {
   Droplets,
   Layers
 } from "lucide-react";
-import { EstrategiaPorHorizonte, HorizontePlanejamento, CircuitoTipo } from "../typesAdm";
+import { EstrategiaPorHorizonte, HorizontePlanejamento, CircuitoTipo, PrioridadeDiretriz } from "../typesAdm";
 
 interface AdmStrategicHorizonsProps {
   circuitoTipo?: CircuitoTipo;
@@ -70,24 +70,52 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
 
   const defaultSetor = setoresOpcoes[0];
 
-  const parseItemSetorTexto = (itemStr: string) => {
-    if (!itemStr) return { setor: defaultSetor, texto: "" };
-    const match = itemStr.match(/^\[(.*?)\](?:\s)?([\s\S]*)$/);
-    if (match) {
-      return {
-        setor: match[1].trim(),
-        texto: match[2]
-      };
-    }
-    return {
-      setor: defaultSetor,
-      texto: itemStr
-    };
+  // Prioridade padrão para itens novos ou para itens salvos antes desta
+  // classificação existir (formato legado "[Setor] Texto", sem prioridade).
+  const PRIORIDADE_PADRAO: PrioridadeDiretriz = "media";
+
+  const PRIORIDADE_INFO: Record<PrioridadeDiretriz, { sigla: string; label: string; emoji: string; select: string }> = {
+    critica: { sigla: "P1", label: "Crítica", emoji: "🔴", select: "bg-rose-50 border-rose-300 text-rose-800 focus:ring-rose-500" },
+    alta: { sigla: "P2", label: "Alta", emoji: "🟡", select: "bg-amber-50 border-amber-300 text-amber-800 focus:ring-amber-500" },
+    media: { sigla: "P3", label: "Média", emoji: "🔵", select: "bg-blue-50 border-blue-300 text-blue-800 focus:ring-blue-500" }
   };
 
-  const formatItemSetorTexto = (setor: string, texto: string) => {
+  // Formato do item: "[prioridade][Setor] Texto". Itens salvos antes da
+  // classificação por prioridade existir (só "[Setor] Texto") continuam
+  // válidos e assumem Média (P3) até o supervisor reclassificar.
+  const parseItemCompleto = (itemStr: string): { setor: string; prioridade: PrioridadeDiretriz; texto: string } => {
+    if (!itemStr) return { setor: defaultSetor, prioridade: PRIORIDADE_PADRAO, texto: "" };
+    const matchNovo = itemStr.match(/^\[(critica|alta|media)\]\[(.*?)\](?:\s)?([\s\S]*)$/);
+    if (matchNovo) {
+      return { prioridade: matchNovo[1] as PrioridadeDiretriz, setor: matchNovo[2].trim(), texto: matchNovo[3] };
+    }
+    const matchLegado = itemStr.match(/^\[(.*?)\](?:\s)?([\s\S]*)$/);
+    if (matchLegado) {
+      return { setor: matchLegado[1].trim(), prioridade: PRIORIDADE_PADRAO, texto: matchLegado[2] };
+    }
+    return { setor: defaultSetor, prioridade: PRIORIDADE_PADRAO, texto: itemStr };
+  };
+
+  const formatItemCompleto = (setor: string, prioridade: PrioridadeDiretriz, texto: string): string => {
     const cleanSetor = setor && setor.trim().length > 0 ? setor.trim() : defaultSetor;
-    return `[${cleanSetor}] ${texto ?? ""}`;
+    return `[${prioridade}][${cleanSetor}] ${texto ?? ""}`;
+  };
+
+  // Select compacto de prioridade (P1/P2/P3) reaproveitado nas três listas do horizonte.
+  const renderPrioridadeSelect = (prioridade: PrioridadeDiretriz, onChange: (p: PrioridadeDiretriz) => void, titulo: string) => {
+    const info = PRIORIDADE_INFO[prioridade];
+    return (
+      <select
+        value={prioridade}
+        onChange={e => onChange(e.target.value as PrioridadeDiretriz)}
+        className={`font-black text-xs rounded-lg px-2 py-1.5 border cursor-pointer shadow-2xs focus:ring-1 shrink-0 ${info.select}`}
+        title={titulo}
+      >
+        <option value="critica">🔴 P1 · Crítica</option>
+        <option value="alta">🟡 P2 · Alta</option>
+        <option value="media">🔵 P3 · Média</option>
+      </select>
+    );
   };
 
   const horizonData: Record<Exclude<HorizontePlanejamento, "dia">, { data: EstrategiaPorHorizonte; label: string; icon: any; color: string; badge: string }> = {
@@ -109,7 +137,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
       data: estrategiaParada || {
         titulo: "Alinhamento de Parada de Manutenção",
         focoPrincipal: "",
-        diretrizesPrioritarias: [formatItemSetorTexto(isSeco ? "Britagem Primária" : "Moagem & Ciclones", "")],
+        diretrizesPrioritarias: [formatItemCompleto(isSeco ? "Britagem Primária" : "Moagem & Ciclones", PRIORIDADE_PADRAO, "")],
         recursosManutencao: "",
         alertasOperacionais: [],
         planoAlinhamentoParada: ""
@@ -139,83 +167,104 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
 
   const addDiretriz = () => {
     const list = current.diretrizesPrioritarias || [];
-    const novoItem = formatItemSetorTexto(defaultSetor, "");
+    const novoItem = formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "");
     updateField("diretrizesPrioritarias", [...list, novoItem]);
   };
 
   const updateDiretrizTexto = (idx: number, novoTexto: string) => {
     const list = [...(current.diretrizesPrioritarias || [])];
-    const { setor } = parseItemSetorTexto(list[idx] || "");
-    list[idx] = formatItemSetorTexto(setor, novoTexto);
+    const { setor, prioridade } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(setor, prioridade, novoTexto);
     updateField("diretrizesPrioritarias", list);
   };
 
   const updateDiretrizSetor = (idx: number, novoSetor: string) => {
     const list = [...(current.diretrizesPrioritarias || [])];
-    const { texto } = parseItemSetorTexto(list[idx] || "");
-    list[idx] = formatItemSetorTexto(novoSetor, texto);
+    const { prioridade, texto } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(novoSetor, prioridade, texto);
+    updateField("diretrizesPrioritarias", list);
+  };
+
+  const updateDiretrizPrioridade = (idx: number, novaPrioridade: PrioridadeDiretriz) => {
+    const list = [...(current.diretrizesPrioritarias || [])];
+    const { setor, texto } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(setor, novaPrioridade, texto);
     updateField("diretrizesPrioritarias", list);
   };
 
   const removeDiretriz = (idx: number) => {
     const list = (current.diretrizesPrioritarias || []).filter((_, i) => i !== idx);
-    updateField("diretrizesPrioritarias", list.length ? list : [formatItemSetorTexto(defaultSetor, "")]);
+    updateField("diretrizesPrioritarias", list.length ? list : [formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "")]);
   };
 
   const addRecursoManutencao = () => {
     const list = getRecursosList(current.recursosManutencao);
-    const novoItem = formatItemSetorTexto(defaultSetor, "");
+    const novoItem = formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "");
     updateField("recursosManutencao", [...list, novoItem]);
   };
 
   const updateRecursoManutencaoTexto = (idx: number, novoTexto: string) => {
     const list = [...getRecursosList(current.recursosManutencao)];
-    const { setor } = parseItemSetorTexto(list[idx] || "");
-    list[idx] = formatItemSetorTexto(setor, novoTexto);
+    const { setor, prioridade } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(setor, prioridade, novoTexto);
     updateField("recursosManutencao", list);
   };
 
   const updateRecursoManutencaoSetor = (idx: number, novoSetor: string) => {
     const list = [...getRecursosList(current.recursosManutencao)];
-    const { texto } = parseItemSetorTexto(list[idx] || "");
-    list[idx] = formatItemSetorTexto(novoSetor, texto);
+    const { prioridade, texto } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(novoSetor, prioridade, texto);
+    updateField("recursosManutencao", list);
+  };
+
+  const updateRecursoManutencaoPrioridade = (idx: number, novaPrioridade: PrioridadeDiretriz) => {
+    const list = [...getRecursosList(current.recursosManutencao)];
+    const { setor, texto } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(setor, novaPrioridade, texto);
     updateField("recursosManutencao", list);
   };
 
   const removeRecursoManutencao = (idx: number) => {
     const list = getRecursosList(current.recursosManutencao).filter((_, i) => i !== idx);
-    updateField("recursosManutencao", list.length ? list : [formatItemSetorTexto(defaultSetor, "")]);
+    updateField("recursosManutencao", list.length ? list : [formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "")]);
   };
 
   const addAlerta = () => {
     const list = current.alertasOperacionais || [];
-    const novoItem = formatItemSetorTexto(defaultSetor, "");
+    const novoItem = formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "");
     updateField("alertasOperacionais", [...list, novoItem]);
   };
 
   const updateAlertaTexto = (idx: number, novoTexto: string) => {
     const list = [...(current.alertasOperacionais || [])];
-    const { setor } = parseItemSetorTexto(list[idx] || "");
-    list[idx] = formatItemSetorTexto(setor, novoTexto);
+    const { setor, prioridade } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(setor, prioridade, novoTexto);
     updateField("alertasOperacionais", list);
   };
 
   const updateAlertaSetor = (idx: number, novoSetor: string) => {
     const list = [...(current.alertasOperacionais || [])];
-    const { texto } = parseItemSetorTexto(list[idx] || "");
-    list[idx] = formatItemSetorTexto(novoSetor, texto);
+    const { prioridade, texto } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(novoSetor, prioridade, texto);
+    updateField("alertasOperacionais", list);
+  };
+
+  const updateAlertaPrioridade = (idx: number, novaPrioridade: PrioridadeDiretriz) => {
+    const list = [...(current.alertasOperacionais || [])];
+    const { setor, texto } = parseItemCompleto(list[idx] || "");
+    list[idx] = formatItemCompleto(setor, novaPrioridade, texto);
     updateField("alertasOperacionais", list);
   };
 
   const removeAlerta = (idx: number) => {
     const list = (current.alertasOperacionais || []).filter((_, i) => i !== idx);
-    updateField("alertasOperacionais", list.length ? list : [formatItemSetorTexto(defaultSetor, "")]);
+    updateField("alertasOperacionais", list.length ? list : [formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "")]);
   };
 
   const getRecursosList = (val: string | string[] | undefined): string[] => {
-    if (Array.isArray(val)) return val.length ? val : [formatItemSetorTexto(defaultSetor, "")];
+    if (Array.isArray(val)) return val.length ? val : [formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "")];
     if (typeof val === "string" && val.trim().length > 0) return [val];
-    return [formatItemSetorTexto(defaultSetor, "")];
+    return [formatItemCompleto(defaultSetor, PRIORIDADE_PADRAO, "")];
   };
 
   return (
@@ -303,7 +352,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
 
           <div className="space-y-2.5">
             {(current.diretrizesPrioritarias || []).map((dir, idx) => {
-              const { setor, texto } = parseItemSetorTexto(dir);
+              const { setor, prioridade, texto } = parseItemCompleto(dir);
               return (
                 <div
                   key={idx}
@@ -311,6 +360,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-500 w-5 text-right shrink-0">{idx + 1}.</span>
+                    {renderPrioridadeSelect(prioridade, p => updateDiretrizPrioridade(idx, p), "Grau de criticidade desta diretriz")}
                     <div className="relative shrink-0">
                       <select
                         value={setoresOpcoes.includes(setor) ? setor : defaultSetor}
@@ -364,7 +414,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
 
           <div className="space-y-2.5">
             {getRecursosList(current.recursosManutencao).map((rec, idx) => {
-              const { setor, texto } = parseItemSetorTexto(rec);
+              const { setor, prioridade, texto } = parseItemCompleto(rec);
               return (
                 <div
                   key={idx}
@@ -372,6 +422,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-500 w-5 text-right shrink-0">{idx + 1}.</span>
+                    {renderPrioridadeSelect(prioridade, p => updateRecursoManutencaoPrioridade(idx, p), "Grau de criticidade desta intervenção")}
                     <div className="relative shrink-0">
                       <select
                         value={setoresOpcoes.includes(setor) ? setor : defaultSetor}
@@ -425,7 +476,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
 
           <div className="space-y-2.5">
             {(current.alertasOperacionais || []).map((alerta, idx) => {
-              const { setor, texto } = parseItemSetorTexto(alerta);
+              const { setor, prioridade, texto } = parseItemCompleto(alerta);
               return (
                 <div
                   key={idx}
@@ -434,6 +485,7 @@ export const AdmStrategicHorizons: React.FC<AdmStrategicHorizonsProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 ml-1" />
                     <span className="text-xs font-bold text-slate-500 w-4 text-right shrink-0">{idx + 1}.</span>
+                    {renderPrioridadeSelect(prioridade, p => updateAlertaPrioridade(idx, p), "Grau de criticidade deste alerta")}
                     <div className="relative shrink-0">
                       <select
                         value={setoresOpcoes.includes(setor) ? setor : defaultSetor}

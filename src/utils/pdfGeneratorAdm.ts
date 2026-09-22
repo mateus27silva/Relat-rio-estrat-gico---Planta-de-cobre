@@ -100,6 +100,27 @@ export function sanitizePdfText(str: any): string {
 }
 
 /**
+ * Converte o formato interno de item dos horizontes estratégicos
+ * ("[prioridade][Setor] Texto", gravado pelo AdmStrategicHorizons) para uma
+ * exibição legível no PDF ("[P1][Setor] Texto"). Itens salvos antes da
+ * classificação por prioridade existir ("[Setor] Texto", sem prioridade)
+ * assumem Média (P3) até o supervisor reclassificar no editor.
+ */
+function formatarItemPrioridadeParaPdf(item: string): string {
+  if (!item) return item;
+  const siglas: Record<string, string> = { critica: "P1", alta: "P2", media: "P3" };
+  const matchNovo = item.match(/^\[(critica|alta|media)\](\[.*?\][\s\S]*)$/);
+  if (matchNovo) {
+    return `[${siglas[matchNovo[1]]}]${matchNovo[2]}`;
+  }
+  const matchLegado = item.match(/^(\[.*?\][\s\S]*)$/);
+  if (matchLegado) {
+    return `[P3]${matchLegado[1]}`;
+  }
+  return item;
+}
+
+/**
  * Invoca autoTable aplicando automaticamente a sanitização de texto em todas as células,
  * prevenindo que caracteres Unicode não suportados gerem caracteres corrompidos no PDF.
  */
@@ -2000,21 +2021,21 @@ export function gerarRelatorioAdmPDF(payload: RelatorioAdmPayload) {
 
       const dirsList = (d.diretrizesPrioritarias || []).filter(x => x && x.trim().length > 0);
       const dirsFormatted = dirsList.length > 0
-        ? dirsList.map((dir, idx) => `  [${idx + 1}] ${dir}`).join("\n")
+        ? dirsList.map((dir, idx) => `  [${idx + 1}] ${formatarItemPrioridadeParaPdf(dir)}`).join("\n")
         : "  [1] Executar rotinas padrão de SSMA e controle de processo.";
       const splitDirs = doc.splitTextToSize(`> Procedimentos & Diretrizes Prioritárias:\n${dirsFormatted}`, contentWidth);
 
       let extraText = "";
       if (d.recursosManutencao) {
         const recText = Array.isArray(d.recursosManutencao)
-          ? d.recursosManutencao.filter(x => x && x.trim().length > 0).join("; ")
+          ? d.recursosManutencao.filter(x => x && x.trim().length > 0).map(formatarItemPrioridadeParaPdf).join("; ")
           : d.recursosManutencao;
         if (recText && recText.trim().length > 0) {
           extraText += `> Intervenções de Manutenção / Gestão de Ativos: ${recText}\n`;
         }
       }
       if (d.alertasOperacionais && d.alertasOperacionais.length > 0) {
-        extraText += `> Pontos Críticos & Gerenciamento de Risco: ${d.alertasOperacionais.join("; ")}\n`;
+        extraText += `> Pontos Críticos & Gerenciamento de Risco: ${d.alertasOperacionais.map(formatarItemPrioridadeParaPdf).join("; ")}\n`;
       }
       if (d.planoAlinhamentoParada || (hz.codigo === "ALINHAMENTO DE PARADA" && d.planoBlindagemFds)) {
         extraText += `> Protocolo Formal de Alinhamento de Parada: ${d.planoAlinhamentoParada || d.planoBlindagemFds}\n`;

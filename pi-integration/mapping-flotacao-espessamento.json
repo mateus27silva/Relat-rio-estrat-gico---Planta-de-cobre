@@ -1,0 +1,322 @@
+{
+  "geradoEm": "2026-09-17T15:20:04-03:00",
+  "resumo": {
+    "totalParametros": 36,
+    "mapeados": 9,
+    "naoMapeados": 27
+  },
+  "notaMetodologica": "Nao existe area AF (Asset Framework) para FLOTACAO nem ESPESSAMENTO sob \\\\SWVM126\\EROBR\\USINA. As areas REJEITO, FILTRAGEM e REAGENTES existem na AF mas contem apenas elementos de bomba (45BB0xx, 44BB0xx, 46BB0xx) com atributos nao configurados (valores placeholder '0'). Todos os dados reais desses setores vivem em tags brutos do PI Data Archive (servidor SWVM124), convencao PIL-BENF-{SUBSISTEMA 4 digitos}-{EQUIPAMENTO}-{SISTEMA}-{INSTRUMENTO}.PV. Foram varridos os subsistemas 0001-0030 (dados existentes em 0001-0007, 0009 e 0010; demais vazios). Nenhum tag com 'CMC', 'AMIDEX', 'COLETOR', 'ESPUMANTE', 'FLOC' ou 'PH' no nome/descritor foi encontrado em toda a base varrida. Nenhum tag '44EP', '44TQ', 'ESPC' foi encontrado para os espessadores de concentrado -- aparentemente nao instrumentados no PI.",
+  "flotacao": [
+    {
+      "chave": "solidosCleaner",
+      "equipamento": "",
+      "nomeRelatorio": "% Sólidos Cleaner",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0006-ANTR001-SMED-AIT010.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAYQUAAAU1dWTTEyNFxQSUwtQkVORi0wMDA2LUFOVFIwMDEtU01FRC1BSVQwMTAuUFY",
+      "unidadePi": "% (sem EU cadastrada no ponto; Span=100/Zero=0)",
+      "valorAmostra": 0.0,
+      "confianca": "baixa",
+      "nota": "Descritor do tag = 'PERCENTUAL DE SOLIDO LINHA 5 - ALIMENTACAO CLEANER' (analisador ANTR001 do subsistema 0006). Combina conceitualmente com % Solidos Cleaner, mas o historico dos ultimos 2 dias mostra valor constante 0.0 (Good=True), sugerindo instrumento fora de servico ou linha parada. Validar com automacao antes de usar."
+    },
+    {
+      "chave": "solidosScsRougher",
+      "equipamento": "",
+      "nomeRelatorio": "% Sólidos Scs-Rougher",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0006-ANTR001-SMED-AIT006.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAXQUAAAU1dWTTEyNFxQSUwtQkVORi0wMDA2LUFOVFIwMDEtU01FRC1BSVQwMDYuUFY",
+      "unidadePi": "% (sem EU cadastrada no ponto; Span=100/Zero=0)",
+      "valorAmostra": 0.0,
+      "confianca": "baixa",
+      "nota": "Descritor = 'PERCENTUAL DE SOLIDO LINHA 3 - REJEITO SCAVENGER'. Combina conceitualmente com Scavenger-Rougher, mas historico de 2 dias tambem constante em 0.0 (Good=True) -- mesmo padrao suspeito de instrumento parado. Validar com automacao."
+    },
+    {
+      "chave": "teorCf",
+      "equipamento": "Recleaner / Colunas",
+      "nomeRelatorio": "Teor de CF",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0006-ANTR001-SMED-AIT011.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAYgUAAAU1dWTTEyNFxQSUwtQkVORi0wMDA2LUFOVFIwMDEtU01FRC1BSVQwMTEuUFY",
+      "unidadePi": "%",
+      "valorAmostra": 60.24915,
+      "confianca": "alta",
+      "nota": "Descritor = 'TEOR DE COBRE LINHA 6 - CONCENTRADO FINAL'. Valor instantaneo (60.25%) e um pico pontual; historico dos ultimos 2 dias oscila entre ~33.5% e ~52%, faixa compativel com o alvo do relatorio (33.5-40%). Mapeamento validado pela serie historica, nao pelo valor pontual."
+    },
+    {
+      "chave": "teorRf",
+      "equipamento": "Scavenger / Rejeito",
+      "nomeRelatorio": "Teor de RF",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0006-ANTR001-SMED-AIT001.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAWAUAAAU1dWTTEyNFxQSUwtQkVORi0wMDA2LUFOVFIwMDEtU01FRC1BSVQwMDEuUFY",
+      "unidadePi": "%",
+      "valorAmostra": 0.112021692,
+      "confianca": "alta",
+      "nota": "Descritor = 'TEOR DE COBRE LINHA 1 - REJEITO FINAL'. Valor amostral (0.112%) dentro da faixa esperada pelo relatorio (0-0.1%, alvo 0.08%), boa aderencia. Existe tambem PIL-BENF-0006-ANTR001-SMED-AIT015.PV ('TEOR DE COBRE LINHA 8 - REJEITO FINAL L2'), uma segunda linha de rejeito final nao usada aqui; avaliar se o relatorio precisa combinar as duas linhas."
+    }
+  ],
+  "espessamentoRejeito": [
+    {
+      "chave": "densidadeUnderflowRej",
+      "equipamento": "45-EP-001 / 002",
+      "nomeRelatorio": "Densidade Underflow Rejeito",
+      "unidadeRelatorio": "g/L",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0010-ESPS001-SMED-DIT001.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbA3AUAAAU1dWTTEyNFxQSUwtQkVORi0wMDEwLUVTUFMwMDEtU01FRC1ESVQwMDEuUFY",
+      "unidadePi": "g/cm3 (Span=2.0, Zero=1.0 -> faixa 1.0-3.0)",
+      "valorAmostra": 1.67656255,
+      "confianca": "alta",
+      "nota": "Descritor = 'Densidade Underflow 45EP001'. Valor esta em g/cm3 (densidade especifica), NAO em g/L -- multiplicar por 1000 para comparar com a faixa do relatorio (1400-1750 g/L): 1.6766 g/cm3 = ~1677 g/L, dentro da faixa. Existe tag equivalente PIL-BENF-0010-ESPS002-SMED-DIT001.PV para o 45EP002 (mesmo valor no momento da amostra: 1.67656255) -- o parametro do relatorio e unico para os dois equipamentos; escolhida a tag do EP001 como referencia primaria."
+    },
+    {
+      "chave": "torqueRejEp001",
+      "equipamento": "45-EP-001",
+      "nomeRelatorio": "Torque 45EP001",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0010-ESPS001-ACIO-IWT001.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbA2QUAAAU1dWTTEyNFxQSUwtQkVORi0wMDEwLUVTUFMwMDEtQUNJTy1JV1QwMDEuUFY",
+      "unidadePi": "nao identificada (sem EU; Span=100/Zero=0 configurado no ponto, mas valor amostral observado = 4233, fora dessa faixa nominal)",
+      "valorAmostra": 4233.0,
+      "confianca": "media",
+      "nota": "Descritor = 'Torque Rake - Celula 1 DO 45EP001'. Equipamento e grandeza (torque do rake) combinam com o parametro do relatorio, mas o valor amostral (4233) esta muito fora da faixa 0-35% esperada -- provavelmente o tag registra torque em unidade absoluta (ex.: N.m ou sinal bruto do variador), nao em % do torque nominal. Existe segundo instrumento no mesmo equipamento: PIL-BENF-0010-ESPS001-ACIO-IWT002.PV ('Torque Rake - Celula 2 DO 45EP001', valor amostral 5659). Necessario confirmar com automacao/eletrica a formula de conversao para % antes de usar em producao."
+    },
+    {
+      "chave": "torqueRejEp002",
+      "equipamento": "45-EP-002",
+      "nomeRelatorio": "Torque 45EP002",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0010-ESPS002-ACIO-IWT001.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbA3gUAAAU1dWTTEyNFxQSUwtQkVORi0wMDEwLUVTUFMwMDItQUNJTy1JV1QwMDEuUFY",
+      "unidadePi": "nao identificada (sem EU; mesma ressalva do 45EP001)",
+      "valorAmostra": 4079.0,
+      "confianca": "media",
+      "nota": "Descritor = 'Torque Rake - Celula 1 DO 45EP002'. Mesma ressalva de unidade do torqueRejEp001. Segundo instrumento: PIL-BENF-0010-ESPS002-ACIO-IWT002.PV ('Torque Rake - Celula 2 DO 45EP002', valor amostral 4748)."
+    },
+    {
+      "chave": "solidosRej45ep001",
+      "equipamento": "45-EP-001",
+      "nomeRelatorio": "% Sólidos 45EP001",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0010-ESPS001-SMED-AIT001.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbA3QUAAAU1dWTTEyNFxQSUwtQkVORi0wMDEwLUVTUFMwMDEtU01FRC1BSVQwMDEuUFY",
+      "unidadePi": "% (Span=100/Zero=0)",
+      "valorAmostra": 62.66577,
+      "confianca": "alta",
+      "nota": "Descritor = '% Solidos Underflow 45EP001'. Correspondencia direta de nome, equipamento e unidade. Valor amostral (62.7%) dentro da faixa do relatorio (60-68%, alvo 63%)."
+    },
+    {
+      "chave": "solidosRej45ep002",
+      "equipamento": "45-EP-002",
+      "nomeRelatorio": "% Sólidos 45EP002",
+      "unidadeRelatorio": "%",
+      "piKind": "raw-point",
+      "piPath": "\\\\SWVM124\\PIL-BENF-0010-ESPS002-SMED-AIT001.PV",
+      "piWebId": "F1DPqnhseYX34k6s-gAJn-JtbAVAYAAAU1dWTTEyNFxQSUwtQkVORi0wMDEwLUVTUFMwMDItU01FRC1BSVQwMDEuUFY",
+      "unidadePi": "% (Span=100/Zero=0)",
+      "valorAmostra": 62.66577,
+      "confianca": "alta",
+      "nota": "Descritor = '% Solidos Underflow 45EP002'. Correspondencia direta de nome, equipamento e unidade. Valor amostral (62.7%) dentro da faixa do relatorio (60-68%, alvo 63%)."
+    }
+  ],
+  "espessamentoConcentrado": [],
+  "naoMapeados": [
+    {
+      "chave": "solidosRougher",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "% Sólidos Rougher",
+      "motivo": "Nao existe tag/linha de analisador para 'Rougher' entre as 8 linhas do analisador ANTR001 (subsistema 0006): rejeito final, rejeito jameson, rejeito scavenger, alimentacao flotacao, alimentacao cleaner, concentrado final, concentrado jameson, rejeito final L2. Nenhuma cobre especificamente o banco Rougher."
+    },
+    {
+      "chave": "solidosRecleaner",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "% Sólidos Recleaner",
+      "motivo": "Nenhum tag com 'RECLEANER' no nome ou descritor foi encontrado em toda a base varrida (subsistemas 0001-0030)."
+    },
+    {
+      "chave": "dosagemCmc",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "Dosagem de CMC",
+      "motivo": "Existem bombas dosadoras genericas (PIL-BENF-0007-BBDS042 a BBDS052, descritor 'CONTROLE DE DOSAGEM DA 43BBxxx') mas sem identificacao do reagente na descricao do ponto nem em atributos AF. Sem uma legenda de qual bomba corresponde a CMC, o mapeamento seria uma suposicao -- nao realizado."
+    },
+    {
+      "chave": "dosagemAmidex",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "Dosagem de AMIDEX",
+      "motivo": "Mesmo motivo de dosagemCmc: bombas dosadoras 43BBxxx sem identificacao do reagente."
+    },
+    {
+      "chave": "dosagemColetor",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "Dosagem de Coletor",
+      "motivo": "Mesmo motivo de dosagemCmc: bombas dosadoras 43BBxxx sem identificacao do reagente."
+    },
+    {
+      "chave": "dosagemEspumante",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "Dosagem de Espumante",
+      "motivo": "Mesmo motivo de dosagemCmc: bombas dosadoras 43BBxxx sem identificacao do reagente."
+    },
+    {
+      "chave": "phRougher",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "pH Rougher",
+      "motivo": "Nenhum tag com 'PH' ou instrumento tipico de pH (QIT) foi encontrado em nenhum subsistema varrido (0001-0030). Apenas tags de vazao/valvula de leite de cal (SCAL001, VFCV005) foram encontrados, que sao atuadores, nao a medicao de pH."
+    },
+    {
+      "chave": "phCleaner",
+      "setor": "FLOTACAO",
+      "equipamento": "",
+      "nomeRelatorio": "pH Cleaner",
+      "motivo": "Mesmo motivo de phRougher -- nenhum tag de pH encontrado."
+    },
+    {
+      "chave": "phJameson",
+      "setor": "FLOTACAO",
+      "equipamento": "Célula Jameson",
+      "nomeRelatorio": "pH Jameson",
+      "motivo": "A celula Jameson (equipamento 43JC001, familia JMCL001) esta bem instrumentada no PI (nivel, pressao, vazao, densidade), mas nenhum dos seus ~30 tags mapeados tem relacao com pH."
+    },
+    {
+      "chave": "solidosRejBh01",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "45-BH-001",
+      "nomeRelatorio": "% Sólidos 45BH01",
+      "motivo": "Nenhum tag '45BH*' encontrado. Existem tags 'HDCL003/004/005' (subsistema 0004) rotulados '43BH003/004/005', mas esses pertencem ao circuito de flotacao/remoagem (prefixo de area 43), nao ao circuito de rejeito (prefixo 45), e so possuem tags de pressao e status -- sem %solidos."
+    },
+    {
+      "chave": "solidosRejBh02",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "45-BH-002",
+      "nomeRelatorio": "% Sólidos 45BH02",
+      "motivo": "Mesmo motivo de solidosRejBh01."
+    },
+    {
+      "chave": "solidosRejBh03",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "45-BH-003",
+      "nomeRelatorio": "% Sólidos 45BH03",
+      "motivo": "Mesmo motivo de solidosRejBh01."
+    },
+    {
+      "chave": "consumoFloculanteRej",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "45-DS-001",
+      "nomeRelatorio": "Consumo Floculante",
+      "motivo": "Nenhum tag com 'FLOC' no nome ou descritor foi encontrado em nenhum subsistema (incluindo 0009 e 0010, onde vivem os demais tags do espessador de rejeito). O sistema de dosagem de floculante (45-DS-001) nao aparece instrumentado no PI Data Archive sob a convencao PIL-BENF."
+    },
+    {
+      "chave": "htrLinha1",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "Linha 1 Rejeito",
+      "nomeRelatorio": "HTR Linha 1",
+      "motivo": "Existem tags de status ON/OFF das bombas da Linha 1 de rejeito (PIL-BENF-0010-BBPO008/009, 'STATUS DA 45BB008/009 - LINHA 1 REJEITO'), mas nenhum tag acumulador de horas trabalhadas (HTR). Calcular horas a partir do historico de status seria uma estimativa derivada, nao um tag real -- nao realizado para evitar fabricar dado."
+    },
+    {
+      "chave": "htrLinha2",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "Linha 2 Rejeito",
+      "nomeRelatorio": "HTR Linha 2",
+      "motivo": "Mesmo motivo de htrLinha1 (tags de status BBPO010/011 existem, mas sem acumulador de horas)."
+    },
+    {
+      "chave": "htrLinha3",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "Linha 3 Rejeito",
+      "nomeRelatorio": "HTR Linha 3",
+      "motivo": "Mesmo motivo de htrLinha1 (tags de status BBPO012/013 existem, mas sem acumulador de horas)."
+    },
+    {
+      "chave": "htrLinha4",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "Linha 4 Rejeito",
+      "nomeRelatorio": "HTR Linha 4",
+      "motivo": "Mesmo motivo de htrLinha1 (tags de status BBPO014/015 existem, mas sem acumulador de horas)."
+    },
+    {
+      "chave": "htrPastFill",
+      "setor": "ESPESSAMENTO_REJEITO",
+      "equipamento": "Planta Past Fill",
+      "nomeRelatorio": "HTR Past Fill",
+      "motivo": "Nenhum tag relacionado a Past Fill (envio de polpa para enchimento de realces) foi encontrado nos subsistemas varridos. O equipamento EPMI001 (subsistema a confirmar) pode estar relacionado a espessador de mina, mas nao foi possivel confirmar associacao com Past Fill nem encontrar tag de horas."
+    },
+    {
+      "chave": "densidadeUnderflowConc",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-001 / 002",
+      "nomeRelatorio": "Densidade Underflow Conc",
+      "motivo": "Nenhum tag '44EP*' encontrado em nenhum subsistema varrido (0001-0030). A area AF FILTRAGEM so contem elementos de bomba (44BB0xx) sem atributos configurados. Os espessadores de concentrado nao aparentam estar instrumentados no PI Data Archive sob a convencao PIL-BENF, ou usam uma nomenclatura de tag ainda nao identificada."
+    },
+    {
+      "chave": "solidosConc44ep001",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-001",
+      "nomeRelatorio": "% Sólidos 44EP001",
+      "motivo": "Mesmo motivo de densidadeUnderflowConc."
+    },
+    {
+      "chave": "solidosConc44ep002",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-002",
+      "nomeRelatorio": "% Sólidos 44EP002",
+      "motivo": "Mesmo motivo de densidadeUnderflowConc."
+    },
+    {
+      "chave": "nivelTanqueConc",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-TQ-001",
+      "nomeRelatorio": "Nível Tanque 44TQ001",
+      "motivo": "Nenhum tag '44TQ*' encontrado em nenhum subsistema varrido. Os tanques de polpa identificados no PI (familia TQPOxxx) pertencem todos ao circuito de flotacao/remoagem (prefixo 43), nao ao circuito de concentrado (prefixo 44)."
+    },
+    {
+      "chave": "consumoFloculanteConc",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-001 / 002",
+      "nomeRelatorio": "Consumo Floculante",
+      "motivo": "Nenhum tag com 'FLOC' no nome ou descritor encontrado em nenhum subsistema varrido."
+    },
+    {
+      "chave": "elevacaoRakeConcEp001",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-001",
+      "nomeRelatorio": "Elevação Rake 44EP001",
+      "motivo": "Mesmo motivo de densidadeUnderflowConc -- nenhum tag do espessador 44EP001 encontrado."
+    },
+    {
+      "chave": "elevacaoRakeConcEp002",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-002",
+      "nomeRelatorio": "Elevação Rake 44EP002",
+      "motivo": "Mesmo motivo de densidadeUnderflowConc -- nenhum tag do espessador 44EP002 encontrado."
+    },
+    {
+      "chave": "torqueConcEp001",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-001",
+      "nomeRelatorio": "Torque 44EP001",
+      "motivo": "Mesmo motivo de densidadeUnderflowConc -- nenhum tag do espessador 44EP001 encontrado."
+    },
+    {
+      "chave": "torqueConcEp002",
+      "setor": "ESPESSAMENTO_CONCENTRADO",
+      "equipamento": "44-EP-002",
+      "nomeRelatorio": "Torque 44EP002",
+      "motivo": "Mesmo motivo de densidadeUnderflowConc -- nenhum tag do espessador 44EP002 encontrado."
+    }
+  ]
+}

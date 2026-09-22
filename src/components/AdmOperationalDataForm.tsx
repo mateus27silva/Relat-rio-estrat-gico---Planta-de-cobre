@@ -37,7 +37,9 @@ import {
   HelpCircle,
   Trash2,
   RotateCcw,
-  Wrench
+  Wrench,
+  Wifi,
+  Loader2
 } from "lucide-react";
 import {
   DadosSetorBritagemRebritagem,
@@ -112,6 +114,10 @@ interface AdmOperationalDataFormProps {
   onChangeBR: (dados: DadosSetorBritagemRebritagem) => void;
   onChangeCE: (dados: DadosSetorConcentradorEta) => void;
   onChangeDiretrizes?: (diretrizes: DiretrizSupervisorTurno[]) => void;
+  /** Header "Basic ..." da mesma sessão de login do PI usada para entrar no relatório. */
+  piAuthHeader: string | null;
+  /** Chamado se uma busca no PI voltar 401 (sessão expirada) — o AdmModule desloga o supervisor. */
+  onPiSessionExpirada?: () => void;
 }
 
 export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
@@ -121,7 +127,9 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
   diretrizes = [],
   onChangeBR,
   onChangeCE,
-  onChangeDiretrizes
+  onChangeDiretrizes,
+  piAuthHeader,
+  onPiSessionExpirada
 }) => {
   const isSeco = circuitoTipo === "seco";
   const isUmido = circuitoTipo === "umido";
@@ -131,6 +139,95 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
   const [acoesSincronizadasToast, setAcoesSincronizadasToast] = useState<boolean>(false);
   const [toastMensagem, setToastMensagem] = useState<string>("");
+
+  // ── Integração PI Web API — usa a MESMA sessão de login que abriu o
+  // relatório (AdmModule). Nenhuma senha é gerenciada aqui.
+  const [piBuscando, setPiBuscando] = useState<string | null>(null);
+  const [piErro, setPiErro] = useState<string>("");
+  const [piProgresso, setPiProgresso] = useState<{ setor: string; atual: number; total: number } | null>(null);
+
+  // Segunda = 0 ... Domingo = 6, mesma convenção usada no restante do relatório
+  const hojeIdx = (new Date().getDay() + 6) % 7;
+
+  // Data local (YYYY-MM-DD) de um índice de dia da semana atual, relativa a hoje.
+  // Evita passar por toISOString() puro (que converte para UTC e pode virar o dia
+  // errado à noite, já que o Brasil está atrás do UTC).
+  function dataDoDiaDaSemana(diaIdx: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + (diaIdx - hojeIdx));
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+    const dia = String(d.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  // Fetch cru de um setor/data no PI, sem gerenciar o estado de loading/erro —
+  // usado internamente pela busca semanal para não piscar o spinner a cada dia.
+  async function fetchPISetorData(setor: string, date: string): Promise<Record<string, number> | null> {
+    if (!piAuthHeader) return null;
+    try {
+      const r = await fetch(`/api/pi/${setor}?date=${date}`, { headers: { Authorization: piAuthHeader } });
+      if (r.status === 401) {
+        setPiErro("Sessão do PI expirada. Faça login novamente.");
+        onPiSessionExpirada?.();
+        return null;
+      }
+      if (!r.ok) return null;
+      const json = await r.json();
+      return (json?.dados ?? {}) as Record<string, number>;
+    } catch {
+      return null;
+    }
+  }
+
+  // Busca a média diária no PI para cada dia já decorrido da semana atual
+  // (Segunda até hoje) e devolve um mapa diaIdx -> valores. Dias futuros da
+  // semana não têm dado real no PI ainda, então ficam de fora do mapa.
+  async function buscarValoresPISemana(setor: string): Promise<Record<number, Record<string, number>>> {
+    if (!piAuthHeader) {
+      setPiErro("Sessão do PI não encontrada. Faça login novamente.");
+      return {};
+    }
+    setPiErro("");
+    setPiBuscando(setor);
+    const totalDias = hojeIdx + 1;
+    setPiProgresso({ setor, atual: 0, total: totalDias });
+    const porDia: Record<number, Record<string, number>> = {};
+    try {
+      for (let dia = 0; dia <= hojeIdx; dia++) {
+        const dados = await fetchPISetorData(setor, dataDoDiaDaSemana(dia));
+        if (dados && Object.keys(dados).length > 0) porDia[dia] = dados;
+        setPiProgresso({ setor, atual: dia + 1, total: totalDias });
+      }
+      if (Object.keys(porDia).length === 0) {
+        setPiErro("Não foi possível buscar dados do PI para este setor.");
+      }
+    } finally {
+      setPiBuscando(null);
+      setPiProgresso(null);
+    }
+    return porDia;
+  }
+
+  // Barra fina de progresso (%) exibida abaixo do botão "Buscar do PI" enquanto
+  // a busca semanal (dia a dia) está em andamento para aquele setor.
+  function progressoBarraPI(setor: string) {
+    if (piBuscando !== setor || !piProgresso || piProgresso.setor !== setor) return null;
+    const pct = Math.round((piProgresso.atual / piProgresso.total) * 100);
+    return (
+      <div className="w-full mt-1">
+        <div className="h-1.5 w-full bg-indigo-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <span className="block text-center text-[10px] font-bold text-indigo-600 mt-0.5">
+          {pct}%
+        </span>
+      </div>
+    );
+  }
 
   // Estado para Modal de Colar Coluna do Excel (Britagem Primária)
   const [modalColarColunaAberto, setModalColarColunaAberto] = useState<boolean>(false);
@@ -2311,8 +2408,106 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
     onChangeCE(next);
   };
 
+  // ── Handlers "Buscar do PI" — preenchem cada dia já decorrido da semana atual
+  // (Segunda até hoje) com a média diária buscada no PI (só existe tag real para
+  // quem foi mapeado; ver pi-integration/). Dias futuros da semana ficam manuais.
+  async function handleBuscarPiBritagem() {
+    const porDia = await buscarValoresPISemana("britagem");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiario.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextBR = { ...dadosBR, historicoDiarioBritagem: novoHist as any };
+    sincronizarLeiturasAtuais(nextBR);
+    onChangeBR(nextBR);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana na Britagem!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
+  async function handleBuscarPiRebritagem() {
+    const porDia = await buscarValoresPISemana("rebritagem");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiarioRebritagem.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextBR = { ...dadosBR, historicoDiarioRebritagem: novoHist as any };
+    sincronizarLeiturasAtuaisRebritagem(nextBR);
+    onChangeBR(nextBR);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana na Rebritagem!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
+  async function handleBuscarPiMoagem() {
+    const porDia = await buscarValoresPISemana("moagem");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiarioMoagem.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextCE = { ...dadosCE, historicoDiarioMoagem: novoHist as any };
+    sincronizarLeiturasAtuaisMoagem(nextCE);
+    onChangeCE(nextCE);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana na Moagem!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
+  async function handleBuscarPiRemoagem() {
+    const porDia = await buscarValoresPISemana("remoagem");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiarioRemoagem.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextCE = { ...dadosCE, historicoDiarioRemoagem: novoHist as any };
+    onChangeCE(nextCE);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana na Remoagem!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
+  async function handleBuscarPiFlotacao() {
+    const porDia = await buscarValoresPISemana("flotacao");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiarioFlotacao.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextCE = { ...dadosCE, historicoDiarioFlotacao: novoHist as any };
+    onChangeCE(nextCE);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana na Flotação!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
+  async function handleBuscarPiEspessamentoRejeito() {
+    const porDia = await buscarValoresPISemana("espessamentoRejeito");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiarioEspessamentoRejeito.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextCE = { ...dadosCE, historicoDiarioEspessamentoRejeito: novoHist as any };
+    onChangeCE(nextCE);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana no Espessamento de Rejeito!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
+  async function handleBuscarPiFiltragemConcentrado() {
+    const porDia = await buscarValoresPISemana("filtragemConcentrado");
+    const diasComDado = Object.keys(porDia).length;
+    if (diasComDado === 0) return;
+    const novoHist = historicoDiarioFiltragemConcentrado.map((item, i) => (porDia[i] ? { ...item, ...porDia[i] } : item));
+    const nextCE = { ...dadosCE, historicoDiarioFiltragemConcentrado: novoHist as any };
+    onChangeCE(nextCE);
+    setToastMensagem(`✅ Médias diárias do PI aplicadas em ${diasComDado} dia(s) da semana na Filtragem!`);
+    setAcoesSincronizadasToast(true);
+    setTimeout(() => setAcoesSincronizadasToast(false), 4000);
+  }
+
   return (
     <div className="space-y-5">
+      {/* Erro de busca no PI (login já foi feito no AdmModule — aqui só avisa se algo falhar) */}
+      {piErro && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center gap-2">
+          <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+          <span className="text-xs font-semibold text-red-700">{piErro}</span>
+        </div>
+      )}
+
       {/* ÁREA 1: BRITAGEM + REBRITAGEM (EXCLUSIVO CIRCUITO SECO) */}
       {(isSeco || (!isSeco && !isUmido && activeArea === "britagem_rebritagem")) && (
         <div className="space-y-5">
@@ -2345,6 +2540,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
                 {/* Ações Rápidas de Preenchimento e Excel */}
                 <div className="flex items-center flex-wrap gap-2">
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={handleBuscarPiBritagem}
+                      disabled={!piAuthHeader || piBuscando === "britagem"}
+                      className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                    >
+                      {piBuscando === "britagem" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                      <span>Buscar do PI</span>
+                    </button>
+                    {progressoBarraPI("britagem")}
+                  </div>
+
                   <button
                     type="button"
                     onClick={handleLimparTabela}
@@ -2654,6 +2863,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={handleBuscarPiRebritagem}
+                      disabled={!piAuthHeader || piBuscando === "rebritagem"}
+                      className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                    >
+                      {piBuscando === "rebritagem" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                      <span>Buscar do PI</span>
+                    </button>
+                    {progressoBarraPI("rebritagem")}
+                  </div>
+
                   <button
                     type="button"
                     onClick={handleLimparTabelaRebritagem}
@@ -2990,6 +3213,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
 
               <div className="flex items-center gap-2">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={handleBuscarPiMoagem}
+                    disabled={!piAuthHeader || piBuscando === "moagem"}
+                    className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                  >
+                    {piBuscando === "moagem" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                    <span>Buscar do PI</span>
+                  </button>
+                  {progressoBarraPI("moagem")}
+                </div>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaMoagem}
@@ -3289,6 +3526,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={handleBuscarPiRemoagem}
+                    disabled={!piAuthHeader || piBuscando === "remoagem"}
+                    className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                  >
+                    {piBuscando === "remoagem" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                    <span>Buscar do PI</span>
+                  </button>
+                  {progressoBarraPI("remoagem")}
+                </div>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaRemoagem}
@@ -3586,6 +3837,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={handleBuscarPiFlotacao}
+                    disabled={!piAuthHeader || piBuscando === "flotacao"}
+                    className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                  >
+                    {piBuscando === "flotacao" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                    <span>Buscar do PI</span>
+                  </button>
+                  {progressoBarraPI("flotacao")}
+                </div>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaFlotacao}
@@ -3891,6 +4156,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
               {/* Botões de Ação Rápida */}
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={handleBuscarPiEspessamentoRejeito}
+                    disabled={!piAuthHeader || piBuscando === "espessamentoRejeito"}
+                    className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                  >
+                    {piBuscando === "espessamentoRejeito" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                    <span>Buscar do PI</span>
+                  </button>
+                  {progressoBarraPI("espessamentoRejeito")}
+                </div>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaEspessamentoRejeito}
@@ -4548,6 +4827,20 @@ export const AdmOperationalDataForm: React.FC<AdmOperationalDataFormProps> = ({
 
               {/* Botões de Ação Rápida */}
               <div className="flex items-center gap-2 self-end sm:self-auto flex-wrap">
+                <div className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={handleBuscarPiFiltragemConcentrado}
+                    disabled={!piAuthHeader || piBuscando === "filtragemConcentrado"}
+                    className="px-3 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition flex items-center gap-1.5 shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={piAuthHeader ? "Buscar média do dia no PI" : "Conecte-se ao PI acima para usar"}
+                  >
+                    {piBuscando === "filtragemConcentrado" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wifi className="w-3.5 h-3.5 text-indigo-600" />}
+                    <span>Buscar do PI</span>
+                  </button>
+                  {progressoBarraPI("filtragemConcentrado")}
+                </div>
+
                 <button
                   type="button"
                   onClick={handleLimparTabelaFiltragemConcentrado}

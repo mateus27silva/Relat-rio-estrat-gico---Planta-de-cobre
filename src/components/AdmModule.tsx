@@ -43,7 +43,6 @@ import {
   calcularSemanaOperacional,
   gerarWppAdm
 } from "../typesAdm";
-import { SENHA_SUPERVISOR } from "../types";
 import { AdmOperationalDataForm } from "./AdmOperationalDataForm";
 import { AdmStrategicHorizons } from "./AdmStrategicHorizons";
 import { AdmDirectivesManager } from "./AdmDirectivesManager";
@@ -148,20 +147,18 @@ function mesclarComExemplosCompletos(parsed: any, defaultInitial: RelatorioAdmPa
 export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = true, toggleModoWeb }) => {
   const isSeco = circuitoTipo === "seco";
   const storageKey = isSeco ? "relatorio_adm_seco_draft_v2" : "relatorio_adm_umido_draft_v2";
-  const authSessionKey = isSeco ? "adm_seco_auth_session" : "adm_umido_auth_session";
   const defaultInitial = isSeco ? RELATORIO_ADM_SECO_INICIAL : RELATORIO_ADM_UMIDO_INICIAL;
 
-  const [autenticado, setAutenticado] = useState<boolean>(() => {
-    try {
-      return sessionStorage.getItem(authSessionKey) === "true";
-    } catch {
-      return false;
-    }
-  });
-
-  const [senha, setSenha] = useState<string>("");
+  // O login de entrada É o login do PI — mesma credencial abre o relatório e
+  // autoriza a busca de dados. Fica só em memória (nunca em sessionStorage/
+  // localStorage) porque é uma senha real do PI, não uma senha de app.
+  const [piUser, setPiUser] = useState<string>("");
+  const [piPass, setPiPass] = useState<string>("");
+  const [piAuthHeader, setPiAuthHeader] = useState<string | null>(null);
+  const [piConectando, setPiConectando] = useState<boolean>(false);
+  const [piErro, setPiErro] = useState<string>("");
   const [showSenha, setShowSenha] = useState<boolean>(false);
-  const [senhaErro, setSenhaErro] = useState<boolean>(false);
+  const autenticado = piAuthHeader !== null;
 
   const [activeTab, setActiveTab] = useState<"operacional" | "horizontes" | "diretrizes" | "visualizacao">("operacional");
   const [baixandoPdf, setBaixandoPdf] = useState<boolean>(false);
@@ -205,15 +202,8 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
     } catch (e) {
       setPayload(defaultInitial);
     }
-
-    try {
-      setAutenticado(sessionStorage.getItem(authSessionKey) === "true");
-    } catch {
-      setAutenticado(false);
-    }
-    setSenha("");
-    setSenhaErro(false);
-  }, [circuitoTipo, storageKey, authSessionKey]);
+    // Trocar de circuito não desconecta do PI — é a mesma sessão de login.
+  }, [circuitoTipo, storageKey]);
 
   // Auto-save no LocalStorage
   useEffect(() => {
@@ -228,32 +218,37 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
     }
   }, [payload, storageKey, circuitoTipo, autenticado]);
 
-  function entrar() {
-    if (senha === SENHA_SUPERVISOR) {
-      setSenhaErro(false);
-      setAutenticado(true);
-      try {
-        sessionStorage.setItem(authSessionKey, "true");
-      } catch (e) {
-        console.error(e);
+  // Login = autenticação real no PI Web API. A mesma credencial que abre o
+  // relatório é usada depois pelos botões "Buscar do PI" — não existe mais
+  // uma senha de app separada da senha do PI.
+  async function entrar() {
+    if (!piUser.trim() || !piPass) {
+      setPiErro("Informe seu usuário e senha do PI.");
+      return;
+    }
+    setPiConectando(true);
+    setPiErro("");
+    const header = "Basic " + btoa(`${piUser}:${piPass}`);
+    try {
+      const r = await fetch("/api/pi/check-auth", { headers: { Authorization: header } });
+      if (r.ok) {
+        setPiAuthHeader(header);
+        setPiPass("");
+      } else {
+        setPiErro("Usuário ou senha do PI inválidos.");
       }
-    } else {
-      setSenhaErro(true);
-      setSenha("");
+    } catch {
+      setPiErro("Não foi possível conectar ao PI. Verifique a rede.");
+    } finally {
+      setPiConectando(false);
     }
   }
 
   function sair() {
-    setAutenticado(false);
-    setSenha("");
-    setSenhaErro(false);
-    try {
-      sessionStorage.removeItem(authSessionKey);
-      sessionStorage.removeItem("adm_seco_auth_session");
-      sessionStorage.removeItem("adm_umido_auth_session");
-    } catch (e) {
-      console.error("Erro ao encerrar sessão:", e);
-    }
+    setPiAuthHeader(null);
+    setPiUser("");
+    setPiPass("");
+    setPiErro("");
   }
 
   const handleUpdateHorizonte = (tipo: HorizontePlanejamento, data: EstrategiaPorHorizonte) => {
@@ -422,28 +417,44 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                   </div>
                 </div>
 
-                {/* Password / Login Card */}
+                {/* Login = autenticação real no PI Web API (mesma credencial abre o relatório e busca dados) */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
                     <Lock className="h-4 w-4 text-teal-600" />
                     <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                      Login Supervisor ADM ({isSeco ? "Circuito Seco" : "Circuito Úmido"})
+                      Login PI ({isSeco ? "Circuito Seco" : "Circuito Úmido"})
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                  <p className="text-xs text-slate-600 mb-3">
+                    Você está acessando: <strong className="text-slate-800">Relatório Estratégico — {isSeco ? "Circuito Seco (Britagem, Rebritagem, Pátios de ROM)" : "Circuito Úmido (Moagem, Flotação, Espessadores, Filtragem & ETA)"}</strong>
+                  </p>
+
+                  <div className="flex gap-2 flex-wrap">
+                    <input
+                      type="text"
+                      placeholder="Usuário PI..."
+                      value={piUser}
+                      onChange={e => {
+                        setPiUser(e.target.value);
+                        setPiErro("");
+                      }}
+                      onKeyDown={e => e.key === "Enter" && entrar()}
+                      className="flex-1 min-w-[140px] bg-white border border-slate-250 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition font-medium"
+                    />
+
+                    <div className="relative flex-1 min-w-[140px]">
                       <input
                         type={showSenha ? "text" : "password"}
-                        placeholder="Senha do Supervisor..."
-                        value={senha}
+                        placeholder="Senha do PI..."
+                        value={piPass}
                         onChange={e => {
-                          setSenha(e.target.value);
-                          setSenhaErro(false);
+                          setPiPass(e.target.value);
+                          setPiErro("");
                         }}
                         onKeyDown={e => e.key === "Enter" && entrar()}
                         className={`w-full bg-white border focus:ring-1 focus:ring-emerald-500 rounded-xl pl-3 pr-10 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition font-medium ${
-                          senhaErro ? "border-red-500" : "border-slate-250 focus:border-emerald-500"
+                          piErro ? "border-red-500" : "border-slate-250 focus:border-emerald-500"
                         }`}
                       />
                       <button
@@ -458,21 +469,25 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                     <button
                       type="button"
                       onClick={entrar}
-                      disabled={!payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !senha}
+                      disabled={!payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !piUser.trim() || !piPass || piConectando}
                       className={`px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition flex items-center gap-1.5 ${
-                        !payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !senha
+                        !payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !piUser.trim() || !piPass || piConectando
                           ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                           : "bg-[#007369] hover:bg-[#005F56] text-white shadow-md cursor-pointer"
                       }`}
                     >
-                      <span>Acessar</span>
-                      <ArrowRight className="h-4 w-4" />
+                      {piConectando ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>Acessar</span>}
+                      {!piConectando && <ArrowRight className="h-4 w-4" />}
                     </button>
                   </div>
 
-                  {senhaErro && (
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    Use seu login pessoal do PI — ele autentica o acesso ao relatório e as buscas de dados. A senha nunca é salva.
+                  </p>
+
+                  {piErro && (
                     <p className="text-xs text-red-500 mt-2.5 flex items-center gap-1.5 font-medium">
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Senha operativa de supervisor incorreta ou inválida.
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {piErro}
                     </p>
                   )}
                 </div>
@@ -526,6 +541,11 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[11px] text-teal-700 font-semibold bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200 flex items-center gap-1">
+                    <Lock className="w-3.5 h-3.5" />
+                    Conectado ao PI: {piUser}
+                  </span>
+
                   {savedToast && (
                     <span className="text-[11px] text-teal-700 font-semibold bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200 flex items-center gap-1 animate-in fade-in">
                       <CheckCircle2 className="w-3.5 h-3.5" />
@@ -674,6 +694,8 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                 onChangeBR={dados => setPayload(prev => ({ ...prev, dadosBritagemRebritagem: dados }))}
                 onChangeCE={dados => setPayload(prev => ({ ...prev, dadosConcentradorEta: dados }))}
                 onChangeDiretrizes={dirs => setPayload(prev => ({ ...prev, diretrizesTurno: dirs }))}
+                piAuthHeader={piAuthHeader}
+                onPiSessionExpirada={sair}
               />
             )}
 
