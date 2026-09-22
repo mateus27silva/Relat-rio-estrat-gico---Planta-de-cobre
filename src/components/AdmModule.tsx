@@ -158,7 +158,11 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
   const [piConectando, setPiConectando] = useState<boolean>(false);
   const [piErro, setPiErro] = useState<string>("");
   const [showSenha, setShowSenha] = useState<boolean>(false);
-  const autenticado = piAuthHeader !== null;
+  // Acesso sem PI: usado quando o backend do PI não está alcançável (ex: versão
+  // publicada na Vercel, fora da rede interna da Ero) — libera o relatório em
+  // modo manual, sem os botões "Buscar do PI" (que continuam exigindo piAuthHeader).
+  const [acessoManual, setAcessoManual] = useState<boolean>(false);
+  const autenticado = piAuthHeader !== null || acessoManual;
 
   const [activeTab, setActiveTab] = useState<"operacional" | "horizontes" | "diretrizes" | "visualizacao">("operacional");
   const [baixandoPdf, setBaixandoPdf] = useState<boolean>(false);
@@ -255,6 +259,7 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
     setPiUser("");
     setPiPass("");
     setPiErro("");
+    setAcessoManual(false);
   }
 
   const handleUpdateHorizonte = (tipo: HorizontePlanejamento, data: EstrategiaPorHorizonte) => {
@@ -496,6 +501,26 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                       <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {piErro}
                     </p>
                   )}
+
+                  <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+                    <p className="text-[11px] text-slate-500 max-w-[380px]">
+                      Sem acesso à rede interna da Ero agora (ex: acessando fora do escritório)? Você pode preencher o relatório manualmente, sem a busca automática do PI.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim()) {
+                          setPiErro("Preencha Data de Emissão e Supervisor ADM antes de continuar sem o PI.");
+                          return;
+                        }
+                        setPiErro("");
+                        setAcessoManual(true);
+                      }}
+                      className="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition cursor-pointer whitespace-nowrap shrink-0"
+                    >
+                      Continuar sem o PI →
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -524,6 +549,16 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
           transition={{ duration: 0.2 }}
           className="space-y-6"
         >
+            {/* Aviso de modo manual (sem sessão real do PI) */}
+            {acessoManual && !piAuthHeader && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                <span className="text-xs font-semibold text-amber-800">
+                  Modo manual: sem sessão do PI ativa. Os botões "Buscar do PI" ficam desabilitados — preencha os dados manualmente ou colando do Excel.
+                </span>
+              </div>
+            )}
+
             {/* Header Corporativo do Módulo Estratégico - Ero Brasil */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs border-l-4 border-l-[#007369]">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
