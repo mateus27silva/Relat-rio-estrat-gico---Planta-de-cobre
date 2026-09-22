@@ -54,7 +54,8 @@ import {
   fmtData,
   gerarWpp,
   OcorrenciaPerdaSeguranca,
-  EXEMPLO_OCORRENCIA
+  EXEMPLO_OCORRENCIA,
+  SENHA_SUPERVISOR
 } from "./types";
 import { gerarRelatorioPDF } from "./utils/pdfGenerator";
 import { AdmModule } from "./components/AdmModule";
@@ -88,15 +89,9 @@ export default function App() {
   const [turma, setTurma] = useState<string | null>(null);
   const [data, setData] = useState<string>(() => new Date().toISOString().split("T")[0]);
   const [sup, setSup] = useState<string>("");
+  const [senha, setSenha] = useState<string>("");
+  const [senhaErro, setSenhaErro] = useState<boolean>(false);
   const [showSenha, setShowSenha] = useState<boolean>(false);
-
-  // Login = autenticação real no PI Web API. A mesma credencial que abre o
-  // relatório é a única usada em todo o app — fica só em memória.
-  const [piUser, setPiUser] = useState<string>("");
-  const [piPass, setPiPass] = useState<string>("");
-  const [piAuthHeader, setPiAuthHeader] = useState<string | null>(null);
-  const [piConectando, setPiConectando] = useState<boolean>(false);
-  const [piErro, setPiErro] = useState<string>("");
   const [idx, setIdx] = useState<number>(0);
   const [temaDds, setTemaDds] = useState<string>("");
   const [dados, setDados] = useState<Record<string, Record<string, any>>>({});
@@ -416,27 +411,13 @@ export default function App() {
     }
   };
 
-  async function entrar() {
-    if (!piUser.trim() || !piPass) {
-      setPiErro("Informe seu usuário e senha do PI.");
-      return;
-    }
-    setPiConectando(true);
-    setPiErro("");
-    const header = "Basic " + btoa(`${piUser}:${piPass}`);
-    try {
-      const r = await fetch("/api/pi/check-auth", { headers: { Authorization: header } });
-      if (r.ok) {
-        setPiAuthHeader(header);
-        setPiPass("");
-        setTela("form");
-      } else {
-        setPiErro("Usuário ou senha do PI inválidos.");
-      }
-    } catch {
-      setPiErro("Não foi possível conectar ao PI. Verifique a rede.");
-    } finally {
-      setPiConectando(false);
+  function entrar() {
+    if (senha === SENHA_SUPERVISOR) {
+      setSenhaErro(false);
+      setTela("form");
+    } else {
+      setSenhaErro(true);
+      setSenha("");
     }
   }
 
@@ -454,10 +435,8 @@ export default function App() {
       setObs("");
       setOcorrencias([]);
       setWpp("");
-      setPiAuthHeader(null);
-      setPiUser("");
-      setPiPass("");
-      setPiErro("");
+      setSenha("");
+      setSenhaErro(false);
     }
   }
 
@@ -896,47 +875,28 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Login PI — a mesma credencial abre o relatório e autoriza a busca de dados */}
+                  {/* Password Card */}
                   <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                     <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
                       <Lock className="h-4 w-4 text-teal-600" />
                       <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                        Login PI
+                        Login Supervisor
                       </p>
                     </div>
 
-                    <p className="text-xs text-slate-600 mb-3">
-                      Você está acessando: <strong className="text-slate-800">Relatório de Turno — Planta de Beneficiamento de Cobre</strong>
-                      {turno && turma ? (
-                        <> ({turno === "diurno" ? "Diurno 07h–19h" : "Noturno 19h–07h"}, Turma {turma}{data ? `, ${fmtData(data)}` : ""})</>
-                      ) : null}
-                    </p>
-
-                    <div className="flex gap-2 flex-wrap">
-                      <input
-                        type="text"
-                        placeholder="Usuário PI..."
-                        value={piUser}
-                        onChange={e => {
-                          setPiUser(e.target.value);
-                          setPiErro("");
-                        }}
-                        onKeyDown={e => e.key === "Enter" && entrar()}
-                        className="flex-1 min-w-[120px] bg-white border border-slate-250 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition"
-                      />
-
-                      <div className="relative flex-1 min-w-[120px]">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
                         <input
                           type={showSenha ? "text" : "password"}
-                          placeholder="Senha do PI..."
-                          value={piPass}
+                          placeholder="Senha..."
+                          value={senha}
                           onChange={e => {
-                            setPiPass(e.target.value);
-                            setPiErro("");
+                            setSenha(e.target.value);
+                            setSenhaErro(false);
                           }}
                           onKeyDown={e => e.key === "Enter" && entrar()}
                           className={`w-full bg-white border focus:ring-1 focus:ring-emerald-500 rounded-xl pl-3 pr-10 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition ${
-                            piErro ? "border-red-500" : "border-slate-250 focus:border-emerald-500"
+                            senhaErro ? "border-red-500" : "border-slate-250 focus:border-emerald-500"
                           }`}
                         />
                         <button
@@ -951,24 +911,20 @@ export default function App() {
                       <button
                         type="button"
                         onClick={entrar}
-                        disabled={!turno || !turma || !sup.trim() || !piUser.trim() || !piPass || piConectando}
+                        disabled={!turno || !turma || !sup.trim() || !senha}
                         className={`px-5 py-3 rounded-xl font-bold text-sm tracking-wide transition flex items-center gap-1.5 ${
-                          !turno || !turma || !sup.trim() || !piUser.trim() || !piPass || piConectando
+                          !turno || !turma || !sup.trim() || !senha
                             ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                             : "bg-teal-600 hover:bg-teal-500 text-white shadow-md cursor-pointer"
                         }`}
                       >
-                        {piConectando ? <Loader2 className="h-4 w-4 animate-spin" /> : "Entrar"}
+                        Entrar
                       </button>
                     </div>
 
-                    <p className="text-[11px] text-slate-400 mt-2">
-                      Use seu login pessoal do PI — ele autentica o acesso ao relatório. A senha nunca é salva.
-                    </p>
-
-                    {piErro && (
+                    {senhaErro && (
                       <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" /> {piErro}
+                        <AlertCircle className="h-3 w-3" /> Senha operativa incorreta ou inválida.
                       </p>
                     )}
                   </div>
