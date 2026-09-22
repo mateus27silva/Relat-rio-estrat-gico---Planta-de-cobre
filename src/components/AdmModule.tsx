@@ -43,6 +43,7 @@ import {
   calcularSemanaOperacional,
   gerarWppAdm
 } from "../typesAdm";
+import { SENHA_SUPERVISOR } from "../types";
 import { AdmOperationalDataForm } from "./AdmOperationalDataForm";
 import { AdmStrategicHorizons } from "./AdmStrategicHorizons";
 import { AdmDirectivesManager } from "./AdmDirectivesManager";
@@ -147,22 +148,30 @@ function mesclarComExemplosCompletos(parsed: any, defaultInitial: RelatorioAdmPa
 export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = true, toggleModoWeb }) => {
   const isSeco = circuitoTipo === "seco";
   const storageKey = isSeco ? "relatorio_adm_seco_draft_v2" : "relatorio_adm_umido_draft_v2";
+  const authSessionKey = isSeco ? "adm_seco_auth_session" : "adm_umido_auth_session";
   const defaultInitial = isSeco ? RELATORIO_ADM_SECO_INICIAL : RELATORIO_ADM_UMIDO_INICIAL;
 
-  // O login de entrada É o login do PI — mesma credencial abre o relatório e
-  // autoriza a busca de dados. Fica só em memória (nunca em sessionStorage/
-  // localStorage) porque é uma senha real do PI, não uma senha de app.
+  // Acesso ao relatório = senha fixa de supervisor (como era antes da integração
+  // com o PI). Não depende de rede nem do PI — funciona local ou publicado.
+  const [autenticado, setAutenticado] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem(authSessionKey) === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [senha, setSenha] = useState<string>("");
+  const [showSenha, setShowSenha] = useState<boolean>(false);
+  const [senhaErro, setSenhaErro] = useState<boolean>(false);
+
+  // Conexão com o PI Web API: agora é OPCIONAL, dentro do relatório (não bloqueia
+  // mais o acesso). Só quem está na rede interna da Ero consegue conectar; sem
+  // isso, os botões "Buscar do PI" ficam desabilitados e o resto funciona normal.
   const [piUser, setPiUser] = useState<string>("");
   const [piPass, setPiPass] = useState<string>("");
   const [piAuthHeader, setPiAuthHeader] = useState<string | null>(null);
   const [piConectando, setPiConectando] = useState<boolean>(false);
   const [piErro, setPiErro] = useState<string>("");
-  const [showSenha, setShowSenha] = useState<boolean>(false);
-  // Acesso sem PI: usado quando o backend do PI não está alcançável (ex: versão
-  // publicada na Vercel, fora da rede interna da Ero) — libera o relatório em
-  // modo manual, sem os botões "Buscar do PI" (que continuam exigindo piAuthHeader).
-  const [acessoManual, setAcessoManual] = useState<boolean>(false);
-  const autenticado = piAuthHeader !== null || acessoManual;
 
   const [activeTab, setActiveTab] = useState<"operacional" | "horizontes" | "diretrizes" | "visualizacao">("operacional");
   const [baixandoPdf, setBaixandoPdf] = useState<boolean>(false);
@@ -206,8 +215,16 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
     } catch (e) {
       setPayload(defaultInitial);
     }
-    // Trocar de circuito não desconecta do PI — é a mesma sessão de login.
-  }, [circuitoTipo, storageKey]);
+
+    try {
+      setAutenticado(sessionStorage.getItem(authSessionKey) === "true");
+    } catch {
+      setAutenticado(false);
+    }
+    setSenha("");
+    setSenhaErro(false);
+    // Trocar de circuito não desconecta do PI — é a mesma sessão de conexão opcional.
+  }, [circuitoTipo, storageKey, authSessionKey]);
 
   // Auto-save no LocalStorage
   useEffect(() => {
@@ -222,10 +239,25 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
     }
   }, [payload, storageKey, circuitoTipo, autenticado]);
 
-  // Login = autenticação real no PI Web API. A mesma credencial que abre o
-  // relatório é usada depois pelos botões "Buscar do PI" — não existe mais
-  // uma senha de app separada da senha do PI.
-  async function entrar() {
+  // Acesso ao relatório: senha fixa de supervisor, sem depender de rede/PI.
+  function entrar() {
+    if (senha === SENHA_SUPERVISOR) {
+      setSenhaErro(false);
+      setAutenticado(true);
+      try {
+        sessionStorage.setItem(authSessionKey, "true");
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      setSenhaErro(true);
+      setSenha("");
+    }
+  }
+
+  // Conexão opcional com o PI Web API — não gera acesso ao relatório, só
+  // habilita os botões "Buscar do PI" para quem está na rede interna da Ero.
+  async function entrarPi() {
     if (!piUser.trim() || !piPass) {
       setPiErro("Informe seu usuário e senha do PI.");
       return;
@@ -255,11 +287,22 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
   }
 
   function sair() {
+    setAutenticado(false);
+    setSenha("");
+    setSenhaErro(false);
+    try {
+      sessionStorage.removeItem(authSessionKey);
+    } catch (e) {
+      console.error("Erro ao encerrar sessão:", e);
+    }
+    desconectarPi();
+  }
+
+  function desconectarPi() {
     setPiAuthHeader(null);
     setPiUser("");
     setPiPass("");
     setPiErro("");
-    setAcessoManual(false);
   }
 
   const handleUpdateHorizonte = (tipo: HorizontePlanejamento, data: EstrategiaPorHorizonte) => {
@@ -428,44 +471,28 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                   </div>
                 </div>
 
-                {/* Login = autenticação real no PI Web API (mesma credencial abre o relatório e busca dados) */}
+                {/* Password / Login Card */}
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <div className="flex items-center gap-2 border-b border-slate-200 pb-2 mb-3">
                     <Lock className="h-4 w-4 text-teal-600" />
                     <p className="text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                      Login PI ({isSeco ? "Circuito Seco" : "Circuito Úmido"})
+                      Login Supervisor ADM ({isSeco ? "Circuito Seco" : "Circuito Úmido"})
                     </p>
                   </div>
 
-                  <p className="text-xs text-slate-600 mb-3">
-                    Você está acessando: <strong className="text-slate-800">Relatório Estratégico — {isSeco ? "Circuito Seco (Britagem, Rebritagem, Pátios de ROM)" : "Circuito Úmido (Moagem, Flotação, Espessadores, Filtragem & ETA)"}</strong>
-                  </p>
-
-                  <div className="flex gap-2 flex-wrap">
-                    <input
-                      type="text"
-                      placeholder="Usuário PI..."
-                      value={piUser}
-                      onChange={e => {
-                        setPiUser(e.target.value);
-                        setPiErro("");
-                      }}
-                      onKeyDown={e => e.key === "Enter" && entrar()}
-                      className="flex-1 min-w-[140px] bg-white border border-slate-250 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl px-3 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition font-medium"
-                    />
-
-                    <div className="relative flex-1 min-w-[140px]">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
                       <input
                         type={showSenha ? "text" : "password"}
-                        placeholder="Senha do PI..."
-                        value={piPass}
+                        placeholder="Senha do Supervisor..."
+                        value={senha}
                         onChange={e => {
-                          setPiPass(e.target.value);
-                          setPiErro("");
+                          setSenha(e.target.value);
+                          setSenhaErro(false);
                         }}
                         onKeyDown={e => e.key === "Enter" && entrar()}
                         className={`w-full bg-white border focus:ring-1 focus:ring-emerald-500 rounded-xl pl-3 pr-10 py-3 text-sm text-slate-800 placeholder-slate-400 outline-none transition font-medium ${
-                          piErro ? "border-red-500" : "border-slate-250 focus:border-emerald-500"
+                          senhaErro ? "border-red-500" : "border-slate-250 focus:border-emerald-500"
                         }`}
                       />
                       <button
@@ -480,47 +507,23 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                     <button
                       type="button"
                       onClick={entrar}
-                      disabled={!payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !piUser.trim() || !piPass || piConectando}
+                      disabled={!payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !senha}
                       className={`px-6 py-3 rounded-xl font-bold text-sm tracking-wide transition flex items-center gap-1.5 ${
-                        !payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !piUser.trim() || !piPass || piConectando
+                        !payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim() || !senha
                           ? "bg-slate-200 text-slate-400 cursor-not-allowed"
                           : "bg-[#007369] hover:bg-[#005F56] text-white shadow-md cursor-pointer"
                       }`}
                     >
-                      {piConectando ? <Loader2 className="h-4 w-4 animate-spin" /> : <span>Acessar</span>}
-                      {!piConectando && <ArrowRight className="h-4 w-4" />}
+                      <span>Acessar</span>
+                      <ArrowRight className="h-4 w-4" />
                     </button>
                   </div>
 
-                  <p className="text-[11px] text-slate-400 mt-2">
-                    Use seu login pessoal do PI — ele autentica o acesso ao relatório e as buscas de dados. A senha nunca é salva.
-                  </p>
-
-                  {piErro && (
+                  {senhaErro && (
                     <p className="text-xs text-red-500 mt-2.5 flex items-center gap-1.5 font-medium">
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {piErro}
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" /> Senha operativa de supervisor incorreta ou inválida.
                     </p>
                   )}
-
-                  <div className="mt-3 pt-3 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
-                    <p className="text-[11px] text-slate-500 max-w-[380px]">
-                      Sem acesso à rede interna da Ero agora (ex: acessando fora do escritório)? Você pode preencher o relatório manualmente, sem a busca automática do PI.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!payload.dataEmissao || !payload.supervisorAdmResponsavel?.trim()) {
-                          setPiErro("Preencha Data de Emissão e Supervisor ADM antes de continuar sem o PI.");
-                          return;
-                        }
-                        setPiErro("");
-                        setAcessoManual(true);
-                      }}
-                      className="px-3 py-2 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition cursor-pointer whitespace-nowrap shrink-0"
-                    >
-                      Continuar sem o PI →
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -549,15 +552,87 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
           transition={{ duration: 0.2 }}
           className="space-y-6"
         >
-            {/* Aviso de modo manual (sem sessão real do PI) */}
-            {acessoManual && !piAuthHeader && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                <span className="text-xs font-semibold text-amber-800">
-                  Modo manual: sem sessão do PI ativa. Os botões "Buscar do PI" ficam desabilitados — preencha os dados manualmente ou colando do Excel.
-                </span>
+            {/* Conexão opcional com o PI Web API — não bloqueia o acesso ao relatório;
+                só habilita os botões "Buscar do PI" para quem está na rede interna da Ero. */}
+            <div className="bg-white border border-slate-200 rounded-xl p-3.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Lock className={`w-4 h-4 shrink-0 ${piAuthHeader ? "text-teal-600" : "text-slate-400"}`} />
+                  {piAuthHeader ? (
+                    <span className="text-xs font-bold text-slate-800 truncate">
+                      Conectado ao PI: <span className="text-teal-700">{piUser}</span>
+                    </span>
+                  ) : (
+                    <span className="text-xs font-semibold text-slate-600">
+                      Conectar ao PI (opcional, rede interna da Ero) — habilita "Buscar do PI"
+                    </span>
+                  )}
+                </div>
+
+                {piAuthHeader ? (
+                  <button
+                    type="button"
+                    onClick={desconectarPi}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-rose-700 hover:bg-rose-50 border border-slate-200 transition cursor-pointer"
+                  >
+                    Desconectar
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <input
+                      type="text"
+                      placeholder="Usuário PI..."
+                      value={piUser}
+                      onChange={e => {
+                        setPiUser(e.target.value);
+                        setPiErro("");
+                      }}
+                      onKeyDown={e => e.key === "Enter" && entrarPi()}
+                      className="w-32 bg-slate-50 border border-slate-250 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 outline-none transition"
+                    />
+                    <div className="relative">
+                      <input
+                        type={showSenha ? "text" : "password"}
+                        placeholder="Senha do PI..."
+                        value={piPass}
+                        onChange={e => {
+                          setPiPass(e.target.value);
+                          setPiErro("");
+                        }}
+                        onKeyDown={e => e.key === "Enter" && entrarPi()}
+                        className={`w-32 bg-slate-50 border focus:ring-1 focus:ring-emerald-500 rounded-lg pl-2.5 pr-7 py-1.5 text-xs text-slate-800 placeholder-slate-400 outline-none transition ${
+                          piErro ? "border-red-400" : "border-slate-250 focus:border-emerald-500"
+                        }`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowSenha(!showSenha)}
+                        className="absolute right-1.5 top-1.5 text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                      >
+                        {showSenha ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={entrarPi}
+                      disabled={!piUser.trim() || !piPass || piConectando}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
+                        !piUser.trim() || !piPass || piConectando
+                          ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          : "bg-[#007369] hover:bg-[#005F56] text-white"
+                      }`}
+                    >
+                      {piConectando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <span>Conectar</span>}
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
+              {piErro && (
+                <p className="text-xs text-red-500 mt-2 flex items-center gap-1.5 font-medium">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" /> {piErro}
+                </p>
+              )}
+            </div>
 
             {/* Header Corporativo do Módulo Estratégico - Ero Brasil */}
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs border-l-4 border-l-[#007369]">
@@ -736,7 +811,7 @@ export const AdmModule: React.FC<AdmModuleProps> = ({ circuitoTipo, modoWeb = tr
                 onChangeCE={dados => setPayload(prev => ({ ...prev, dadosConcentradorEta: dados }))}
                 onChangeDiretrizes={dirs => setPayload(prev => ({ ...prev, diretrizesTurno: dirs }))}
                 piAuthHeader={piAuthHeader}
-                onPiSessionExpirada={sair}
+                onPiSessionExpirada={desconectarPi}
               />
             )}
 
